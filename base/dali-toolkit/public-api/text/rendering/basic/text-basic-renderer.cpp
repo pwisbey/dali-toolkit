@@ -28,6 +28,8 @@ using namespace Dali;
 using namespace Dali::Toolkit;
 using namespace Dali::Toolkit::Text;
 
+#define NO_MESH 1
+
 namespace
 {
 
@@ -214,6 +216,8 @@ struct BasicRenderer::Impl
     return helper.CreateAtlas();
   }
 
+
+#if ! defined( NO_MESH )
   /**
    * @brief Helper method to create a mesh with one quad per glyph.
    *
@@ -265,6 +269,7 @@ struct BasicRenderer::Impl
     Dali::Mesh mesh = Mesh::New( meshData );
     return mesh;
   }
+#endif
 
   RenderableActor mActor; ///< The actor which renders the text
 
@@ -293,6 +298,7 @@ RenderableActor BasicRenderer::Render( Text::ViewInterface& view )
 
     Atlas atlas = mImpl->CreateAtlas( glyphs );
 
+#if ! defined( NO_MESH )
     MeshActor actor = MeshActor::New( mImpl->CreateMesh( glyphs, positions, atlas ) );
     actor.SetParentOrigin( ParentOrigin::TOP_LEFT );
     actor.SetAffectedByLighting( false );
@@ -301,6 +307,7 @@ RenderableActor BasicRenderer::Render( Text::ViewInterface& view )
     actor.SetShaderEffect( shader );
 
     mImpl->mActor = actor;
+#endif
   }
 
   return mImpl->mActor;

@@ -72,7 +72,6 @@
 // INTERNAL INCLUDES
 
 #include <dali-toolkit/public-api/controls/bloom-view/bloom-view.h>
-#include <dali-toolkit/public-api/controls/bubble-effect/bubble-emitter.h>
 #include <dali-toolkit/public-api/controls/buttons/check-box-button.h>
 #include <dali-toolkit/public-api/controls/cluster/cluster.h>
 
@@ -113,7 +112,6 @@
 #include <dali-toolkit/public-api/shader-effects/alpha-discard-effect.h>
 #include <dali-toolkit/public-api/shader-effects/bendy-effect.h>
 #include <dali-toolkit/public-api/shader-effects/blind-effect.h>
-#include <dali-toolkit/public-api/shader-effects/bouncing-effect.h>
 #include <dali-toolkit/public-api/shader-effects/carousel-effect.h>
 #include <dali-toolkit/public-api/shader-effects/displacement-effect.h>
 #include <dali-toolkit/public-api/shader-effects/dissolve-local-effect.h>
@@ -127,8 +125,6 @@
 #include <dali-toolkit/public-api/shader-effects/spot-effect.h>
 #include <dali-toolkit/public-api/shader-effects/square-dissolve-effect.h>
 #include <dali-toolkit/public-api/shader-effects/water-effect.h>
-#include <dali-toolkit/public-api/shader-effects/bubble-effect/bubble-effect.h>
-#include <dali-toolkit/public-api/shader-effects/bubble-effect/color-adjuster.h>
 
 #include <dali-toolkit/public-api/transition-effects/cube-transition-effect.h>
 #include <dali-toolkit/public-api/transition-effects/cube-transition-wave-effect.h>

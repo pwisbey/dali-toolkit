@@ -52,7 +52,6 @@ public_api_base_src_files = \
   $(public_api_base_src_dir)/focus-manager/keyboard-focus-manager.cpp \
   $(public_api_base_src_dir)/focus-manager/keyinput-focus-manager.cpp \
   $(public_api_base_src_dir)/shader-effects/image-region-effect.cpp \
-  $(public_api_base_src_dir)/shader-effects/bouncing-effect.cpp \
   $(public_api_base_src_dir)/styling/style-manager.cpp \
   $(public_api_base_src_dir)/builder/builder.cpp \
   $(public_api_base_src_dir)/builder/json-parser.cpp \
@@ -147,7 +146,6 @@ public_api_base_focus_manager_header_files = \
   $(public_api_base_src_dir)/focus-manager/keyboard-focus-manager.h
 
 public_api_base_shader_effects_header_files = \
-  $(public_api_base_src_dir)/shader-effects/bouncing-effect.h \
   $(public_api_base_src_dir)/shader-effects/dissolve-effect.h \
   $(public_api_base_src_dir)/shader-effects/image-region-effect.h \
   $(public_api_base_src_dir)/shader-effects/iris-effect.h \

@@ -13,7 +13,6 @@ toolkit_optional_src_files = \
    $(toolkit_optional_src_dir)/controls/shadow-view/shadow-view-impl.cpp \
    $(toolkit_optional_src_dir)/controls/slider/slider-impl.cpp \
    $(toolkit_optional_src_dir)/controls/super-blur-view/super-blur-view-impl.cpp \
-   $(toolkit_optional_src_dir)/controls/bubble-effect/bubble-emitter-impl.cpp \
    $(toolkit_optional_src_dir)/controls/tool-bar/tool-bar-impl.cpp \
    $(toolkit_optional_src_dir)/controls/view/view-impl.cpp \
    $(toolkit_optional_src_dir)/controls/navigation-frame/navigation-control-impl.cpp \
