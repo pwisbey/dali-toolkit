@@ -21,7 +21,8 @@
 #include <dali/dali.h>
 
 // Toolkit
-
+#include <dali-toolkit/public-api/builder/builder.h>
+#include <dali-toolkit/public-api/builder/tree-node.h>
 #include <dali-toolkit/public-api/controls/alignment/alignment.h>
 #include <dali-toolkit/public-api/controls/bloom-view/bloom-view.h>
 #include <dali-toolkit/public-api/controls/bubble-effect/bubble-emitter.h>
@@ -85,6 +86,9 @@
 
 #include <dali-toolkit/public-api/markup-processor/markup-processor.h>
 
+#include <dali-toolkit/public-api/scripting/script.h>
+#include <dali-toolkit/public-api/scripting/script-plugin.h>
+
 #include <dali-toolkit/public-api/shader-effects/alpha-discard-effect.h>
 #include <dali-toolkit/public-api/shader-effects/bendy-effect.h>
 #include <dali-toolkit/public-api/shader-effects/blind-effect.h>
@@ -111,6 +115,7 @@
 #include <dali-toolkit/public-api/shader-effects/nine-patch-mask-effect.h>
 #include <dali-toolkit/public-api/shader-effects/page-turn-book-spine-effect.h>
 #include <dali-toolkit/public-api/shader-effects/page-turn-effect.h>
+#include <dali-toolkit/public-api/shader-effects/quadratic-bezier.h>
 #include <dali-toolkit/public-api/shader-effects/ripple-effect.h>
 #include <dali-toolkit/public-api/shader-effects/ripple2d-effect.h>
 #include <dali-toolkit/public-api/shader-effects/swirl-effect.h>

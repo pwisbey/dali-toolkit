@@ -43,20 +43,41 @@ class ScrollBar;
 /**
  * ScrollBar is a UI component that can be added to the scrollable controls
  * indicating the current scroll position of the scrollable content.
+ *
+ * Signals
+ * | %Signal Name             | Method                              |
+ * |--------------------------|-------------------------------------|
+ * | scroll-position-notified | @ref ScrollPositionNotifiedSignal() |
  */
 class DALI_IMPORT_API ScrollBar : public ScrollComponent
 {
 public:
 
-  // Signals
-  static const char* const SCROLL_POSITION_NOTIFIED_SIGNAL_NAME;        ///< "scroll-position-notified" signal name
-  typedef Signal< void ( float ) > ScrollPositionNotifiedSignalType;
+  /**
+   * @brief The start and end property ranges for this control.
+   */
+  enum PropertyRange
+  {
+    PROPERTY_START_INDEX = Control::CONTROL_PROPERTY_END_INDEX + 1,
+    PROPERTY_END_INDEX =   PROPERTY_START_INDEX + 1000              ///< Reserve property indices
+  };
 
-  // Properties
-  static const Property::Index PROPERTY_INDICATOR_HEIGHT_POLICY;         ///< name "indicator-height-policy", @see SetIndicatorHeightPolicy(), type STRING
-  static const Property::Index PROPERTY_INDICATOR_FIXED_HEIGHT;          ///< name "indicator-fixed-height",  @see SetIndicatorFixedHeight(),  type FLOAT
-  static const Property::Index PROPERTY_INDICATOR_SHOW_DURATION;         ///< name "indicator-show-duration", @see SetIndicatorShowDuration(), type FLOAT
-  static const Property::Index PROPERTY_INDICATOR_HIDE_DURATION;         ///< name "indicator-hide-duration", @see SetIndicatorHideDuration(), type FLOAT
+  /**
+   * @brief An enumeration of properties belonging to the ScrollBar class.
+   */
+  struct Property
+  {
+    enum
+    {
+      INDICATOR_HEIGHT_POLICY = PROPERTY_START_INDEX, ///< name "indicator-height-policy", @see SetIndicatorHeightPolicy(), type STRING
+      INDICATOR_FIXED_HEIGHT,                         ///< name "indicator-fixed-height",  @see SetIndicatorFixedHeight(),  type FLOAT
+      INDICATOR_SHOW_DURATION,                        ///< name "indicator-show-duration", @see SetIndicatorShowDuration(), type FLOAT
+      INDICATOR_HIDE_DURATION,                        ///< name "indicator-hide-duration", @see SetIndicatorHideDuration(), type FLOAT
+    };
+  };
+
+  // Signals
+  typedef Signal< void ( float ) > ScrollPositionNotifiedSignalType;
 
 public:
 

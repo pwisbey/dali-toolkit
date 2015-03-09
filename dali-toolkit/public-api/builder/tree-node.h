@@ -18,11 +18,9 @@
  *
  */
 
+// EXTERNAL INCLUDES
 #include <utility> // pair
 #include <iterator>
-#include <vector>
-
-// INTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
 
 namespace Dali

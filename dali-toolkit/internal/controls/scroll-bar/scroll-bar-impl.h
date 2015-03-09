@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <dali/public-api/actors/image-actor.h>
+#include <dali/public-api/animation/active-constraint.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/object/property-notification.h>
 
@@ -50,13 +51,6 @@ class ScrollBar : public ScrollComponentImpl
 {
 
 public:
-
-  // Properties
-  enum
-  {
-    SCROLLBAR_PROPERTY_START_INDEX = Control::CONTROL_PROPERTY_END_INDEX + 1,
-    SCROLLBAR_PROPERTY_END_INDEX = SCROLLBAR_PROPERTY_START_INDEX + 1000 ///< Reserving 1000 property indices
-  };
 
   // Signals
   typedef Toolkit::ScrollBar::ScrollPositionNotifiedSignalType ScrollPositionNotifiedSignalType;
@@ -156,6 +150,17 @@ public:
    return mScrollPositionNotifiedSignal;
  }
 
+ /**
+  * Connects a callback function with the object's signals.
+  * @param[in] object The object providing the signal.
+  * @param[in] tracker Used to disconnect the signal.
+  * @param[in] signalName The signal to connect to.
+  * @param[in] functor A newly allocated FunctorDelegate.
+  * @return True if the signal was connected.
+  * @post If a signal was connected, ownership of functor was passed to CallbackBase. Otherwise the caller is responsible for deleting the unused functor.
+  */
+ static bool DoConnectSignal( BaseObject* object, ConnectionTrackerInterface* tracker, const std::string& signalName, FunctorDelegate* functor );
+
  // Properties
 
  /**
@@ -228,7 +233,7 @@ private:
 
 private:
 
-  Constrainable mScrollPositionObject;                               ///< From mScrollConnector
+  Handle mScrollPositionObject;                               ///< From mScrollConnector
 
   ImageActor mIndicator;                                             ///< Image of scroll indicator.
   Animation mAnimation;                                              ///< Scroll indicator Show/Hide Animation.

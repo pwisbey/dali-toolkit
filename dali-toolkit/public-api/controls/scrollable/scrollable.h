@@ -33,53 +33,21 @@ class Scrollable;
 }
 
 /**
- * @brief How axes/rotation or scale are clamped
- */
-enum ClampState
-{
-  NotClamped,   ///< The quantity isn't clamped
-  ClampedToMin, ///< The quantity is clamped to the min value
-  ClampedToMax  ///< The quantity is clamped to the max value
-};
-
-/**
- * @brief A 2 dimensional clamp
- */
-struct ClampState2
-{
-  ClampState x; ///< The clamp state of the x axis
-  ClampState y; ///< The clamp state of the y axis
-};
-
-/**
- * @brief A 3 dimensional clamp
- */
-struct ClampState3
-{
-  ClampState x; ///< The clamp state of the x axis
-  ClampState y; ///< The clamp state of the y axis
-  ClampState z; ///< The clamp state of the z axis
-};
-
-/**
  * @brief Base class for derived Scrollables that contains actors that can be scrolled manually
  * (via touch) or automatically.
  *
  * Scrollables such as ScrollView and ItemView can be derived from this class.
+ *
+ * Signals
+ * | %Signal Name      | Method                       |
+ * |-------------------|------------------------------|
+ * | scroll-started    | @ref ScrollStartedSignal()   |
+ * | scroll-completed  | @ref ScrollUpdatedSignal()   |
+ * | scroll-updated    | @ref ScrollCompletedSignal() |
  */
 class DALI_IMPORT_API Scrollable : public Control
 {
 public:
-
-  /**
-   * @brief Clamp signal event's data
-   */
-  struct ClampEvent
-  {
-    ClampState3 scale;       ///< Clamp information for scale axes
-    ClampState3 position;    ///< Clamp information for position axes
-    ClampState rotation;     ///< Clamp information for rotation
-  };
 
   /**
    * @brief Scroll component types
@@ -98,26 +66,32 @@ public:
   static const std::string SCROLL_POSITION_MAX_PROPERTY_NAME;           ///< Property, name "scroll-position-max",      type VECTOR3
   static const std::string SCROLL_DIRECTION_PROPERTY_NAME;              ///< Property, name "scroll-direction",         type VECTOR2
 
-  /// @name Properties
-  /** @{ */
-  static const Property::Index PROPERTY_OVERSHOOT_EFFECT_COLOR;         ///< Property, name "overshoot-effect-color",  @see SetOvershootEffectColor(),  type VECTOR4
-  static const Property::Index PROPERTY_OVERSHOOT_ANIMATION_SPEED;      ///< Property, name "overshoot-animation-speed",  @see SetOvershootAnimationSpeed(),  type FLOAT
-  /** @} */
+  /**
+   * @brief The start and end property ranges for this control.
+   */
+  enum PropertyRange
+  {
+    PROPERTY_START_INDEX = Control::CONTROL_PROPERTY_END_INDEX + 1,
+    PROPERTY_END_INDEX =   PROPERTY_START_INDEX + 1000              ///< Reserve property indices
+  };
 
-  /// @name Signals
-  /** @{ */
-  static const char* const SIGNAL_SCROLL_STARTED;   ///< "scroll-started";
-  static const char* const SIGNAL_SCROLL_COMPLETED; ///< "scroll-completed";
-  static const char* const SIGNAL_SCROLL_UPDATED;   ///< "scroll-updated";
-  static const char* const SIGNAL_SCROLL_CLAMPED;   ///< "scroll-clamped";
-  /** @} */
+  /**
+   * @brief An enumeration of properties belonging to the Scrollable class.
+   */
+  struct Property
+  {
+    enum
+    {
+      OVERSHOOT_EFFECT_COLOR = PROPERTY_START_INDEX, ///< Property, name "overshoot-effect-color",    @see SetOvershootEffectColor(),    type VECTOR4
+      OVERSHOOT_ANIMATION_SPEED,                     ///< Property, name "overshoot-animation-speed", @see SetOvershootAnimationSpeed(), type FLOAT
+    };
+  };
 
 public:
 
   typedef Signal< void ( const Vector3& ) > ScrollStartedSignalType;   ///< ScrollStarted signal type
   typedef Signal< void ( const Vector3& ) > ScrollCompletedSignalType; ///< ScrollCompleted signal type
   typedef Signal< void ( const Vector3& ) > ScrollUpdatedSignalType;   ///< Scroll updated signal type
-  typedef Signal< void ( const ClampEvent& ) > ScrollClampedSignalType; ///< Scroll clamped signal type
 
   /**
    * @brief Signal emitted when the Scrollable has moved (whether by touch or animation).
@@ -133,14 +107,6 @@ public:
    * @brief Signal emitted when the Scrollable has completed movement (whether by touch or animation).
    */
   ScrollCompletedSignalType& ScrollCompletedSignal();
-
-  /**
-   * @brief Signal emitted when the Scrollable is pushing against a domain boundary
-   * (in either position, scale, or rotation).
-   *
-   * @return The signal to connect to
-   */
-  ScrollClampedSignalType& ScrollClampedSignal();
 
 public:
 

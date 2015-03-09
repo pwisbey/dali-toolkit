@@ -25,7 +25,7 @@
 #include <dali/public-api/events/pan-gesture.h>
 #include <dali/public-api/events/pinch-gesture.h>
 #include <dali/public-api/events/tap-gesture.h>
-#include <dali/public-api/object/property-index.h>
+#include <dali/public-api/object/property-index-ranges.h>
 #include <dali/public-api/object/type-info.h>
 
 // INTERNAL INCLUDES
@@ -61,13 +61,6 @@ namespace Internal
 class DALI_IMPORT_API Control : public CustomActorImpl, public ConnectionTrackerInterface
 {
 public:
-
-  // Properties
-  enum
-  {
-    CONTROL_PROPERTY_START_INDEX = PROPERTY_REGISTRATION_START_INDEX,
-    CONTROL_PROPERTY_END_INDEX = CONTROL_PROPERTY_START_INDEX + 1000 ///< Reserving 1000 property indices
-  };
 
   // Creation & Destruction
 
@@ -477,7 +470,7 @@ private:
   virtual void OnInitialize();
 
   /**
-   * @brief This method is called when the control is activates.
+   * @brief This method is called when the control is activated.
    *
    * Derived classes should override this if they wish to be notified when they are activated.
    */

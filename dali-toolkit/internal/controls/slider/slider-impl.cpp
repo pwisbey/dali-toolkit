@@ -19,13 +19,14 @@
 #include <dali-toolkit/internal/controls/slider/slider-impl.h>
 
 // EXTERNAL INCLUDES
+#include <sstream>
 #include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
+#include <dali/public-api/images/resource-image.h>
 
-// EXTERNAL INCLUDES
+// INTERNAL INCLUDES
 #include <dali-toolkit/public-api/controls/control-impl.h>
-
-#include <sstream>
 
 using namespace Dali;
 
@@ -35,40 +36,46 @@ namespace Dali
 namespace Toolkit
 {
 
-// Properties
-const Property::Index Slider::LOWER_BOUND_PROPERTY             = Internal::Slider::SLIDER_PROPERTY_START_INDEX;
-const Property::Index Slider::UPPER_BOUND_PROPERTY             = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 1;
-
-const Property::Index Slider::VALUE_PROPERTY                   = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 2;
-const Property::Index Slider::HIT_REGION_PROPERTY              = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 3;
-const Property::Index Slider::BACKING_REGION_PROPERTY          = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 4;
-const Property::Index Slider::HANDLE_REGION_PROPERTY           = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 5;
-
-const Property::Index Slider::BACKING_IMAGE_NAME_PROPERTY      = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 6;
-const Property::Index Slider::HANDLE_IMAGE_NAME_PROPERTY       = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 7;
-const Property::Index Slider::PROGRESS_IMAGE_NAME_PROPERTY     = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 8;
-const Property::Index Slider::POPUP_IMAGE_NAME_PROPERTY        = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 9;
-const Property::Index Slider::POPUP_ARROW_IMAGE_NAME_PROPERTY  = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 10;
-
-const Property::Index Slider::DISABLE_COLOR_PROPERTY           = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 11;
-const Property::Index Slider::POPUP_TEXT_COLOR_PROPERTY        = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 12;
-
-const Property::Index Slider::VALUE_PRECISION_PROPERTY         = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 13;
-
-const Property::Index Slider::SHOW_POPUP_PROPERTY              = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 14;
-const Property::Index Slider::SHOW_VALUE_PROPERTY              = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 15;
-
-const Property::Index Slider::ENABLED_PROPERTY                 = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 16;
-
-const Property::Index Slider::MARKS_PROPERTY                   = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 17;
-const Property::Index Slider::SNAP_TO_MARKS_PROPERTY           = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 18;
-const Property::Index Slider::MARK_TOLERANCE_PROPERTY          = Internal::Slider::SLIDER_PROPERTY_START_INDEX + 19;
-
 namespace Internal
 {
 
-namespace
+namespace // Unnamed namespace
 {
+
+BaseHandle Create()
+{
+  return Dali::Toolkit::Slider::New();
+}
+
+// Setup properties, signals and actions using the type-registry.
+DALI_TYPE_REGISTRATION_BEGIN( Toolkit::Slider, Toolkit::Control, Create )
+
+DALI_PROPERTY_REGISTRATION( Slider, "lower-bound",            FLOAT,    LOWER_BOUND            )
+DALI_PROPERTY_REGISTRATION( Slider, "upper-bound",            FLOAT,    UPPER_BOUND            )
+DALI_PROPERTY_REGISTRATION( Slider, "value",                  FLOAT,    VALUE                  )
+DALI_PROPERTY_REGISTRATION( Slider, "hit-region",             VECTOR2,  HIT_REGION             )
+DALI_PROPERTY_REGISTRATION( Slider, "backing-region",         VECTOR2,  BACKING_REGION         )
+DALI_PROPERTY_REGISTRATION( Slider, "handle-region",          VECTOR2,  HANDLE_REGION          )
+DALI_PROPERTY_REGISTRATION( Slider, "backing-image-name",     STRING,   BACKING_IMAGE_NAME     )
+DALI_PROPERTY_REGISTRATION( Slider, "handle-image-name",      STRING,   HANDLE_IMAGE_NAME      )
+DALI_PROPERTY_REGISTRATION( Slider, "progress-image-name",    STRING,   PROGRESS_IMAGE_NAME    )
+DALI_PROPERTY_REGISTRATION( Slider, "popup-image-name",       STRING,   POPUP_IMAGE_NAME       )
+DALI_PROPERTY_REGISTRATION( Slider, "popup-arrow-image-name", STRING,   POPUP_ARROW_IMAGE_NAME )
+DALI_PROPERTY_REGISTRATION( Slider, "disable-color",          VECTOR4,  DISABLE_COLOR          )
+DALI_PROPERTY_REGISTRATION( Slider, "popup-text-color",       VECTOR4,  POPUP_TEXT_COLOR       )
+DALI_PROPERTY_REGISTRATION( Slider, "value-precision",        INTEGER,  VALUE_PRECISION        )
+DALI_PROPERTY_REGISTRATION( Slider, "show-popup",             BOOLEAN,  SHOW_POPUP             )
+DALI_PROPERTY_REGISTRATION( Slider, "show-value",             BOOLEAN,  SHOW_VALUE             )
+DALI_PROPERTY_REGISTRATION( Slider, "enabled",                BOOLEAN,  ENABLED                )
+DALI_PROPERTY_REGISTRATION( Slider, "marks",                  ARRAY,    MARKS                  )
+DALI_PROPERTY_REGISTRATION( Slider, "snap-to-marks",          BOOLEAN,  SNAP_TO_MARKS          )
+DALI_PROPERTY_REGISTRATION( Slider, "mark-tolerance",         FLOAT,    MARK_TOLERANCE         )
+
+DALI_SIGNAL_REGISTRATION(   Slider, "value-changed",                    SIGNAL_VALUE_CHANGED   )
+DALI_SIGNAL_REGISTRATION(   Slider, "mark",                             SIGNAL_MARK            )
+
+DALI_TYPE_REGISTRATION_END()
+
 const float BACKING_Z = -0.1f;
 const float PROGRESS_Z = 0.1f;
 const float HANDLE_Z = 1.0f;
@@ -115,45 +122,7 @@ const bool DEFAULT_SHOW_VALUE = true;
 const bool DEFAULT_ENABLED = true;
 const bool DEFAULT_SNAP_TO_MARKS = false;
 
-BaseHandle Create()
-{
-  return Dali::Toolkit::Slider::New();
-}
-
-TypeRegistration typeRegistration( typeid(Dali::Toolkit::Slider), typeid(Dali::Toolkit::Control), Create );
-
-SignalConnectorType signalConnector1( typeRegistration, Toolkit::Slider::SIGNAL_VALUE_CHANGED, &Toolkit::Internal::Slider::DoConnectSignal );
-SignalConnectorType signalConnector2( typeRegistration, Toolkit::Slider::SIGNAL_MARK, &Toolkit::Internal::Slider::DoConnectSignal );
-
-PropertyRegistration property1( typeRegistration, "lower-bound",  Toolkit::Slider::LOWER_BOUND_PROPERTY, Property::FLOAT, &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property2( typeRegistration, "upper-bound",  Toolkit::Slider::UPPER_BOUND_PROPERTY, Property::FLOAT, &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property3( typeRegistration, "value",        Toolkit::Slider::VALUE_PROPERTY,       Property::FLOAT, &Slider::SetProperty, &Slider::GetProperty );
-
-PropertyRegistration property4( typeRegistration, "hit-region",     Toolkit::Slider::HIT_REGION_PROPERTY,      Property::VECTOR2, &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property5( typeRegistration, "backing-region", Toolkit::Slider::BACKING_REGION_PROPERTY,  Property::VECTOR2, &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property6( typeRegistration, "handle-region",  Toolkit::Slider::HANDLE_REGION_PROPERTY,   Property::VECTOR2, &Slider::SetProperty, &Slider::GetProperty );
-
-PropertyRegistration property7( typeRegistration, "backing-image-name",       Toolkit::Slider::BACKING_IMAGE_NAME_PROPERTY,      Property::STRING, &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property8( typeRegistration, "handle-image-name",        Toolkit::Slider::HANDLE_IMAGE_NAME_PROPERTY,       Property::STRING, &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property9( typeRegistration, "progress-image-name",      Toolkit::Slider::PROGRESS_IMAGE_NAME_PROPERTY,     Property::STRING, &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property10( typeRegistration, "popup-image-name",        Toolkit::Slider::POPUP_IMAGE_NAME_PROPERTY,        Property::STRING, &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property11( typeRegistration, "popup-arrow-image-name",  Toolkit::Slider::POPUP_ARROW_IMAGE_NAME_PROPERTY,  Property::STRING, &Slider::SetProperty, &Slider::GetProperty );
-
-PropertyRegistration property12( typeRegistration, "disable-color",       Toolkit::Slider::DISABLE_COLOR_PROPERTY,     Property::VECTOR4, &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property13( typeRegistration, "popup-text-color",    Toolkit::Slider::POPUP_TEXT_COLOR_PROPERTY,  Property::VECTOR4, &Slider::SetProperty, &Slider::GetProperty );
-
-PropertyRegistration property14( typeRegistration, "value-precision",    Toolkit::Slider::VALUE_PRECISION_PROPERTY,  Property::INTEGER, &Slider::SetProperty, &Slider::GetProperty );
-
-PropertyRegistration property15( typeRegistration, "show-popup",    Toolkit::Slider::SHOW_POPUP_PROPERTY,  Property::BOOLEAN, &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property16( typeRegistration, "show-value",    Toolkit::Slider::SHOW_VALUE_PROPERTY,  Property::BOOLEAN, &Slider::SetProperty, &Slider::GetProperty );
-
-PropertyRegistration property17( typeRegistration, "enabled",       Toolkit::Slider::ENABLED_PROPERTY,  Property::BOOLEAN, &Slider::SetProperty, &Slider::GetProperty );
-
-PropertyRegistration property18( typeRegistration, "marks",          Toolkit::Slider::MARKS_PROPERTY,          Property::ARRAY,    &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property19( typeRegistration, "snap-to-marks",  Toolkit::Slider::SNAP_TO_MARKS_PROPERTY,  Property::BOOLEAN,  &Slider::SetProperty, &Slider::GetProperty );
-PropertyRegistration property20( typeRegistration, "mark-tolerance", Toolkit::Slider::MARK_TOLERANCE_PROPERTY, Property::FLOAT,    &Slider::SetProperty, &Slider::GetProperty );
-
-} // namespace
+} // Unnamed namespace
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Slider
@@ -437,9 +406,9 @@ ImageActor Slider::CreateBacking()
 
 void Slider::SetBackingImageName( const std::string& imageName )
 {
-  if( mBacking && imageName != String::EMPTY )
+  if( mBacking && ( imageName.size() > 0 ) )
   {
-    Image image = Image::New( imageName );
+    Image image = ResourceImage::New( imageName );
     mBacking.SetImage( image );
   }
 }
@@ -448,7 +417,7 @@ std::string Slider::GetBackingImageName()
 {
   if( mBacking )
   {
-    return mBacking.GetImage().GetFilename();
+    return ResourceImage::DownCast( mBacking.GetImage() ).GetUrl();
   }
 
   return std::string( "" );
@@ -466,9 +435,9 @@ ImageActor Slider::CreateProgress()
 
 void Slider::SetProgressImageName( const std::string& imageName )
 {
-  if( mProgress && imageName != String::EMPTY )
+  if( mProgress && ( imageName.size() > 0 ) )
   {
-    Image image = Image::New( imageName );
+    Image image = ResourceImage::New( imageName );
     mProgress.SetImage( image );
   }
 }
@@ -477,7 +446,7 @@ std::string Slider::GetProgressImageName()
 {
   if( mProgress )
   {
-    return mProgress.GetImage().GetFilename();
+    return ResourceImage::DownCast( mProgress.GetImage()).GetUrl();
   }
 
   return std::string( "" );
@@ -495,9 +464,9 @@ std::string Slider::GetPopupImageName()
 
 void Slider::CreatePopupImage( const std::string& imageName )
 {
-  if( mPopup && imageName != String::EMPTY )
+  if( mPopup && ( imageName.size() > 0 ) )
   {
-    Image image = Image::New( imageName );
+    Image image = ResourceImage::New( imageName );
     mPopup.SetImage( image );
   }
 }
@@ -514,9 +483,9 @@ std::string Slider::GetPopupArrowImageName()
 
 void Slider::CreatePopupArrowImage( const std::string& imageName )
 {
-  if( mPopupArrow && imageName != String::EMPTY )
+  if( mPopupArrow && ( imageName.size() > 0 ) )
   {
-    Image image = Image::New( imageName );
+    Image image = ResourceImage::New( imageName );
     mPopupArrow.SetImage( image );
   }
 }
@@ -573,9 +542,9 @@ ImageActor Slider::CreatePopup()
 
 void Slider::SetHandleImageName( const std::string& imageName )
 {
-  if( mHandle && imageName != String::EMPTY )
+  if( mHandle && ( imageName.size() > 0 ) )
   {
-    Image image = Image::New( imageName );
+    Image image = ResourceImage::New( imageName );
     mHandle.SetImage( image );
   }
 }
@@ -584,7 +553,7 @@ std::string Slider::GetHandleImageName()
 {
   if( mHandle )
   {
-    return mHandle.GetImage().GetFilename();
+    return ResourceImage::DownCast( mHandle.GetImage() ).GetUrl();
   }
 
   return std::string( "" );
@@ -827,16 +796,14 @@ bool Slider::MarkReached( float value, int& outIndex )
       outIndex = current;
       return true;
     }
+
+    if( value < mark )
+    {
+      tail = current - 1;
+    }
     else
     {
-      if( value < mark )
-      {
-        tail = current - 1;
-      }
-      else
-      {
-        head = current + 1;
-      }
+      head = current + 1;
     }
   }
 
@@ -1018,8 +985,7 @@ float Slider::GetMarkTolerance() const
   return mMarkTolerance;
 }
 
-// static class method to support script connecting signals
-
+// Static class method to support script connecting signals
 bool Slider::DoConnectSignal( BaseObject* object, ConnectionTrackerInterface* tracker, const std::string& signalName, FunctorDelegate* functor )
 {
   Dali::BaseHandle handle( object );
@@ -1027,11 +993,11 @@ bool Slider::DoConnectSignal( BaseObject* object, ConnectionTrackerInterface* tr
   bool connected = true;
   Toolkit::Slider slider = Toolkit::Slider::DownCast( handle );
 
-  if( signalName == Dali::Toolkit::Slider::SIGNAL_VALUE_CHANGED )
+  if( 0 == strcmp( signalName.c_str(), SIGNAL_VALUE_CHANGED ) )
   {
     slider.ValueChangedSignal().Connect( tracker, functor );
   }
-  else if( signalName == Dali::Toolkit::Slider::SIGNAL_MARK )
+  else if( 0 == strcmp( signalName.c_str(), SIGNAL_MARK ) )
   {
     slider.MarkSignal().Connect( tracker, functor );
   }
@@ -1084,121 +1050,121 @@ void Slider::SetProperty( BaseObject* object, Property::Index propertyIndex, con
 
     switch ( propertyIndex )
     {
-      case Toolkit::Slider::LOWER_BOUND_PROPERTY:
+      case Toolkit::Slider::Property::LOWER_BOUND:
       {
         sliderImpl.SetLowerBound( value.Get< float >() );
         break;
       }
 
-      case Toolkit::Slider::UPPER_BOUND_PROPERTY:
+      case Toolkit::Slider::Property::UPPER_BOUND:
       {
         sliderImpl.SetUpperBound( value.Get< float >() );
         break;
       }
 
-      case Toolkit::Slider::VALUE_PROPERTY:
+      case Toolkit::Slider::Property::VALUE:
       {
         sliderImpl.SetValue( value.Get< float >() );
         break;
       }
 
-      case Toolkit::Slider::HIT_REGION_PROPERTY:
+      case Toolkit::Slider::Property::HIT_REGION:
       {
         sliderImpl.SetHitRegion( value.Get< Vector2 >() );
         break;
       }
 
-      case Toolkit::Slider::BACKING_REGION_PROPERTY:
+      case Toolkit::Slider::Property::BACKING_REGION:
       {
         sliderImpl.SetBackingRegion( value.Get< Vector2 >() );
         break;
       }
 
-      case Toolkit::Slider::HANDLE_REGION_PROPERTY:
+      case Toolkit::Slider::Property::HANDLE_REGION:
       {
         sliderImpl.SetHandleRegion( value.Get< Vector2 >() );
         break;
       }
 
-      case Toolkit::Slider::BACKING_IMAGE_NAME_PROPERTY:
+      case Toolkit::Slider::Property::BACKING_IMAGE_NAME:
       {
         sliderImpl.SetBackingImageName( value.Get< std::string >() );
         break;
       }
 
-      case Toolkit::Slider::HANDLE_IMAGE_NAME_PROPERTY:
+      case Toolkit::Slider::Property::HANDLE_IMAGE_NAME:
       {
         sliderImpl.SetHandleImageName( value.Get< std::string >() );
         break;
       }
 
-      case Toolkit::Slider::PROGRESS_IMAGE_NAME_PROPERTY:
+      case Toolkit::Slider::Property::PROGRESS_IMAGE_NAME:
       {
         sliderImpl.SetProgressImageName( value.Get< std::string >() );
         break;
       }
 
-      case Toolkit::Slider::POPUP_IMAGE_NAME_PROPERTY:
+      case Toolkit::Slider::Property::POPUP_IMAGE_NAME:
       {
         sliderImpl.SetPopupImageName( value.Get< std::string >() );
         break;
       }
 
-      case Toolkit::Slider::POPUP_ARROW_IMAGE_NAME_PROPERTY:
+      case Toolkit::Slider::Property::POPUP_ARROW_IMAGE_NAME:
       {
         sliderImpl.SetPopupArrowImageName( value.Get< std::string >() );
         break;
       }
 
-      case Toolkit::Slider::DISABLE_COLOR_PROPERTY:
+      case Toolkit::Slider::Property::DISABLE_COLOR:
       {
         sliderImpl.SetDisableColor( value.Get< Vector4 >() );
         break;
       }
 
-      case Toolkit::Slider::POPUP_TEXT_COLOR_PROPERTY:
+      case Toolkit::Slider::Property::POPUP_TEXT_COLOR:
       {
         sliderImpl.SetPopupTextColor( value.Get< Vector4 >() );
         break;
       }
 
-      case Toolkit::Slider::VALUE_PRECISION_PROPERTY:
+      case Toolkit::Slider::Property::VALUE_PRECISION:
       {
         sliderImpl.SetValuePrecision( value.Get< int >() );
         break;
       }
 
-      case Toolkit::Slider::SHOW_POPUP_PROPERTY:
+      case Toolkit::Slider::Property::SHOW_POPUP:
       {
         sliderImpl.SetShowPopup( value.Get< bool >() );
         break;
       }
 
-      case Toolkit::Slider::SHOW_VALUE_PROPERTY:
+      case Toolkit::Slider::Property::SHOW_VALUE:
       {
         sliderImpl.SetShowValue( value.Get< bool >() );
         break;
       }
 
-      case Toolkit::Slider::ENABLED_PROPERTY:
+      case Toolkit::Slider::Property::ENABLED:
       {
         sliderImpl.SetEnabled( value.Get< bool >() );
         break;
       }
 
-      case Toolkit::Slider::MARKS_PROPERTY:
+      case Toolkit::Slider::Property::MARKS:
       {
         sliderImpl.SetMarks( value.Get< Property::Array >() );
         break;
       }
 
-      case Toolkit::Slider::SNAP_TO_MARKS_PROPERTY:
+      case Toolkit::Slider::Property::SNAP_TO_MARKS:
       {
         sliderImpl.SetSnapToMarks( value.Get< bool >() );
         break;
       }
 
-      case Toolkit::Slider::MARK_TOLERANCE_PROPERTY:
+      case Toolkit::Slider::Property::MARK_TOLERANCE:
       {
         sliderImpl.SetMarkTolerance( value.Get< float >() );
         break;
@@ -1219,122 +1185,122 @@ Property::Value Slider::GetProperty( BaseObject* object, Property::Index propert
 
     switch ( propertyIndex )
     {
-      case Toolkit::Slider::LOWER_BOUND_PROPERTY:
+      case Toolkit::Slider::Property::LOWER_BOUND:
       {
         value = sliderImpl.GetLowerBound();
         break;
       }
 
-      case Toolkit::Slider::UPPER_BOUND_PROPERTY:
+      case Toolkit::Slider::Property::UPPER_BOUND:
       {
         value = sliderImpl.GetUpperBound();
         break;
       }
 
-      case Toolkit::Slider::VALUE_PROPERTY:
+      case Toolkit::Slider::Property::VALUE:
       {
         value = sliderImpl.GetValue();
         break;
       }
 
-      case Toolkit::Slider::HIT_REGION_PROPERTY:
+      case Toolkit::Slider::Property::HIT_REGION:
       {
         value = sliderImpl.GetHitRegion();
         break;
       }
 
-      case Toolkit::Slider::BACKING_REGION_PROPERTY:
+      case Toolkit::Slider::Property::BACKING_REGION:
       {
         value = sliderImpl.GetBackingRegion();
         break;
       }
 
-      case Toolkit::Slider::HANDLE_REGION_PROPERTY:
+      case Toolkit::Slider::Property::HANDLE_REGION:
       {
         value = sliderImpl.GetHandleRegion();
         break;
       }
 
-      case Toolkit::Slider::BACKING_IMAGE_NAME_PROPERTY:
+      case Toolkit::Slider::Property::BACKING_IMAGE_NAME:
       {
         value = sliderImpl.GetBackingImageName();
         break;
       }
 
-      case Toolkit::Slider::HANDLE_IMAGE_NAME_PROPERTY:
+      case Toolkit::Slider::Property::HANDLE_IMAGE_NAME:
       {
         value = sliderImpl.GetHandleImageName();
         break;
       }
 
-      case Toolkit::Slider::PROGRESS_IMAGE_NAME_PROPERTY:
+      case Toolkit::Slider::Property::PROGRESS_IMAGE_NAME:
       {
         value = sliderImpl.GetProgressImageName();
         break;
       }
 
-      case Toolkit::Slider::POPUP_IMAGE_NAME_PROPERTY:
+      case Toolkit::Slider::Property::POPUP_IMAGE_NAME:
       {
         value = sliderImpl.GetPopupImageName();
         break;
       }
 
-      case Toolkit::Slider::POPUP_ARROW_IMAGE_NAME_PROPERTY:
+      case Toolkit::Slider::Property::POPUP_ARROW_IMAGE_NAME:
       {
         value = sliderImpl.GetPopupArrowImageName();
         break;
       }
 
-      case Toolkit::Slider::DISABLE_COLOR_PROPERTY:
+      case Toolkit::Slider::Property::DISABLE_COLOR:
       {
         value = sliderImpl.GetDisableColor();
         break;
       }
 
-      case Toolkit::Slider::POPUP_TEXT_COLOR_PROPERTY:
+      case Toolkit::Slider::Property::POPUP_TEXT_COLOR:
       {
         value = sliderImpl.GetPopupTextColor();
         break;
       }
 
-      case Toolkit::Slider::VALUE_PRECISION_PROPERTY:
+      case Toolkit::Slider::Property::VALUE_PRECISION:
       {
         value = sliderImpl.GetValuePrecision();
         break;
       }
 
-      case Toolkit::Slider::SHOW_POPUP_PROPERTY:
+      case Toolkit::Slider::Property::SHOW_POPUP:
       {
         value = sliderImpl.GetShowPopup();
         break;
       }
 
-      case Toolkit::Slider::SHOW_VALUE_PROPERTY:
+      case Toolkit::Slider::Property::SHOW_VALUE:
       {
         value = sliderImpl.GetShowValue();
         break;
       }
 
-      case Toolkit::Slider::ENABLED_PROPERTY:
+      case Toolkit::Slider::Property::ENABLED:
       {
         value = sliderImpl.IsEnabled();
         break;
       }
 
-      case Toolkit::Slider::MARKS_PROPERTY:
+      case Toolkit::Slider::Property::MARKS:
       {
         // TODO: Need to be able to return a PropertyArray
         // value = sliderImpl.GetMarks();
         break;
       }
 
-      case Toolkit::Slider::SNAP_TO_MARKS_PROPERTY:
+      case Toolkit::Slider::Property::SNAP_TO_MARKS:
       {
         value = sliderImpl.GetSnapToMarks();
         break;
       }
 
-      case Toolkit::Slider::MARK_TOLERANCE_PROPERTY:
+      case Toolkit::Slider::Property::MARK_TOLERANCE:
       {
         value = sliderImpl.GetMarkTolerance();
         break;

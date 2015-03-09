@@ -20,7 +20,9 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/stage.h>
-#include <dali/public-api/images/image-attributes.h>
+#include <dali/public-api/images/buffer-image.h>
+#include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
 #include <dali/public-api/render-tasks/render-task-list.h>
 
 namespace Dali
@@ -31,6 +33,18 @@ namespace Toolkit
 
 namespace Internal
 {
+
+namespace
+{
+
+// Setup properties, signals and actions using the type-registry.
+DALI_TYPE_REGISTRATION_BEGIN( Toolkit::CubeTransitionEffect, Dali::BaseHandle, NULL );
+
+DALI_SIGNAL_REGISTRATION( CubeTransitionEffect, "transition-completed", SIGNAL_TRANSITION_COMPLETED )
+
+DALI_TYPE_REGISTRATION_END()
+
+}
 
 const Vector4 CubeTransitionEffect::FULL_BRIGHTNESS( 1.0f, 1.0f, 1.0f, 1.0f );
 const Vector4 CubeTransitionEffect::HALF_BRIGHTNESS( 0.5f, 0.5f, 0.5f, 1.0f );
@@ -76,7 +90,7 @@ void CubeTransitionEffect::Initialize()
                               (-mViewAreaSize.height + mTileSize.height) * 0.5f,
                               -mTileSize.width * 0.5f );
 
-  Image placeHolder = BitmapImage::WHITE();
+  Image placeHolder = BufferImage::WHITE();
   for( unsigned int y = 0; y < mNumRows; y++ )
   {
     float positionY = y * mTileSize.height + basePosition.y;
@@ -179,19 +193,21 @@ void CubeTransitionEffect::SetTargetImage( ImageActor imageActor )
 void CubeTransitionEffect::SetImage( ImageActor imageActor )
 {
   mCurrentImage = imageActor;
-  mIsImageLoading = true;
 
   Image image = imageActor.GetImage();
+  ResourceImage resourceImage = ResourceImage::DownCast( image );
   mBufferIndex = mBufferIndex^1;
 
   //must make sure the image is already loaded before using its attributes
-  if( image.GetLoadingState() == ResourceLoadingSucceeded )
+  if( resourceImage && resourceImage.GetLoadingState() != ResourceLoadingSucceeded )
   {
-    OnImageLoaded( image );
+    mIsImageLoading = true;
+    resourceImage.LoadingFinishedSignal().Connect( this, &CubeTransitionEffect::OnImageLoaded );
   }
   else
   {
-    image.LoadingFinishedSignal().Connect( this, &CubeTransitionEffect::OnImageLoaded );
+    mIsImageLoading = false;
+    PrepareTiles( image );
   }
 }
 
@@ -299,12 +315,21 @@ void CubeTransitionEffect::StopTransition()
   }
 }
 
-void CubeTransitionEffect::OnImageLoaded(Image image)
+void CubeTransitionEffect::OnImageLoaded(ResourceImage image)
+{
+  mIsImageLoading = false;
+  PrepareTiles( image );
+}
+
+/**
+ * Set sub-image to each tile.
+ * @param[in] image The image content of the imageActor for transition
+ */
+void CubeTransitionEffect::PrepareTiles( Image image )
 {
   // Fit the image to view area, while keeping the aspect; FitKeepAspectRatio(imageSize, viewAreaSize)
-  ImageAttributes attributes( image.GetAttributes() );
-  float scale = std::min(  mViewAreaSize.width / attributes.GetWidth(), mViewAreaSize.height / attributes.GetHeight() );
-  Vector2 imageSize(attributes.GetWidth()*scale, attributes.GetHeight()*scale);
+  float scale = std::min(  mViewAreaSize.width / image.GetWidth(), mViewAreaSize.height / image.GetHeight() );
+  Vector2 imageSize(image.GetWidth()*scale, image.GetHeight()*scale);
 
   mFullImageCreator.SetEffectImage(image);
   mFullImageCreator.SetRegionSize(mViewAreaSize, imageSize);
@@ -325,8 +350,8 @@ void CubeTransitionEffect::OnImageLoaded(Image image)
       mTiles[mContainerIndex][idx].SetPixelArea( pixelArea );
     }
   }
-  mIsImageLoading = false;
 }
+
 
 void CubeTransitionEffect::OnTransitionFinished(Animation& source)
 {
@@ -343,6 +368,26 @@ void CubeTransitionEffect::OnTransitionFinished(Animation& source)
 Toolkit::CubeTransitionEffect::TransitionCompletedSignalType& CubeTransitionEffect::TransitionCompletedSignal()
 {
   return mTransitionCompletedSignal;
+}
+
+bool CubeTransitionEffect::DoConnectSignal( BaseObject* object, ConnectionTrackerInterface* tracker, const std::string& signalName, FunctorDelegate* functor )
+{
+  Dali::BaseHandle handle( object );
+
+  bool connected( true );
+  Toolkit::CubeTransitionEffect cubeTransitionEffect = Toolkit::CubeTransitionEffect::DownCast( handle );
+
+  if( 0 == strcmp( signalName.c_str(), SIGNAL_TRANSITION_COMPLETED ) )
+  {
+    cubeTransitionEffect.TransitionCompletedSignal().Connect( tracker, functor );
+  }
+  else
+  {
+    // signalName does not match any signal
+    connected = false;
+  }
+
+  return connected;
 }
 
 } // namespace Internal

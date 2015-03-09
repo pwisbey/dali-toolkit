@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
@@ -29,13 +30,6 @@
 #include <dali-toolkit/internal/controls/cluster/cluster-style-impl.h>
 
 using namespace Dali;
-
-namespace // unnamed namespace
-{
-
-const float CLUSTER_STYLE_CONSTRAINT_DURATION = 1.0f;
-
-}
 
 namespace Dali
 {
@@ -51,15 +45,19 @@ namespace
 
 BaseHandle Create()
 {
-  Toolkit::ClusterStyleStandard s = Toolkit::ClusterStyleStandard::New(Toolkit::ClusterStyleStandard::ClusterStyle1);
+  Toolkit::ClusterStyleStandard s = Toolkit::ClusterStyleStandard::New( Toolkit::ClusterStyleStandard::ClusterStyle1 );
   return Toolkit::Cluster::New( s );
 }
 
-TypeRegistration mType( typeid(Toolkit::Cluster), typeid(Toolkit::Control), Create );
+DALI_TYPE_REGISTRATION_BEGIN( Toolkit::Cluster, Toolkit::Control, Create )
 
-TypeAction a1(mType, Toolkit::Cluster::ACTION_EXPAND   , &Cluster::DoAction);
-TypeAction a2(mType, Toolkit::Cluster::ACTION_COLLAPSE , &Cluster::DoAction);
-TypeAction a3(mType, Toolkit::Cluster::ACTION_TRANSFORM, &Cluster::DoAction);
+DALI_ACTION_REGISTRATION( Cluster, "expand",    ACTION_EXPAND    )
+DALI_ACTION_REGISTRATION( Cluster, "collapse",  ACTION_COLLAPSE  )
+DALI_ACTION_REGISTRATION( Cluster, "transform", ACTION_TRANSFORM )
+
+DALI_TYPE_REGISTRATION_END()
+
+const float CLUSTER_STYLE_CONSTRAINT_DURATION = 1.0f;
 
 }
 
@@ -345,9 +343,9 @@ void Cluster::TransformChild( unsigned int index, const Vector3& position, const
 
       child.RemoveConstraints();
       Animation animation = Animation::New(period.delaySeconds + period.durationSeconds);
-      animation.AnimateTo( Property(child, Actor::POSITION), position, AlphaFunctions::EaseOut, period);
-      animation.AnimateTo( Property(child, Actor::SCALE), scale, AlphaFunctions::EaseOut, period);
-      animation.AnimateTo( Property(child, Actor::ROTATION), rotation, AlphaFunctions::EaseOut, period);
+      animation.AnimateTo( Property(child, Actor::Property::POSITION), position, AlphaFunctions::EaseOut, period);
+      animation.AnimateTo( Property(child, Actor::Property::SCALE), scale, AlphaFunctions::EaseOut, period);
+      animation.AnimateTo( Property(child, Actor::Property::ROTATION), rotation, AlphaFunctions::EaseOut, period);
       animation.Play();
     }
   }
@@ -552,25 +550,25 @@ bool Cluster::DoAction(BaseObject* object, const std::string& actionName, const 
 {
   bool ret = false;
 
-  Dali::BaseHandle handle(object);
+  Dali::BaseHandle handle( object );
 
-  Toolkit::Cluster cluster = Toolkit::Cluster::DownCast(handle);
+  Toolkit::Cluster cluster = Toolkit::Cluster::DownCast( handle );
 
-  DALI_ASSERT_ALWAYS(cluster);
+  DALI_ASSERT_ALWAYS( cluster );
 
-  if(Toolkit::Cluster::ACTION_EXPAND == actionName)
+  if( 0 == strcmp( actionName.c_str(), ACTION_EXPAND ) )
   {
-    GetImpl(cluster).DoExpandAction(attributes);
+    GetImpl( cluster ).DoExpandAction( attributes );
     ret = true;
   }
-  else if(Toolkit::Cluster::ACTION_COLLAPSE == actionName)
+  else if( 0 == strcmp( actionName.c_str(), ACTION_COLLAPSE ) )
   {
-    GetImpl(cluster).DoCollapseAction(attributes);
+    GetImpl( cluster ).DoCollapseAction( attributes );
     ret = true;
   }
-  else if(Toolkit::Cluster::ACTION_TRANSFORM == actionName)
+  else if( 0 == strcmp( actionName.c_str(), ACTION_TRANSFORM ) )
   {
-    GetImpl(cluster).DoTransformAction(attributes);
+    GetImpl( cluster ).DoTransformAction( attributes );
     ret = true;
   }
 

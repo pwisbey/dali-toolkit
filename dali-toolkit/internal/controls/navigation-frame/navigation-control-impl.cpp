@@ -22,12 +22,13 @@
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/events/key-event.h>
 #include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
 
 // INTERNAL INCLUDES
+#include <dali-toolkit/public-api/focus-manager/focus-manager.h>
 #include <dali-toolkit/internal/controls/navigation-frame/navigation-tool-bar.h>
 #include <dali-toolkit/internal/controls/navigation-frame/navigation-title-bar.h>
 #include <dali-toolkit/internal/controls/relayout-controller.h>
-#include <dali-toolkit/public-api/focus-manager/focus-manager.h>
 
 namespace Dali
 {
@@ -40,15 +41,20 @@ namespace Internal
 
 namespace // to register type
 {
+
 BaseHandle Create()
 {
   return Toolkit::NavigationControl::New();
 }
 
-TypeRegistration mType( typeid(Toolkit::NavigationControl), typeid(Toolkit::Control), Create );
+// Setup properties, signals and actions using the type-registry.
+DALI_TYPE_REGISTRATION_BEGIN( Toolkit::NavigationControl, Toolkit::Control, Create )
 
-TypeAction a1(mType, Toolkit::NavigationControl::ACTION_PUSH, &NavigationControl::DoAction);
-TypeAction a2(mType, Toolkit::NavigationControl::ACTION_POP, &NavigationControl::DoAction);
+DALI_ACTION_REGISTRATION( NavigationControl, "push", ACTION_PUSH )
+DALI_ACTION_REGISTRATION( NavigationControl, "pop",  ACTION_POP  )
+
+DALI_TYPE_REGISTRATION_END()
+
 }
 
 NavigationControl::NavigationControl()
@@ -413,38 +419,38 @@ Toolkit::NavigationControl::ItemPoppedSignalType& NavigationControl::ItemPoppedS
   return mItemPoppedSignal;
 }
 
-bool NavigationControl::DoAction(BaseObject* object, const std::string& actionName, const PropertyValueContainer& attributes)
+bool NavigationControl::DoAction( BaseObject* object, const std::string& actionName, const PropertyValueContainer& attributes )
 {
   bool ret = false;
 
-  Dali::BaseHandle handle(object);
-  Toolkit::NavigationControl control = Toolkit::NavigationControl::DownCast(handle);
-  DALI_ASSERT_ALWAYS(control);
+  Dali::BaseHandle handle( object );
+  Toolkit::NavigationControl control = Toolkit::NavigationControl::DownCast( handle );
+  DALI_ASSERT_ALWAYS( control );
 
-  if (Toolkit::NavigationControl::ACTION_PUSH == actionName)
+  if( 0 == strcmp( actionName.c_str(), ACTION_PUSH ) )
   {
-    for (PropertyValueConstIter iter = attributes.begin(); iter != attributes.end(); ++iter)
+    for( PropertyValueConstIter iter = attributes.begin(); iter != attributes.end(); ++iter )
     {
       const Property::Value& value = *iter;
 
-      DALI_ASSERT_ALWAYS(value.GetType() == Property::STRING);
-      std::string itemName = value.Get<std::string> ();
+      DALI_ASSERT_ALWAYS( value.GetType() == Property::STRING );
+      std::string itemName = value.Get<std::string>();
 
-      for (std::list<Toolkit::Page>::iterator itemsIter = GetImpl(control).mUnpushedItems.begin(); itemsIter != GetImpl(control).mUnpushedItems.end(); ++itemsIter)
+      for( std::list<Toolkit::Page>::iterator itemsIter = GetImpl( control ).mUnpushedItems.begin(); itemsIter != GetImpl( control ).mUnpushedItems.end(); ++itemsIter )
       {
         Toolkit::Page page = *itemsIter;
-        if (page.GetName() == itemName)
+        if( page.GetName() == itemName )
         {
-          GetImpl(control).PushItem(page);
+          GetImpl( control ).PushItem( page );
           ret = true;
           break;
         }
       }
     }
   }
-  else if(Toolkit::NavigationControl::ACTION_POP == actionName)
+  else if( 0 == strcmp( actionName.c_str(), ACTION_POP ) )
   {
-    GetImpl(control).PopItem();
+    GetImpl( control ).PopItem();
 
     ret = true;
   }

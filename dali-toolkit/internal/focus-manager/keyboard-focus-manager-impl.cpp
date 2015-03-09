@@ -26,13 +26,15 @@
 #include <dali/public-api/common/stage.h>
 #include <dali/public-api/events/key-event.h>
 #include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
+#include <dali/public-api/images/resource-image.h>
+#include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
 #include <dali-toolkit/public-api/controls/control.h>
 #include <dali-toolkit/public-api/controls/control-impl.h>
 #include <dali-toolkit/public-api/focus-manager/focus-manager.h>
 #include <dali-toolkit/public-api/focus-manager/keyinput-focus-manager.h>
-#include <dali/integration-api/debug.h>
 
 namespace Dali
 {
@@ -43,16 +45,16 @@ namespace Toolkit
 namespace Internal
 {
 
-namespace // unnamed namespace
+namespace // Unnamed namespace
 {
 
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_KEYBOARD_FOCUS_MANAGER");
 #endif
 
-const std::string IS_FOCUS_GROUP_PROPERTY_NAME("is-keyboard-focus-group"); // This property will be replaced by a flag in Control.
+const char* const IS_FOCUS_GROUP_PROPERTY_NAME = "is-keyboard-focus-group"; // This property will be replaced by a flag in Control.
 
-const char* FOCUS_BORDER_IMAGE_PATH = DALI_IMAGE_DIR "keyboard_focus.png";
+const char* const FOCUS_BORDER_IMAGE_PATH = DALI_IMAGE_DIR "keyboard_focus.png";
 const Vector4 FOCUS_BORDER_IMAGE_BORDER = Vector4(7.0f, 7.0f, 7.0f, 7.0f);
 
 BaseHandle Create()
@@ -72,7 +74,15 @@ BaseHandle Create()
 
   return handle;
 }
-TypeRegistration KEYBOARD_FOCUS_MANAGER_TYPE( typeid(Dali::Toolkit::KeyboardFocusManager), typeid(Dali::BaseHandle), Create, true /* Create instance at startup */ );
+
+DALI_TYPE_REGISTRATION_BEGIN_CREATE( Toolkit::KeyboardFocusManager, Dali::BaseHandle, Create, true )
+
+DALI_SIGNAL_REGISTRATION( KeyboardFocusManager, "keyboard-pre-focus-change",        SIGNAL_PRE_FOCUS_CHANGE        )
+DALI_SIGNAL_REGISTRATION( KeyboardFocusManager, "keyboard-focus-changed",           SIGNAL_FOCUS_CHANGED           )
+DALI_SIGNAL_REGISTRATION( KeyboardFocusManager, "keyboard-focus-group-changed",     SIGNAL_FOCUS_GROUP_CHANGED     )
+DALI_SIGNAL_REGISTRATION( KeyboardFocusManager, "keyboard-focused-actor-activated", SIGNAL_FOCUSED_ACTOR_ACTIVATED )
+
+DALI_TYPE_REGISTRATION_END()
 
 } // unnamed namespace
 
@@ -458,7 +468,7 @@ Actor KeyboardFocusManager::GetFocusIndicatorActor()
 void KeyboardFocusManager::CreateDefaultFocusIndicatorActor()
 {
   // Create a focus indicator actor shared by all the keyboard focusable actors
-  Image borderImage = Image::New(FOCUS_BORDER_IMAGE_PATH);
+  Image borderImage = ResourceImage::New(FOCUS_BORDER_IMAGE_PATH);
 
   ImageActor focusIndicator = ImageActor::New(borderImage);
   focusIndicator.SetPositionInheritanceMode( Dali::USE_PARENT_POSITION_PLUS_LOCAL_POSITION );
@@ -467,10 +477,7 @@ void KeyboardFocusManager::CreateDefaultFocusIndicatorActor()
   focusIndicator.SetPosition(Vector3(0.0f, 0.0f, 1.0f));
 
   // Apply size constraint to the focus indicator
-  Constraint constraint = Constraint::New<Vector3>(Actor::SIZE,
-                                                   ParentSource(Actor::SIZE),
-                                                   EqualToConstraint());
-  focusIndicator.ApplyConstraint(constraint);
+  focusIndicator.SetSizeMode( SIZE_EQUAL_TO_PARENT );
 
   SetFocusIndicatorActor(focusIndicator);
 }
@@ -720,21 +727,21 @@ bool KeyboardFocusManager::DoConnectSignal( BaseObject* object, ConnectionTracke
   Dali::BaseHandle handle( object );
 
   bool connected( true );
-  KeyboardFocusManager* manager = dynamic_cast<KeyboardFocusManager*>(object);
+  KeyboardFocusManager* manager = dynamic_cast<KeyboardFocusManager*>( object );
 
-  if( Dali::Toolkit::KeyboardFocusManager::SIGNAL_PRE_FOCUS_CHANGE == signalName )
+  if( 0 == strcmp( signalName.c_str(), SIGNAL_PRE_FOCUS_CHANGE ) )
   {
     manager->PreFocusChangeSignal().Connect( tracker, functor );
   }
-  if( Dali::Toolkit::KeyboardFocusManager::SIGNAL_FOCUS_CHANGED == signalName )
+  if( 0 == strcmp( signalName.c_str(), SIGNAL_FOCUS_CHANGED ) )
   {
     manager->FocusChangedSignal().Connect( tracker, functor );
   }
-  if( Dali::Toolkit::KeyboardFocusManager::SIGNAL_FOCUS_GROUP_CHANGED == signalName )
+  if( 0 == strcmp( signalName.c_str(), SIGNAL_FOCUS_GROUP_CHANGED ) )
   {
     manager->FocusGroupChangedSignal().Connect( tracker, functor );
   }
-  else if( Dali::Toolkit::KeyboardFocusManager::SIGNAL_FOCUSED_ACTOR_ACTIVATED== signalName )
+  else if( 0 == strcmp( signalName.c_str(), SIGNAL_FOCUSED_ACTOR_ACTIVATED ) )
   {
     manager->FocusedActorActivatedSignal().Connect( tracker, functor );
   }

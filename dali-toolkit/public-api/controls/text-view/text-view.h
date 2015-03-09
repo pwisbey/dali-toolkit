@@ -42,25 +42,44 @@ class TextView;
  * It provides support for multi-line wrapping, multi-language font detection, text alignment, scrolling and styling.
  *
  * See the \link text-view Text View \endlink page of the Programming Guide for more details and examples.
+ *
+ * Signals
+ * | %Signal Name      | Method                    |
+ * |-------------------|---------------------------|
+ * | scrolled          | @ref ScrolledSignal()     |
  */
 class DALI_IMPORT_API TextView : public Control
 {
 public:
 
-  // Signal Names
-  static const char* const SIGNAL_TEXT_SCROLLED; ///< Signal emitted when the scroll position changes. @see ScrolledSignal()
+  /**
+   * @brief The start and end property ranges for this control.
+   */
+  enum PropertyRange
+  {
+    PROPERTY_START_INDEX = Control::CONTROL_PROPERTY_END_INDEX + 1,
+    PROPERTY_END_INDEX =   PROPERTY_START_INDEX + 1000              ///< Reserve property indices
+  };
 
-  // Properties
-  static const Property::Index PROPERTY_MARKUP_ENABLED;         ///< name "markup-enabled",       @see SetMarkupProcessingEnabled(), type BOOLEAN
-  static const Property::Index PROPERTY_TEXT;                   ///< name "text",                 @see SetText(),                    type STRING
-  static const Property::Index PROPERTY_MULTILINE_POLICY;       ///< name "multiline-policy",     @see SetMultilinePolicy(),         type STRING
-  static const Property::Index PROPERTY_WIDTH_EXCEED_POLICY;    ///< name "width-exceed-policy",  @see SetWidthExceedPolicy(),       type STRING
-  static const Property::Index PROPERTY_HEIGHT_EXCEED_POLICY;   ///< name "height-exceed-policy", @see SetHeightExceedPolicy(),      type STRING
-  static const Property::Index PROPERTY_LINE_JUSTIFICATION;     ///< name "line-justification",   @see SetLineJustification(),       type STRING
-  static const Property::Index PROPERTY_FADE_BOUNDARY;          ///< name "fade-boundary",        @see SetFadeBoundary(),            type VECTOR4
-  static const Property::Index PROPERTY_LINE_HEIGHT_OFFSET;     ///< name "line-height-offset",   @see SetLineHeightOffset(),        type FLOAT
-  static const Property::Index PROPERTY_HORIZONTAL_ALIGNMENT;   ///< name "horizontal-alignment", @see SetTextAlignment(),           type STRING
-  static const Property::Index PROPERTY_VERTICAL_ALIGNMENT;     ///< name "vertical-alignment",   @see SetTextAlignment(),           type STRING
+  /**
+   * @brief An enumeration of properties belonging to the TextView class.
+   */
+  struct Property
+  {
+    enum
+    {
+      MARKUP_ENABLED = PROPERTY_START_INDEX, ///< name "markup-enabled",       @see SetMarkupProcessingEnabled(), type BOOLEAN
+      TEXT,                                  ///< name "text",                 @see SetText(),                    type STRING
+      MULTILINE_POLICY,                      ///< name "multiline-policy",     @see SetMultilinePolicy(),         type STRING
+      WIDTH_EXCEED_POLICY,                   ///< name "width-exceed-policy",  @see SetWidthExceedPolicy(),       type STRING
+      HEIGHT_EXCEED_POLICY,                  ///< name "height-exceed-policy", @see SetHeightExceedPolicy(),      type STRING
+      LINE_JUSTIFICATION,                    ///< name "line-justification",   @see SetLineJustification(),       type STRING
+      FADE_BOUNDARY,                         ///< name "fade-boundary",        @see SetFadeBoundary(),            type VECTOR4
+      LINE_HEIGHT_OFFSET,                    ///< name "line-height-offset",   @see SetLineHeightOffset(),        type FLOAT
+      HORIZONTAL_ALIGNMENT,                  ///< name "horizontal-alignment", @see SetTextAlignment(),           type STRING
+      VERTICAL_ALIGNMENT,                    ///< name "vertical-alignment",   @see SetTextAlignment(),           type STRING
+    };
+  };
 
   /**
    * @brief Structure used to retrieve Layout info per character.

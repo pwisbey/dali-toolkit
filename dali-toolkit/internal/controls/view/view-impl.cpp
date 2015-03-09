@@ -22,8 +22,7 @@
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/common/stage.h>
 #include <dali/public-api/object/type-registry.h>
-
-// INTERNAL INCLUDES
+#include <dali/public-api/object/type-registry-helper.h>
 
 namespace Dali
 {
@@ -34,7 +33,7 @@ namespace Toolkit
 namespace Internal
 {
 
-namespace // to register type
+namespace
 {
 
 BaseHandle Create()
@@ -42,14 +41,11 @@ BaseHandle Create()
   return Toolkit::View::New();
 }
 
-TypeRegistration typeRegistration( typeid(Toolkit::View), typeid(Toolkit::Control), Create );
+DALI_TYPE_REGISTRATION_BEGIN( Toolkit::View, Toolkit::Control, Create )
 
-SignalConnectorType signalConnector1( typeRegistration, Toolkit::View::SIGNAL_ORIENTATION_ANIMATION_START , &View::DoConnectSignal );
+DALI_SIGNAL_REGISTRATION( View, "orientation-animation-start", SIGNAL_ORIENTATION_ANIMATION_START )
 
-}
-
-namespace
-{
+DALI_TYPE_REGISTRATION_END()
 
 const float ROTATION_ANIMATION_DURATION = 0.5f;
 
@@ -251,7 +247,7 @@ bool View::DoConnectSignal( BaseObject* object, ConnectionTrackerInterface* trac
   bool connected( true );
   Toolkit::View view = Toolkit::View::DownCast(handle);
 
-  if( Toolkit::View::SIGNAL_ORIENTATION_ANIMATION_START == signalName )
+  if( 0 == strcmp( signalName.c_str(), SIGNAL_ORIENTATION_ANIMATION_START ) )
   {
     view.OrientationAnimationStartedSignal().Connect( tracker, functor );
   }

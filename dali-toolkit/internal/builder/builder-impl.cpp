@@ -23,8 +23,9 @@
 #include <boost/function.hpp>
 #include <sstream>
 
-// INTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
+
+// INTERNAL INCLUDES
 
 #include <dali-toolkit/public-api/controls/control.h>
 #include <dali-toolkit/public-api/builder/json-parser.h>
@@ -292,7 +293,7 @@ void Builder::SetProperties( const TreeNode& node, Handle& handle, const Replace
 
       Handle propertyObject( handle );
 
-      Property::Index index = propertyObject.GetPropertyIndex( key );
+      Dali::Property::Index index = propertyObject.GetPropertyIndex( key );
 
       if( Property::INVALID_INDEX == index )
       {
@@ -769,7 +770,7 @@ Path Builder::GetPath( const std::string& name )
           if( SetPropertyFromNode( *pointsProperty, Property::ARRAY, points ) )
           {
             ret = Path::New();
-            ret.SetProperty( Path::POINTS, points);
+            ret.SetProperty( Path::Property::POINTS, points);
 
             //control-points property
             if( OptionalChild pointsProperty = IsChild( *path, "control-points") )
@@ -777,7 +778,7 @@ Path Builder::GetPath( const std::string& name )
               Dali::Property::Value points(Property::ARRAY);
               if( SetPropertyFromNode( *pointsProperty, Property::ARRAY, points ) )
               {
-                ret.SetProperty( Path::CONTROL_POINTS, points);
+                ret.SetProperty( Path::Property::CONTROL_POINTS, points);
               }
             }
             else

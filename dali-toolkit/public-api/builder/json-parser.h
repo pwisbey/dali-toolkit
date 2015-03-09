@@ -18,14 +18,14 @@
  *
  */
 
+// EXTERNAL INCLUDES
 #include <string>
-#include <vector>
 #include <list>
 #include <ostream>
+#include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
 #include <dali-toolkit/public-api/builder/tree-node.h>
-#include <dali/public-api/object/base-handle.h>
 
 namespace Dali
 {

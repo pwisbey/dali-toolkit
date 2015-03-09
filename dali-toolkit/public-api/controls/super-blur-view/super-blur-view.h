@@ -56,8 +56,25 @@ class DALI_IMPORT_API SuperBlurView : public Control
 {
 public:
 
-  // Properties
-  static const Property::Index PROPERTY_IMAGE;     ///< name "image",    @see SetImage,    type MAP
+  /**
+   * @brief The start and end property ranges for this control.
+   */
+  enum PropertyRange
+  {
+    PROPERTY_START_INDEX = Control::CONTROL_PROPERTY_END_INDEX + 1,
+    PROPERTY_END_INDEX =   PROPERTY_START_INDEX + 1000              ///< Reserve property indices
+  };
+
+  /**
+   * @brief An enumeration of properties belonging to the SuperBlurView class.
+   */
+  struct Property
+  {
+    enum
+    {
+      IMAGE = PROPERTY_START_INDEX, ///< name "image",    @see SetImage,    type MAP
+    };
+  };
 
   /**
    * @brief Signal type for notifications.
@@ -125,7 +142,7 @@ public:
    * User can use this to animate the blur. A value of 0.0 is zero blur and 1.0 is full blur. Default is 0.0.
    * @return Index of the property that can be used to fade the blur in / out
    */
-  Property::Index GetBlurStrengthPropertyIndex() const;
+  Dali::Property::Index GetBlurStrengthPropertyIndex() const;
 
   /**
    * @brief Set the blur strength to display the image.

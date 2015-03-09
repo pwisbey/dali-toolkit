@@ -46,35 +46,51 @@ class Control;
  *
  * The implementation of the control must be supplied; see Internal::Control for more details.
  * @see Internal::Control
+ *
+ * Signals
+ * | %Signal Name      | Method                                              |
+ * |-------------------|-----------------------------------------------------|
+ * | key-event         | @ref KeyEventSignal()                               |
+ * | tapped            | @ref GetTapGestureDetector().DetectedSignal()       |
+ * | panned            | @ref GetPanGestureDetector().DetectedSignal()       |
+ * | pinched           | @ref GetPinchGestureDetector().DetectedSignal()     |
+ * | long-pressed      | @ref GetLongPressGestureDetector().DetectedSignal() |
+ *
+ * Actions
+ * | %Action Name      | %Control method called                              |
+ * |-------------------|-----------------------------------------------------|
+ * | control-activated | %OnActivated()                                      |
  */
 class DALI_IMPORT_API Control : public CustomActor
 {
 public:
 
-  /// @name Properties
-  /** @{ */
-  static const Property::Index PROPERTY_BACKGROUND_COLOR;    ///< name "background-color",        @see SetBackgroundColor,        type VECTOR4
-  static const Property::Index PROPERTY_BACKGROUND;          ///< name "background",              @see SetBackground,             type MAP
-  static const Property::Index PROPERTY_WIDTH_POLICY;        ///< name "width-policy",            @see SetSizePolicy,             type STRING
-  static const Property::Index PROPERTY_HEIGHT_POLICY;       ///< name "height-policy",           @see SetSizePolicy,             type STRING
-  static const Property::Index PROPERTY_MINIMUM_SIZE;        ///< name "minimum-size",            @see SetMinimumSize,            type VECTOR3
-  static const Property::Index PROPERTY_MAXIMUM_SIZE;        ///< name "maximum-size",            @see SetMaximumSize,            type VECTOR3
-  static const Property::Index PROPERTY_KEY_INPUT_FOCUS;     ///< name "key-input-focus",         @see SetKeyInputFocus,          type BOOLEAN
-  /** @} */
+  /**
+   * @brief The start and end property ranges for control.
+   */
+  enum PropertyRange
+  {
+    PROPERTY_START_INDEX = PROPERTY_REGISTRATION_START_INDEX,        ///< Start index is used by the property registration macro.
+    CONTROL_PROPERTY_START_INDEX = PROPERTY_START_INDEX,             ///< Start index of Control properties.
+    CONTROL_PROPERTY_END_INDEX = CONTROL_PROPERTY_START_INDEX + 1000 ///< Reserving 1000 property indices.
+  };
 
-  /// @name Signals
-  /** @{ */
-  static const char* const SIGNAL_KEY_EVENT;                 ///< name "key-event"
-  static const char* const SIGNAL_TAPPED;                    ///< name "tapped"
-  static const char* const SIGNAL_PANNED;                    ///< name "panned"
-  static const char* const SIGNAL_PINCHED;                   ///< name "pinched"
-  static const char* const SIGNAL_LONG_PRESSED;              ///< name "long-pressed"
-  /** @} */
-
-  /// @name Actions
-  /** @{ */
-  static const char* const ACTION_CONTROL_ACTIVATED;         ///< name "control-activated"
-  /** @} */
+  /**
+   * @brief An enumeration of properties belonging to the Control class.
+   */
+  struct Property
+  {
+    enum
+    {
+      BACKGROUND_COLOR = PROPERTY_START_INDEX, ///< name "background-color", @see SetBackgroundColor, type VECTOR4
+      BACKGROUND,                              ///< name "background",       @see SetBackground,      type MAP
+      WIDTH_POLICY,                            ///< name "width-policy",     @see SetSizePolicy,      type STRING
+      HEIGHT_POLICY,                           ///< name "height-policy",    @see SetSizePolicy,      type STRING
+      MINIMUM_SIZE,                            ///< name "minimum-size",     @see SetMinimumSize,     type VECTOR3
+      MAXIMUM_SIZE,                            ///< name "maximum-size",     @see SetMaximumSize,     type VECTOR3
+      KEY_INPUT_FOCUS,                         ///< name "key-input-focus",  @see SetKeyInputFocus,   type BOOLEAN
+    };
+  };
 
   /**
    * @brief Describes how a control could be resized.

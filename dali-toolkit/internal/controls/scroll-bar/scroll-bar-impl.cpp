@@ -19,8 +19,11 @@
 #include <dali-toolkit/internal/controls/scroll-bar/scroll-bar-impl.h>
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
+#include <dali/public-api/images/resource-image.h>
 
 // INTERNAL INCLUDES
 #include <dali-toolkit/internal/controls/scrollable/item-view/item-view-impl.h>
@@ -100,11 +103,6 @@ namespace Dali
 namespace Toolkit
 {
 
-const Property::Index ScrollBar::PROPERTY_INDICATOR_HEIGHT_POLICY( Internal::ScrollBar::SCROLLBAR_PROPERTY_START_INDEX );
-const Property::Index ScrollBar::PROPERTY_INDICATOR_FIXED_HEIGHT( Internal::ScrollBar::SCROLLBAR_PROPERTY_START_INDEX + 1 );
-const Property::Index ScrollBar::PROPERTY_INDICATOR_SHOW_DURATION( Internal::ScrollBar::SCROLLBAR_PROPERTY_START_INDEX + 2 );
-const Property::Index ScrollBar::PROPERTY_INDICATOR_HIDE_DURATION( Internal::ScrollBar::SCROLLBAR_PROPERTY_START_INDEX + 3 );
-
 namespace Internal
 {
 
@@ -113,19 +111,25 @@ namespace
 
 using namespace Dali;
 
-const char* INDICATOR_HEIGHT_POLICY_NAME[] = {"Variable", "Fixed"};
-
 BaseHandle Create()
 {
   return Toolkit::ScrollBar::New();
 }
 
-TypeRegistration typeRegistration( typeid(Toolkit::ScrollBar), typeid(Toolkit::ScrollComponent), Create );
+// Setup properties, signals and actions using the type-registry.
+DALI_TYPE_REGISTRATION_BEGIN( Toolkit::ScrollBar, Toolkit::ScrollComponent, Create );
 
-PropertyRegistration property1( typeRegistration, "indicator-height-policy", Toolkit::ScrollBar::PROPERTY_INDICATOR_HEIGHT_POLICY, Property::STRING, &ScrollBar::SetProperty, &ScrollBar::GetProperty );
-PropertyRegistration property2( typeRegistration, "indicator-fixed-height",  Toolkit::ScrollBar::PROPERTY_INDICATOR_FIXED_HEIGHT,  Property::FLOAT,  &ScrollBar::SetProperty, &ScrollBar::GetProperty );
-PropertyRegistration property3( typeRegistration, "indicator-show-duration",  Toolkit::ScrollBar::PROPERTY_INDICATOR_SHOW_DURATION,  Property::FLOAT,  &ScrollBar::SetProperty, &ScrollBar::GetProperty );
-PropertyRegistration property4( typeRegistration, "indicator-hide-duration",  Toolkit::ScrollBar::PROPERTY_INDICATOR_HIDE_DURATION,  Property::FLOAT,  &ScrollBar::SetProperty, &ScrollBar::GetProperty );
+DALI_PROPERTY_REGISTRATION( ScrollBar, "indicator-height-policy", STRING, INDICATOR_HEIGHT_POLICY         )
+DALI_PROPERTY_REGISTRATION( ScrollBar, "indicator-fixed-height",  FLOAT,  INDICATOR_FIXED_HEIGHT          )
+DALI_PROPERTY_REGISTRATION( ScrollBar, "indicator-show-duration", FLOAT,  INDICATOR_SHOW_DURATION         )
+DALI_PROPERTY_REGISTRATION( ScrollBar, "indicator-hide-duration", FLOAT,  INDICATOR_HIDE_DURATION         )
+
+DALI_SIGNAL_REGISTRATION(   ScrollBar, "scroll-position-notified",        SCROLL_POSITION_NOTIFIED_SIGNAL )
+
+DALI_TYPE_REGISTRATION_END()
+
+const char* INDICATOR_HEIGHT_POLICY_NAME[] = {"Variable", "Fixed"};
+
 }
 
 ScrollBar::ScrollBar()
@@ -148,7 +152,7 @@ void ScrollBar::OnInitialize()
 {
   Actor self = Self();
 
-  Image indicatorImage = Image::New( DEFAULT_INDICATOR_IMAGE_PATH );
+  Image indicatorImage = ResourceImage::New( DEFAULT_INDICATOR_IMAGE_PATH );
   mIndicator = ImageActor::New( indicatorImage );
   mIndicator.SetNinePatchBorder( DEFAULT_INDICATOR_NINE_PATCH_BORDER );
   mIndicator.SetStyle( ImageActor::STYLE_NINE_PATCH );
@@ -216,9 +220,9 @@ void ScrollBar::ApplyConstraints()
       mIndicator.RemoveConstraint(mIndicatorPositionConstraint);
     }
 
-    constraint = Constraint::New<Vector3>( Actor::POSITION,
-                                           LocalSource( Actor::SIZE ),
-                                           ParentSource( Actor::SIZE ),
+    constraint = Constraint::New<Vector3>( Actor::Property::POSITION,
+                                           LocalSource( Actor::Property::SIZE ),
+                                           ParentSource( Actor::Property::SIZE ),
                                            Source( mScrollPositionObject, Toolkit::ScrollConnector::SCROLL_POSITION ),
                                            IndicatorPositionConstraint( mScrollConnector.GetMinLimit(), mScrollConnector.GetMaxLimit() ) );
     mIndicatorPositionConstraint = mIndicator.ApplyConstraint( constraint );
@@ -437,6 +441,26 @@ void ScrollBar::OnIndicatorHeightPolicyPropertySet( Property::Value propertyValu
   }
 }
 
+bool ScrollBar::DoConnectSignal( BaseObject* object, ConnectionTrackerInterface* tracker, const std::string& signalName, FunctorDelegate* functor )
+{
+  Dali::BaseHandle handle( object );
+
+  bool connected( true );
+  Toolkit::ScrollBar scrollBar = Toolkit::ScrollBar::DownCast( handle );
+
+  if( 0 == strcmp( signalName.c_str(), SCROLL_POSITION_NOTIFIED_SIGNAL ) )
+  {
+    scrollBar.ScrollPositionNotifiedSignal().Connect( tracker, functor );
+  }
+  else
+  {
+    // signalName does not match any signal
+    connected = false;
+  }
+
+  return connected;
+}
+
 void ScrollBar::SetProperty( BaseObject* object, Property::Index index, const Property::Value& value )
 {
   Toolkit::ScrollBar scrollBar = Toolkit::ScrollBar::DownCast( Dali::BaseHandle( object ) );
@@ -446,22 +470,22 @@ void ScrollBar::SetProperty( BaseObject* object, Property::Index index, const Pr
     ScrollBar& scrollBarImpl( GetImpl( scrollBar ) );
     switch( index )
     {
-      case Toolkit::ScrollBar::PROPERTY_INDICATOR_HEIGHT_POLICY:
+      case Toolkit::ScrollBar::Property::INDICATOR_HEIGHT_POLICY:
       {
         scrollBarImpl.OnIndicatorHeightPolicyPropertySet( value );
         break;
       }
-      case Toolkit::ScrollBar::PROPERTY_INDICATOR_FIXED_HEIGHT:
+      case Toolkit::ScrollBar::Property::INDICATOR_FIXED_HEIGHT:
       {
         scrollBarImpl.SetIndicatorFixedHeight(value.Get<float>());
         break;
       }
-      case Toolkit::ScrollBar::PROPERTY_INDICATOR_SHOW_DURATION:
+      case Toolkit::ScrollBar::Property::INDICATOR_SHOW_DURATION:
       {
         scrollBarImpl.SetIndicatorShowDuration(value.Get<float>());
         break;
       }
-      case Toolkit::ScrollBar::PROPERTY_INDICATOR_HIDE_DURATION:
+      case Toolkit::ScrollBar::Property::INDICATOR_HIDE_DURATION:
       {
         scrollBarImpl.SetIndicatorHideDuration(value.Get<float>());
         break;
@@ -481,22 +505,22 @@ Property::Value ScrollBar::GetProperty( BaseObject* object, Property::Index inde
     ScrollBar& scrollBarImpl( GetImpl( scrollBar ) );
     switch( index )
     {
-      case Toolkit::ScrollBar::PROPERTY_INDICATOR_HEIGHT_POLICY:
+      case Toolkit::ScrollBar::Property::INDICATOR_HEIGHT_POLICY:
       {
         value = INDICATOR_HEIGHT_POLICY_NAME[ scrollBarImpl.GetIndicatorHeightPolicy() ];
         break;
       }
-      case Toolkit::ScrollBar::PROPERTY_INDICATOR_FIXED_HEIGHT:
+      case Toolkit::ScrollBar::Property::INDICATOR_FIXED_HEIGHT:
       {
         value = scrollBarImpl.GetIndicatorFixedHeight();
         break;
       }
-      case Toolkit::ScrollBar::PROPERTY_INDICATOR_SHOW_DURATION:
+      case Toolkit::ScrollBar::Property::INDICATOR_SHOW_DURATION:
       {
         value = scrollBarImpl.GetIndicatorShowDuration();
         break;
       }
-      case Toolkit::ScrollBar::PROPERTY_INDICATOR_HIDE_DURATION:
+      case Toolkit::ScrollBar::Property::INDICATOR_HIDE_DURATION:
       {
         value = scrollBarImpl.GetIndicatorHideDuration();
         break;

@@ -28,8 +28,10 @@
 #include <dali/public-api/events/key-event.h>
 #include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
 #include <dali/public-api/object/property-notification.h>
 #include <dali/integration-api/debug.h>
+#include <dali/public-api/images/resource-image.h>
 
 // INTERNAL INCLUDES
 #include <dali-toolkit/internal/controls/text-view/text-processor.h>
@@ -69,13 +71,13 @@ const float UI_Z_OFFSET( 0.2f );                                            ///<
 const Vector3 UI_OFFSET(0.0f, 0.0f, UI_Z_OFFSET);                           ///< Text Selection Handles/Cursor offset.
 const Vector3 DEFAULT_HANDLE_ONE_OFFSET(0.0f, -5.0f, 0.0f);                 ///< Handle One's Offset
 const Vector3 DEFAULT_HANDLE_TWO_OFFSET(0.0f, -5.0f, 0.0f);                 ///< Handle Two's Offset
-const float TOP_HANDLE_TOP_OFFSET( 34.0f);                                   ///< Offset between top handle and cutCopyPaste pop-up
-const float BOTTOM_HANDLE_BOTTOM_OFFSET(34.0f);                              ///< Offset between bottom handle and cutCopyPaste pop-up
+const float TOP_HANDLE_TOP_OFFSET( 34.0f);                                  ///< Offset between top handle and cutCopyPaste pop-up
+const float BOTTOM_HANDLE_BOTTOM_OFFSET(34.0f);                             ///< Offset between bottom handle and cutCopyPaste pop-up
 const float CURSOR_THICKNESS(4.0f);
 const Degree CURSOR_ANGLE_OFFSET(2.0f);                                     ///< Offset from the angle of italic angle.
 const Vector4 DEFAULT_CURSOR_COLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
-const std::string NEWLINE( "\n" );
+const char* const NEWLINE = "\n";
 
 const TextStyle DEFAULT_TEXT_STYLE;
 
@@ -172,29 +174,11 @@ namespace Dali
 
 namespace Toolkit
 {
-// Properties
-const Property::Index TextInput::HIGHLIGHT_COLOR_PROPERTY                     = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX;
-const Property::Index TextInput::CUT_AND_PASTE_COLOR_PROPERTY                 = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+1;
-const Property::Index TextInput::CUT_AND_PASTE_PRESSED_COLOR_PROPERTY         = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+2;
-const Property::Index TextInput::CUT_AND_PASTE_BORDER_COLOR_PROPERTY          = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+3;
-const Property::Index TextInput::CUT_AND_PASTE_ICON_COLOR_PROPERTY            = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+4;
-const Property::Index TextInput::CUT_AND_PASTE_ICON_PRESSED_COLOR_PROPERTY    = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+5;
-const Property::Index TextInput::CUT_AND_PASTE_TEXT_COLOR_PROPERTY            = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+6;
-const Property::Index TextInput::CUT_AND_PASTE_TEXT_PRESSED_COLOR_PROPERTY    = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+7;
-const Property::Index TextInput::CUT_BUTTON_POSITION_PRIORITY_PROPERTY        = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+8;
-const Property::Index TextInput::COPY_BUTTON_POSITION_PRIORITY_PROPERTY       = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+9;
-const Property::Index TextInput::PASTE_BUTTON_POSITION_PRIORITY_PROPERTY      = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+10;
-const Property::Index TextInput::SELECT_BUTTON_POSITION_PRIORITY_PROPERTY     = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+11;
-const Property::Index TextInput::SELECT_ALL_BUTTON_POSITION_PRIORITY_PROPERTY = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+12;
-const Property::Index TextInput::CLIPBOARD_BUTTON_POSITION_PRIORITY_PROPERTY  = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+13;
-const Property::Index TextInput::POP_UP_OFFSET_FROM_TEXT_PROPERTY             = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+14;
-const Property::Index TextInput::CURSOR_COLOR_PROPERTY                        = Internal::TextInput::TEXTINPUT_PROPERTY_START_INDEX+15;
-
 
 namespace Internal
 {
 
-namespace
+namespace // Unnamed namespace
 {
 
 BaseHandle Create()
@@ -202,34 +186,36 @@ BaseHandle Create()
   return Toolkit::TextInput::New();
 }
 
-TypeRegistration typeRegistration( typeid(Toolkit::TextInput), typeid(Toolkit::Control), Create );
+// Setup properties, signals and actions using the type-registry.
+DALI_TYPE_REGISTRATION_BEGIN( Toolkit::TextInput, Toolkit::Control, Create )
 
-SignalConnectorType signalConnector1( typeRegistration, Toolkit::TextInput::SIGNAL_START_INPUT,                  &TextInput::DoConnectSignal );
-SignalConnectorType signalConnector2( typeRegistration, Toolkit::TextInput::SIGNAL_END_INPUT,                    &TextInput::DoConnectSignal );
-SignalConnectorType signalConnector3( typeRegistration, Toolkit::TextInput::SIGNAL_STYLE_CHANGED,                &TextInput::DoConnectSignal );
-SignalConnectorType signalConnector4( typeRegistration, Toolkit::TextInput::SIGNAL_MAX_INPUT_CHARACTERS_REACHED, &TextInput::DoConnectSignal );
-SignalConnectorType signalConnector5( typeRegistration, Toolkit::TextInput::SIGNAL_TOOLBAR_DISPLAYED,            &TextInput::DoConnectSignal );
-SignalConnectorType signalConnector6( typeRegistration, Toolkit::TextInput::SIGNAL_TEXT_EXCEED_BOUNDARIES,       &TextInput::DoConnectSignal );
+DALI_PROPERTY_REGISTRATION( TextInput, "highlight-color",                     VECTOR4,          HIGHLIGHT_COLOR                     )
+DALI_PROPERTY_REGISTRATION( TextInput, "cut-and-paste-bg-color",              VECTOR4,          CUT_AND_PASTE_COLOR                 )
+DALI_PROPERTY_REGISTRATION( TextInput, "cut-and-paste-pressed-color",         VECTOR4,          CUT_AND_PASTE_PRESSED_COLOR         )
+DALI_PROPERTY_REGISTRATION( TextInput, "cut-and-paste-border-color",          VECTOR4,          CUT_AND_PASTE_BORDER_COLOR          )
+DALI_PROPERTY_REGISTRATION( TextInput, "cut-and-paste-icon-color",            VECTOR4,          CUT_AND_PASTE_ICON_COLOR            )
+DALI_PROPERTY_REGISTRATION( TextInput, "cut-and-paste-icon-pressed-color",    VECTOR4,          CUT_AND_PASTE_ICON_PRESSED_COLOR    )
+DALI_PROPERTY_REGISTRATION( TextInput, "cut-and-paste-text-color",            VECTOR4,          CUT_AND_PASTE_TEXT_COLOR            )
+DALI_PROPERTY_REGISTRATION( TextInput, "cut-and-paste-text-pressed-color",    VECTOR4,          CUT_AND_PASTE_TEXT_PRESSED_COLOR    )
+DALI_PROPERTY_REGISTRATION( TextInput, "cut-button-position-priority",        UNSIGNED_INTEGER, CUT_BUTTON_POSITION_PRIORITY        )
+DALI_PROPERTY_REGISTRATION( TextInput, "copy-button-position-priority",       UNSIGNED_INTEGER, COPY_BUTTON_POSITION_PRIORITY       )
+DALI_PROPERTY_REGISTRATION( TextInput, "paste-button-position-priority",      UNSIGNED_INTEGER, PASTE_BUTTON_POSITION_PRIORITY      )
+DALI_PROPERTY_REGISTRATION( TextInput, "select-button-position-priority",     UNSIGNED_INTEGER, SELECT_BUTTON_POSITION_PRIORITY     )
+DALI_PROPERTY_REGISTRATION( TextInput, "select-all-button-position-priority", UNSIGNED_INTEGER, SELECT_ALL_BUTTON_POSITION_PRIORITY )
+DALI_PROPERTY_REGISTRATION( TextInput, "clipboard-button-position-priority",  UNSIGNED_INTEGER, CLIPBOARD_BUTTON_POSITION_PRIORITY  )
+DALI_PROPERTY_REGISTRATION( TextInput, "popup-offset-from-text",              VECTOR4,          POP_UP_OFFSET_FROM_TEXT             )
+DALI_PROPERTY_REGISTRATION( TextInput, "cursor-color",                        VECTOR4,          CURSOR_COLOR                        )
+
+DALI_SIGNAL_REGISTRATION(   TextInput, "start-input",                                           SIGNAL_START_INPUT                  )
+DALI_SIGNAL_REGISTRATION(   TextInput, "end-input",                                             SIGNAL_END_INPUT                    )
+DALI_SIGNAL_REGISTRATION(   TextInput, "style-changed",                                         SIGNAL_STYLE_CHANGED                )
+DALI_SIGNAL_REGISTRATION(   TextInput, "max-input-characters-reached",                          SIGNAL_MAX_INPUT_CHARACTERS_REACHED )
+DALI_SIGNAL_REGISTRATION(   TextInput, "toolbar-displayed",                                     SIGNAL_TOOLBAR_DISPLAYED            )
+DALI_SIGNAL_REGISTRATION(   TextInput, "text-exceed-boundaries",                                SIGNAL_TEXT_EXCEED_BOUNDARIES       )
+
+DALI_TYPE_REGISTRATION_END()
 
 }
-
-PropertyRegistration property1( typeRegistration, "highlight-color",  Toolkit::TextInput::HIGHLIGHT_COLOR_PROPERTY, Property::VECTOR4, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property2( typeRegistration, "cut-and-paste-bg-color",  Toolkit::TextInput::CUT_AND_PASTE_COLOR_PROPERTY, Property::VECTOR4, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property3( typeRegistration, "cut-and-paste-pressed-color",  Toolkit::TextInput::CUT_AND_PASTE_PRESSED_COLOR_PROPERTY, Property::VECTOR4, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property4( typeRegistration, "cut-and-paste-icon-color",  Toolkit::TextInput::CUT_AND_PASTE_ICON_COLOR_PROPERTY, Property::VECTOR4, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property5( typeRegistration, "cut-and-paste-icon-pressed-color",  Toolkit::TextInput::CUT_AND_PASTE_ICON_PRESSED_COLOR_PROPERTY, Property::VECTOR4, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property6( typeRegistration, "cut-and-paste-text-color",  Toolkit::TextInput::CUT_AND_PASTE_TEXT_COLOR_PROPERTY, Property::VECTOR4, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property7( typeRegistration, "cut-and-paste-text-pressed-color",  Toolkit::TextInput::CUT_AND_PASTE_TEXT_PRESSED_COLOR_PROPERTY, Property::VECTOR4, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property8( typeRegistration, "cut-and-paste-border-color",  Toolkit::TextInput::CUT_AND_PASTE_BORDER_COLOR_PROPERTY, Property::VECTOR4, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property9( typeRegistration, "cut-button-position-priority",  Toolkit::TextInput::CUT_BUTTON_POSITION_PRIORITY_PROPERTY, Property::UNSIGNED_INTEGER, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property10( typeRegistration, "copy-button-position-priority",  Toolkit::TextInput::COPY_BUTTON_POSITION_PRIORITY_PROPERTY, Property::UNSIGNED_INTEGER, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property11( typeRegistration, "paste-button-position-priority",  Toolkit::TextInput::PASTE_BUTTON_POSITION_PRIORITY_PROPERTY, Property::UNSIGNED_INTEGER, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property12( typeRegistration, "select-button-position-priority",  Toolkit::TextInput::SELECT_BUTTON_POSITION_PRIORITY_PROPERTY, Property::UNSIGNED_INTEGER, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property13( typeRegistration, "select-all-button-position-priority",  Toolkit::TextInput::SELECT_ALL_BUTTON_POSITION_PRIORITY_PROPERTY, Property::UNSIGNED_INTEGER, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property14( typeRegistration, "clipboard-button-position-priority",  Toolkit::TextInput::CLIPBOARD_BUTTON_POSITION_PRIORITY_PROPERTY, Property::UNSIGNED_INTEGER, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property15( typeRegistration, "popup-offset-from-text", Toolkit::TextInput::POP_UP_OFFSET_FROM_TEXT_PROPERTY, Property::VECTOR4, &TextInput::SetProperty, &TextInput::GetProperty );
-PropertyRegistration property16( typeRegistration, "cursor-color", Toolkit::TextInput::CURSOR_COLOR_PROPERTY, Property::VECTOR4, &TextInput::SetProperty, &TextInput::GetProperty );
-
 
 // [TextInput::HighlightInfo] /////////////////////////////////////////////////
 
@@ -578,25 +564,29 @@ bool TextInput::DoConnectSignal( BaseObject* object, ConnectionTrackerInterface*
   Dali::BaseHandle handle( object );
 
   bool connected( true );
-  Toolkit::TextInput textInput = Toolkit::TextInput::DownCast(handle);
+  Toolkit::TextInput textInput = Toolkit::TextInput::DownCast( handle );
 
-  if( Toolkit::TextInput::SIGNAL_START_INPUT == signalName )
+  if( 0 == strcmp( signalName.c_str(), SIGNAL_START_INPUT ) )
   {
     textInput.InputStartedSignal().Connect( tracker, functor );
   }
-  else if( Toolkit::TextInput::SIGNAL_END_INPUT == signalName )
+  else if( 0 == strcmp( signalName.c_str(), SIGNAL_END_INPUT ) )
   {
     textInput.InputFinishedSignal().Connect( tracker, functor );
   }
-  else if( Toolkit::TextInput::SIGNAL_STYLE_CHANGED == signalName )
+  else if( 0 == strcmp( signalName.c_str(), SIGNAL_STYLE_CHANGED ) )
   {
     textInput.StyleChangedSignal().Connect( tracker, functor );
   }
-  else if( Toolkit::TextInput::SIGNAL_MAX_INPUT_CHARACTERS_REACHED == signalName )
+  else if( 0 == strcmp( signalName.c_str(), SIGNAL_MAX_INPUT_CHARACTERS_REACHED ) )
   {
     textInput.MaxInputCharactersReachedSignal().Connect( tracker, functor );
   }
-  else if( Toolkit::TextInput::SIGNAL_TEXT_EXCEED_BOUNDARIES == signalName )
+  else if( 0 == strcmp( signalName.c_str(), SIGNAL_TOOLBAR_DISPLAYED ) )
+  {
+    textInput.CutAndPasteToolBarDisplayedSignal().Connect( tracker, functor );
+  }
+  else if( 0 == strcmp( signalName.c_str(), SIGNAL_TEXT_EXCEED_BOUNDARIES ) )
   {
     textInput.InputTextExceedBoundariesSignal().Connect( tracker, functor );
   }
@@ -2118,8 +2108,7 @@ void TextInput::SetUpTouchEvents()
 
   if ( !mDoubleTapDetector )
   {
-    mDoubleTapDetector = TapGestureDetector::New();
-    mDoubleTapDetector.SetTapsRequired( 2 );
+    mDoubleTapDetector = TapGestureDetector::New( 2 );
     mDoubleTapDetector.DetectedSignal().Connect(this, &TextInput::OnDoubleTap);
 
     // Only attach and detach the actor to the double tap detector when we enter/leave edit mode
@@ -3021,7 +3010,7 @@ void TextInput::CreateGrabHandle( Dali::Image image )
   {
     if ( !image )
     {
-      mGrabHandleImage = Image::New(DEFAULT_GRAB_HANDLE);
+      mGrabHandleImage = ResourceImage::New(DEFAULT_GRAB_HANDLE);
     }
     else
     {
@@ -3047,7 +3036,8 @@ void TextInput::CreateGrabArea( Actor& parent )
   mGrabArea = Actor::New(); // Area that Grab handle responds to, larger than actual handle so easier to move
   mGrabArea.SetName( "GrabArea" );
   mGrabArea.SetPositionInheritanceMode( Dali::USE_PARENT_POSITION );
-  mGrabArea.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), RelativeToConstraint( DEFAULT_GRAB_HANDLE_RELATIVE_SIZE ) ) );  // grab area to be larger than text actor
+  mGrabArea.SetSizeMode( SIZE_RELATIVE_TO_PARENT );
+  mGrabArea.SetSizeModeFactor( DEFAULT_GRAB_HANDLE_RELATIVE_SIZE );
   mGrabArea.TouchedSignal().Connect(this,&TextInput::OnPressDown);
   mTapDetector.Attach( mGrabArea );
   mPanGestureDetector.Attach( mGrabArea );
@@ -3226,37 +3216,37 @@ void TextInput::SetUpHandlePropertyNotifications()
   Vector3 handlesize = GetSelectionHandleSize();
 
   // Exceeding horizontal boundary
-  PropertyNotification leftNotification = mSelectionHandleOne.AddPropertyNotification( Actor::WORLD_POSITION_X, LessThanCondition( mBoundingRectangleWorldCoordinates.x + handlesize.x) );
+  PropertyNotification leftNotification = mSelectionHandleOne.AddPropertyNotification( Actor::Property::WORLD_POSITION_X, LessThanCondition( mBoundingRectangleWorldCoordinates.x + handlesize.x) );
   leftNotification.NotifySignal().Connect( this, &TextInput::OnLeftBoundaryExceeded );
 
-  PropertyNotification rightNotification = mSelectionHandleTwo.AddPropertyNotification( Actor::WORLD_POSITION_X, GreaterThanCondition( mBoundingRectangleWorldCoordinates.z - handlesize.x ) );
+  PropertyNotification rightNotification = mSelectionHandleTwo.AddPropertyNotification( Actor::Property::WORLD_POSITION_X, GreaterThanCondition( mBoundingRectangleWorldCoordinates.z - handlesize.x ) );
   rightNotification.NotifySignal().Connect( this, &TextInput::OnRightBoundaryExceeded );
 
   // Within horizontal boundary
-  PropertyNotification leftLeaveNotification = mSelectionHandleOne.AddPropertyNotification( Actor::WORLD_POSITION_X, GreaterThanCondition( mBoundingRectangleWorldCoordinates.x + 2*handlesize.x ) );
+  PropertyNotification leftLeaveNotification = mSelectionHandleOne.AddPropertyNotification( Actor::Property::WORLD_POSITION_X, GreaterThanCondition( mBoundingRectangleWorldCoordinates.x + 2*handlesize.x ) );
   leftLeaveNotification.NotifySignal().Connect( this, &TextInput::OnReturnToLeftBoundary );
 
-  PropertyNotification rightLeaveNotification = mSelectionHandleTwo.AddPropertyNotification( Actor::WORLD_POSITION_X, LessThanCondition( mBoundingRectangleWorldCoordinates.z - 2*handlesize.x ) );
+  PropertyNotification rightLeaveNotification = mSelectionHandleTwo.AddPropertyNotification( Actor::Property::WORLD_POSITION_X, LessThanCondition( mBoundingRectangleWorldCoordinates.z - 2*handlesize.x ) );
   rightLeaveNotification.NotifySignal().Connect( this, &TextInput::OnReturnToRightBoundary );
 
   // Exceeding vertical boundary
-  PropertyNotification verticalExceedNotificationOne = mSelectionHandleOne.AddPropertyNotification( Actor::WORLD_POSITION_Y,
+  PropertyNotification verticalExceedNotificationOne = mSelectionHandleOne.AddPropertyNotification( Actor::Property::WORLD_POSITION_Y,
                                                        OutsideCondition( mBoundingRectangleWorldCoordinates.y + handlesize.y,
                                                                          mBoundingRectangleWorldCoordinates.w - handlesize.y ) );
   verticalExceedNotificationOne.NotifySignal().Connect( this, &TextInput::OnHandleOneLeavesBoundary );
 
-  PropertyNotification verticalExceedNotificationTwo = mSelectionHandleTwo.AddPropertyNotification( Actor::WORLD_POSITION_Y,
+  PropertyNotification verticalExceedNotificationTwo = mSelectionHandleTwo.AddPropertyNotification( Actor::Property::WORLD_POSITION_Y,
                                                        OutsideCondition( mBoundingRectangleWorldCoordinates.y + handlesize.y,
                                                                          mBoundingRectangleWorldCoordinates.w - handlesize.y ) );
   verticalExceedNotificationTwo.NotifySignal().Connect( this, &TextInput::OnHandleTwoLeavesBoundary );
 
   // Within vertical boundary
-  PropertyNotification verticalWithinNotificationOne = mSelectionHandleOne.AddPropertyNotification( Actor::WORLD_POSITION_Y,
+  PropertyNotification verticalWithinNotificationOne = mSelectionHandleOne.AddPropertyNotification( Actor::Property::WORLD_POSITION_Y,
                                                        InsideCondition( mBoundingRectangleWorldCoordinates.y + handlesize.y,
                                                                         mBoundingRectangleWorldCoordinates.w - handlesize.y ) );
   verticalWithinNotificationOne.NotifySignal().Connect( this, &TextInput::OnHandleOneWithinBoundary );
 
-  PropertyNotification verticalWithinNotificationTwo = mSelectionHandleTwo.AddPropertyNotification( Actor::WORLD_POSITION_Y,
+  PropertyNotification verticalWithinNotificationTwo = mSelectionHandleTwo.AddPropertyNotification( Actor::Property::WORLD_POSITION_Y,
                                                        InsideCondition( mBoundingRectangleWorldCoordinates.y + handlesize.y,
                                                                         mBoundingRectangleWorldCoordinates.w - handlesize.y ) );
   verticalWithinNotificationTwo.NotifySignal().Connect( this, &TextInput::OnHandleTwoWithinBoundary );
@@ -3270,8 +3260,8 @@ void TextInput::CreateSelectionHandles( std::size_t start, std::size_t end, Dali
   if ( !mSelectionHandleOne )
   {
     // create normal and pressed images
-    mSelectionHandleOneImage = Image::New( DEFAULT_SELECTION_HANDLE_ONE );
-    mSelectionHandleOneImagePressed = Image::New( DEFAULT_SELECTION_HANDLE_ONE_PRESSED );
+    mSelectionHandleOneImage = ResourceImage::New( DEFAULT_SELECTION_HANDLE_ONE );
+    mSelectionHandleOneImagePressed = ResourceImage::New( DEFAULT_SELECTION_HANDLE_ONE_PRESSED );
 
     mSelectionHandleOne = ImageActor::New( mSelectionHandleOneImage );
     mSelectionHandleOne.SetName("SelectionHandleOne");
@@ -3283,7 +3273,8 @@ void TextInput::CreateSelectionHandles( std::size_t start, std::size_t end, Dali
     mHandleOneGrabArea = Actor::New(); // Area that Grab handle responds to, larger than actual handle so easier to move
     mHandleOneGrabArea.SetName("SelectionHandleOneGrabArea");
 
-    mHandleOneGrabArea.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), RelativeToConstraint( DEFAULT_SELECTION_HANDLE_RELATIVE_SIZE ) ) );  // grab area to be larger than text actor
+    mHandleOneGrabArea.SetSizeMode( SIZE_RELATIVE_TO_PARENT );
+    mHandleOneGrabArea.SetSizeModeFactor( DEFAULT_SELECTION_HANDLE_RELATIVE_SIZE );
     mHandleOneGrabArea.SetPositionInheritanceMode( Dali::USE_PARENT_POSITION );
 
     mTapDetector.Attach( mHandleOneGrabArea );
@@ -3298,8 +3289,8 @@ void TextInput::CreateSelectionHandles( std::size_t start, std::size_t end, Dali
   if ( !mSelectionHandleTwo )
   {
     // create normal and pressed images
-    mSelectionHandleTwoImage = Image::New( DEFAULT_SELECTION_HANDLE_TWO );
-    mSelectionHandleTwoImagePressed = Image::New( DEFAULT_SELECTION_HANDLE_TWO_PRESSED );
+    mSelectionHandleTwoImage = ResourceImage::New( DEFAULT_SELECTION_HANDLE_TWO );
+    mSelectionHandleTwoImagePressed = ResourceImage::New( DEFAULT_SELECTION_HANDLE_TWO_PRESSED );
 
     mSelectionHandleTwo = ImageActor::New( mSelectionHandleTwoImage );
     mSelectionHandleTwo.SetName("SelectionHandleTwo");
@@ -3310,7 +3301,8 @@ void TextInput::CreateSelectionHandles( std::size_t start, std::size_t end, Dali
 
     mHandleTwoGrabArea = Actor::New(); // Area that Grab handle responds to, larger than actual handle so easier to move
     mHandleTwoGrabArea.SetName("SelectionHandleTwoGrabArea");
-    mHandleTwoGrabArea.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), RelativeToConstraint( DEFAULT_SELECTION_HANDLE_RELATIVE_SIZE ) ) );  // grab area to be larger than text actor
+    mHandleTwoGrabArea.SetSizeMode( SIZE_RELATIVE_TO_PARENT );
+    mHandleTwoGrabArea.SetSizeModeFactor( DEFAULT_SELECTION_HANDLE_RELATIVE_SIZE );
     mHandleTwoGrabArea.SetPositionInheritanceMode( Dali::USE_PARENT_POSITION );
 
     mTapDetector.Attach( mHandleTwoGrabArea );
@@ -4877,7 +4869,6 @@ void TextInput::CreateHighlight()
     mHighlightMeshActor.SetParentOrigin( ParentOrigin::TOP_LEFT );
     mHighlightMeshActor.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     mHighlightMeshActor.SetPosition( 0.0f, 0.0f, DISPLAYED_HIGHLIGHT_Z_OFFSET );
-    mHighlightMeshActor.SetAffectedByLighting(false);
 
     Self().Add(mHighlightMeshActor);
   }
@@ -5324,84 +5315,85 @@ void TextInput::SetProperty( BaseObject* object, Property::Index propertyIndex, 
 
     switch ( propertyIndex )
     {
-      case Toolkit::TextInput::HIGHLIGHT_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::HIGHLIGHT_COLOR:
       {
         textInputImpl.SetMaterialDiffuseColor( value.Get< Vector4 >() );
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_COLOR:
       {
         textInputImpl.mPopupPanel.SetCutPastePopupColor( value.Get< Vector4 >() );
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_PRESSED_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_PRESSED_COLOR:
       {
         textInputImpl.mPopupPanel.SetCutPastePopupPressedColor( value.Get< Vector4 >() );
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_BORDER_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_BORDER_COLOR:
       {
         textInputImpl.mPopupPanel.SetCutPastePopupBorderColor( value.Get< Vector4 >() );
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_ICON_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_ICON_COLOR:
       {
         textInputImpl.mPopupPanel.SetCutPastePopupIconColor( value.Get< Vector4 >() );
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_ICON_PRESSED_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_ICON_PRESSED_COLOR:
       {
         textInputImpl.mPopupPanel.SetCutPastePopupIconPressedColor( value.Get< Vector4 >() );
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_TEXT_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_TEXT_COLOR:
       {
         textInputImpl.mPopupPanel.SetCutPastePopupTextColor( value.Get< Vector4 >() );
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_TEXT_PRESSED_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_TEXT_PRESSED_COLOR:
       {
         textInputImpl.mPopupPanel.SetCutPastePopupTextPressedColor( value.Get< Vector4 >() );
         break;
       }
-      case Toolkit::TextInput::CUT_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_BUTTON_POSITION_PRIORITY:
       {
         textInputImpl.mPopupPanel.SetButtonPriorityPosition( TextInputPopup::ButtonsCut, value.Get<unsigned int>() );
         break;
       }
-      case Toolkit::TextInput::COPY_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::COPY_BUTTON_POSITION_PRIORITY:
       {
         textInputImpl.mPopupPanel.SetButtonPriorityPosition( TextInputPopup::ButtonsCopy, value.Get<unsigned int>() );
         break;
       }
-      case Toolkit::TextInput::PASTE_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::PASTE_BUTTON_POSITION_PRIORITY:
       {
         textInputImpl.mPopupPanel.SetButtonPriorityPosition( TextInputPopup::ButtonsPaste, value.Get<unsigned int>() );
         break;
       }
-      case Toolkit::TextInput::SELECT_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::SELECT_BUTTON_POSITION_PRIORITY:
       {
         textInputImpl.mPopupPanel.SetButtonPriorityPosition( TextInputPopup::ButtonsSelect, value.Get<unsigned int>() );
         break;
       }
-      case Toolkit::TextInput::SELECT_ALL_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::SELECT_ALL_BUTTON_POSITION_PRIORITY:
       {
         textInputImpl.mPopupPanel.SetButtonPriorityPosition( TextInputPopup::ButtonsSelectAll, value.Get<unsigned int>() );
         break;
       }
-      case Toolkit::TextInput::CLIPBOARD_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::CLIPBOARD_BUTTON_POSITION_PRIORITY:
       {
         textInputImpl.mPopupPanel.SetButtonPriorityPosition( TextInputPopup::ButtonsClipboard, value.Get<unsigned int>() );
         break;
       }
-      case Toolkit::TextInput::POP_UP_OFFSET_FROM_TEXT_PROPERTY:
+      case Toolkit::TextInput::Property::POP_UP_OFFSET_FROM_TEXT:
       {
         textInputImpl.SetOffsetFromText( value.Get< Vector4 >() );
         break;
       }
-      case Toolkit::TextInput::CURSOR_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CURSOR_COLOR:
       {
         textInputImpl.mCursor.SetColor( value.Get< Vector4 >() );
+        break;
       }
     }
   }
@@ -5419,82 +5411,82 @@ Property::Value TextInput::GetProperty( BaseObject* object, Property::Index prop
 
     switch ( propertyIndex )
     {
-      case Toolkit::TextInput::HIGHLIGHT_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::HIGHLIGHT_COLOR:
       {
         value = textInputImpl.GetMaterialDiffuseColor();
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_COLOR:
       {
         value = textInputImpl.mPopupPanel.GetCutPastePopupColor();
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_PRESSED_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_PRESSED_COLOR:
       {
         value = textInputImpl.mPopupPanel.GetCutPastePopupPressedColor();
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_BORDER_COLOR_PROPERTY :
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_BORDER_COLOR :
       {
         value = textInputImpl.mPopupPanel.GetCutPastePopupBorderColor();
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_ICON_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_ICON_COLOR:
       {
         value = textInputImpl.mPopupPanel.GetCutPastePopupIconColor();
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_ICON_PRESSED_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_ICON_PRESSED_COLOR:
       {
         value = textInputImpl.mPopupPanel.GetCutPastePopupIconPressedColor();
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_TEXT_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_TEXT_COLOR:
       {
         value = textInputImpl.mPopupPanel.GetCutPastePopupTextColor();
         break;
       }
-      case Toolkit::TextInput::CUT_AND_PASTE_TEXT_PRESSED_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_AND_PASTE_TEXT_PRESSED_COLOR:
       {
         value = textInputImpl.mPopupPanel.GetCutPastePopupTextPressedColor();
         break;
       }
-      case Toolkit::TextInput::CUT_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::CUT_BUTTON_POSITION_PRIORITY:
       {
         value = textInputImpl.mPopupPanel.GetButtonPriorityPosition( TextInputPopup::ButtonsCut );
         break;
       }
-      case Toolkit::TextInput::COPY_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::COPY_BUTTON_POSITION_PRIORITY:
       {
         value =  textInputImpl.mPopupPanel.GetButtonPriorityPosition( TextInputPopup::ButtonsCopy );
         break;
       }
-      case Toolkit::TextInput::PASTE_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::PASTE_BUTTON_POSITION_PRIORITY:
       {
         value = textInputImpl.mPopupPanel.GetButtonPriorityPosition( TextInputPopup::ButtonsPaste );
         break;
       }
-      case Toolkit::TextInput::SELECT_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::SELECT_BUTTON_POSITION_PRIORITY:
       {
         value = textInputImpl.mPopupPanel.GetButtonPriorityPosition( TextInputPopup::ButtonsSelect );
         break;
       }
-      case Toolkit::TextInput::SELECT_ALL_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::SELECT_ALL_BUTTON_POSITION_PRIORITY:
       {
         value = textInputImpl.mPopupPanel.GetButtonPriorityPosition( TextInputPopup::ButtonsSelectAll );
         break;
       }
-      case Toolkit::TextInput::CLIPBOARD_BUTTON_POSITION_PRIORITY_PROPERTY:
+      case Toolkit::TextInput::Property::CLIPBOARD_BUTTON_POSITION_PRIORITY:
       {
         value = textInputImpl.mPopupPanel.GetButtonPriorityPosition( TextInputPopup::ButtonsClipboard );
         break;
       }
-      case Toolkit::TextInput::POP_UP_OFFSET_FROM_TEXT_PROPERTY:
+      case Toolkit::TextInput::Property::POP_UP_OFFSET_FROM_TEXT:
       {
         value = textInputImpl.GetOffsetFromText();
         break;
       }
-      case Toolkit::TextInput::CURSOR_COLOR_PROPERTY:
+      case Toolkit::TextInput::Property::CURSOR_COLOR:
       {
         value = textInputImpl.mCursor.GetCurrentColor();
       }

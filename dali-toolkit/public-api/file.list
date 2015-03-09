@@ -85,6 +85,7 @@ public_api_src_files = \
   $(public_api_src_dir)/shader-effects/overlay-effect.cpp \
   $(public_api_src_dir)/shader-effects/page-turn-book-spine-effect.cpp \
   $(public_api_src_dir)/shader-effects/page-turn-effect.cpp \
+  $(public_api_src_dir)/shader-effects/quadratic-bezier.cpp \
   $(public_api_src_dir)/shader-effects/ripple-effect.cpp \
   $(public_api_src_dir)/shader-effects/ripple2d-effect.cpp \
   $(public_api_src_dir)/shader-effects/shear-effect.cpp \
@@ -98,6 +99,7 @@ public_api_src_files = \
   $(public_api_src_dir)/transition-effects/cube-transition-effect.cpp \
   $(public_api_src_dir)/transition-effects/cube-transition-fold-effect.cpp \
   $(public_api_src_dir)/transition-effects/cube-transition-wave-effect.cpp \
+  $(public_api_src_dir)/scripting/script.cpp \
   $(public_api_src_dir)/dali-toolkit-version.cpp \
   $(public_api_src_dir)/enums.cpp
 
@@ -250,6 +252,7 @@ public_api_shader_effects_header_files = \
   $(public_api_src_dir)/shader-effects/overlay-effect.h \
   $(public_api_src_dir)/shader-effects/page-turn-book-spine-effect.h \
   $(public_api_src_dir)/shader-effects/page-turn-effect.h \
+  $(public_api_src_dir)/shader-effects/quadratic-bezier.h \
   $(public_api_src_dir)/shader-effects/ripple-effect.h \
   $(public_api_src_dir)/shader-effects/ripple2d-effect.h \
   $(public_api_src_dir)/shader-effects/shear-effect.h \
@@ -271,4 +274,8 @@ public_api_transition_effects_header_files = \
   $(public_api_src_dir)/transition-effects/cube-transition-cross-effect.h \
   $(public_api_src_dir)/transition-effects/cube-transition-fold-effect.h \
   $(public_api_src_dir)/transition-effects/cube-transition-wave-effect.h
+
+public_api_scripting_header_files = \
+  $(public_api_src_dir)/scripting/script.h \
+  $(public_api_src_dir)/scripting/script-plugin.h
 

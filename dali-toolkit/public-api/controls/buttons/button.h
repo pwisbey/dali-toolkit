@@ -41,31 +41,52 @@ class Button;
  * point doesn't leave the boundary of the button.
  *
  * When the \e disabled property is set to \e true, no signal is emitted.
+ *
+ * Signals
+ * | %Signal Name      | Method                      |
+ * |-------------------|-----------------------------|
+ * | pressed           | @ref PressedSignal()        |
+ * | released          | @ref ReleasedSignal()       |
+ * | clicked           | @ref ClickedSignal()        |
+ * | state-changed     | @ref StateChangedSignal()   |
+ *
+ * Actions
+ * | %Action Name      | %Button method called       |
+ * |-------------------|-----------------------------|
+ * | button-click      | %DoClickAction()            |
  */
 class DALI_IMPORT_API Button : public Control
 {
 public:
 
-  // Signal Names
-  static const char* const SIGNAL_PRESSED;       ///< name "pressed"
-  static const char* const SIGNAL_RELEASED;      ///< name "released"
-  static const char* const SIGNAL_CLICKED;       ///< name "clicked"
-  static const char* const SIGNAL_STATE_CHANGED; ///< name "state-changed"
+  /**
+   * @brief The start and end property ranges for this control.
+   */
+  enum PropertyRange
+  {
+    PROPERTY_START_INDEX = Control::CONTROL_PROPERTY_END_INDEX + 1,
+    PROPERTY_END_INDEX =   PROPERTY_START_INDEX + 1000              ///< Reserve property indices
+  };
 
-  //Action Names
-  static const char* const ACTION_BUTTON_CLICK; ///< name "button-click"
-
-  // Properties
-  static const Property::Index PROPERTY_DISABLED;                     ///< name "disabled",                     @see SetDisabled(),                  type BOOLEAN
-  static const Property::Index PROPERTY_AUTO_REPEATING;               ///< name "auto-repeating",               @see SetAutoRepeating(),             type BOOLEAN
-  static const Property::Index PROPERTY_INITIAL_AUTO_REPEATING_DELAY; ///< name "initial-auto-repeating-delay", @see SetInitialAutoRepeatingDelay(), type FLOAT
-  static const Property::Index PROPERTY_NEXT_AUTO_REPEATING_DELAY;    ///< name "next-auto-repeating-delay",    @see SetNextAutoRepeatingDelay(),    type FLOAT
-  static const Property::Index PROPERTY_TOGGLABLE;                    ///< name "togglable",                    @see SetTogglableButton(),           type BOOLEAN
-  static const Property::Index PROPERTY_SELECTED;                     ///< name "selected",                     @see SetSelected(),                  type BOOLEAN
-  static const Property::Index PROPERTY_NORMAL_STATE_ACTOR;           ///< name "normal-state-actor",           @see SetButtonImage(),               type MAP
-  static const Property::Index PROPERTY_SELECTED_STATE_ACTOR;         ///< name "selected-state-actor",         @see SetSelectedImage(),             type MAP
-  static const Property::Index PROPERTY_DISABLED_STATE_ACTOR;         ///< name "disabled-state-actor",         @see SetDisabledImage(),             type MAP
-  static const Property::Index PROPERTY_LABEL_ACTOR;                  ///< name "label-actor",                  @see SetLabel(),                     type MAP
+  /**
+   * @brief An enumeration of properties belonging to the Button class.
+   */
+  struct Property
+  {
+    enum
+    {
+      DISABLED = PROPERTY_START_INDEX, ///< name "disabled",                     @see SetDisabled(),                  type BOOLEAN
+      AUTO_REPEATING,                  ///< name "auto-repeating",               @see SetAutoRepeating(),             type BOOLEAN
+      INITIAL_AUTO_REPEATING_DELAY,    ///< name "initial-auto-repeating-delay", @see SetInitialAutoRepeatingDelay(), type FLOAT
+      NEXT_AUTO_REPEATING_DELAY,       ///< name "next-auto-repeating-delay",    @see SetNextAutoRepeatingDelay(),    type FLOAT
+      TOGGLABLE,                       ///< name "togglable",                    @see SetTogglableButton(),           type BOOLEAN
+      SELECTED,                        ///< name "selected",                     @see SetSelected(),                  type BOOLEAN
+      NORMAL_STATE_ACTOR,              ///< name "normal-state-actor",           @see SetButtonImage(),               type MAP
+      SELECTED_STATE_ACTOR,            ///< name "selected-state-actor",         @see SetSelectedImage(),             type MAP
+      DISABLED_STATE_ACTOR,            ///< name "disabled-state-actor",         @see SetDisabledImage(),             type MAP
+      LABEL_ACTOR,                     ///< name "label-actor",                  @see SetLabel(),                     type MAP
+    };
+  };
 
 public:
 

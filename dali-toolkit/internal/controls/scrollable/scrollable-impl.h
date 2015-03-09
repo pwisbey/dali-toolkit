@@ -44,8 +44,8 @@ typedef IntrusivePtr<Scrollable> ScrollablePtr;
 class Scrollable : public Control
 {
 public:
-  static const std::string SCROLLABLE_CAN_SCROLL_VERTICAL;
-  static const std::string SCROLLABLE_CAN_SCROLL_HORIZONTAL;
+  static const char* const SCROLLABLE_CAN_SCROLL_VERTICAL;
+  static const char* const SCROLLABLE_CAN_SCROLL_HORIZONTAL;
 
   /**
    * Create a new Scrollable.
@@ -156,11 +156,6 @@ public: //Signals
   Toolkit::Scrollable::ScrollCompletedSignalType& ScrollCompletedSignal();
 
   /**
-   * @copydoc Dali::Toolkit::Scrollable::ScrollClampedSignal()
-   */
-  Toolkit::Scrollable::ScrollClampedSignalType& ScrollClampedSignal();
-
-  /**
    * Connects a callback function with the object's signals.
    * @param[in] object The object providing the signal.
    * @param[in] tracker Used to disconnect the signal.
@@ -248,7 +243,6 @@ protected:
   Toolkit::Scrollable::ScrollStartedSignalType mScrollStartedSignal;
   Toolkit::Scrollable::ScrollUpdatedSignalType mScrollUpdatedSignal;
   Toolkit::Scrollable::ScrollCompletedSignalType mScrollCompletedSignal;
-  Toolkit::Scrollable::ScrollClampedSignalType mScrollClampedSignal;
 
 private:
 
