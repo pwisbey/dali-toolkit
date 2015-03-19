@@ -72,19 +72,14 @@ struct IndicatorPositionConstraint
   /**
    * Constraint operator
    * @param[in] current The current indicator position
-   * @param[in] indicatorSizeProperty The size of indicator.
-   * @param[in] parentSizeProperty The parent size of indicator.
-   * @param[in] scrollPositionProperty The scroll position of the scrollable container // (from 0.0 -> 1.0 in each axis)
+   * @param[in] inputs Contains the size of indicator, the size of indicator's parent, and the scroll position of the scrollable container (from 0.0 -> 1.0 in each axis)
    * @return The new indicator position is returned.
    */
-  Vector3 operator()(const Vector3& current,
-                     const PropertyInput& indicatorSizeProperty,
-                     const PropertyInput& parentSizeProperty,
-                     const PropertyInput& scrollPositionProperty)
+  Vector3 operator()(const Vector3& current, const PropertyInputContainer& inputs )
   {
-    Vector3 indicatorSize = indicatorSizeProperty.GetVector3();
-    Vector3 parentSize = parentSizeProperty.GetVector3();
-    float scrollPosition = scrollPositionProperty.GetFloat();
+    const Vector3& indicatorSize = inputs[0]->GetVector3();
+    const Vector3& parentSize = inputs[1]->GetVector3();
+    float scrollPosition = inputs[2]->GetFloat();
 
     const float domainSize = fabs(mMaxPosition - mMinPosition);
     float relativePosition = (mMaxPosition - scrollPosition) / domainSize;
@@ -220,11 +215,10 @@ void ScrollBar::ApplyConstraints()
       mIndicator.RemoveConstraint(mIndicatorPositionConstraint);
     }
 
-    constraint = Constraint::New<Vector3>( Actor::Property::POSITION,
-                                           LocalSource( Actor::Property::SIZE ),
-                                           ParentSource( Actor::Property::SIZE ),
-                                           Source( mScrollPositionObject, Toolkit::ScrollConnector::SCROLL_POSITION ),
-                                           IndicatorPositionConstraint( mScrollConnector.GetMinLimit(), mScrollConnector.GetMaxLimit() ) );
+    constraint = Constraint::New<Vector3>( Actor::Property::POSITION, IndicatorPositionConstraint( mScrollConnector.GetMinLimit(), mScrollConnector.GetMaxLimit() ) );
+    constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
+    constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
+    constraint.AddSource( Source( mScrollPositionObject, Toolkit::ScrollConnector::SCROLL_POSITION ) );
     mIndicatorPositionConstraint = mIndicator.ApplyConstraint( constraint );
   }
 }

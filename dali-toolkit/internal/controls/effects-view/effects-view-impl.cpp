@@ -271,8 +271,14 @@ void EffectsView::SetupProperties()
   mEffectStrengthPropertyIndex = self.RegisterProperty(EFFECT_STRENGTH_PROPERTY_NAME, EFFECT_STRENGTH_DEFAULT, Property::READ_WRITE);
   mEffectOffsetPropertyIndex   = self.RegisterProperty(EFFECT_OFFSET_PROPERTY_NAME, EFFECT_OFFSET_DEFAULT);
   mEffectColorPropertyIndex    = self.RegisterProperty(EFFECT_COLOR_PROPERTY_NAME, EFFECT_COLOR_DEFAULT);
-  mActorPostFilter.ApplyConstraint( Constraint::New<Vector3>( Actor::Property::POSITION, Source( self, mEffectOffsetPropertyIndex ), EqualToConstraint() ) );
-  mActorPostFilter.ApplyConstraint( Constraint::New<Vector4>( Actor::Property::COLOR, Source( self, mEffectColorPropertyIndex ), EqualToConstraint() ) );
+
+  Constraint positionConstraint = Constraint::New<Vector3>( Actor::Property::POSITION, EqualToConstraint() );
+  positionConstraint.AddSource( Source( self, mEffectOffsetPropertyIndex ) );
+  mActorPostFilter.ApplyConstraint( positionConstraint );
+
+  Constraint colorConstraint = Constraint::New<Vector4>( Actor::Property::COLOR, EqualToConstraint() );
+  colorConstraint.AddSource( Source( self, mEffectColorPropertyIndex ) );
+  mActorPostFilter.ApplyConstraint( colorConstraint );
 }
 
 void EffectsView::SetBackgroundColor( const Vector4& color )

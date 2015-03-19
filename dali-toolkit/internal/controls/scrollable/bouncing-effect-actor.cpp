@@ -58,9 +58,9 @@ struct VertexPositionConstraint
   {
   }
 
-  Vector3 operator()( const Vector3& current, const PropertyInput& bounceCoef )
+  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
   {
-    float positionY = mInitialY + mRange * fabsf(bounceCoef.GetFloat());
+    float positionY = mInitialY + mRange * fabsf(inputs[0]->GetFloat());
     return Vector3( current.x, positionY, current.z );
   }
 
@@ -107,12 +107,13 @@ Actor CreateBouncingEffectActor( Property::Index& bouncePropertyIndex )
   for( size_t i=0;i<NUM_LAYERS;i++ )
   {
     size_t j=i*4;
-    mesh.ApplyConstraint( Constraint::New<Vector3>( mesh.GetPropertyIndex(j+2, AnimatableVertex::Property::POSITION ),
-                                                    Source(meshActor, bouncePropertyIndex),
-                                                    VertexPositionConstraint(-0.5f, LAYER_HEIGHTS[i]) ) );
-    mesh.ApplyConstraint( Constraint::New<Vector3>( mesh.GetPropertyIndex(j+3,  AnimatableVertex::Property::POSITION),
-                                                    Source(meshActor, bouncePropertyIndex),
-                                                    VertexPositionConstraint(-0.5f, LAYER_HEIGHTS[i]) ) );
+    Constraint constraint = Constraint::New<Vector3>( mesh.GetPropertyIndex(j+2, AnimatableVertex::Property::POSITION ), VertexPositionConstraint(-0.5f, LAYER_HEIGHTS[i]) );
+    constraint.AddSource( Source(meshActor, bouncePropertyIndex) );
+    mesh.ApplyConstraint( constraint );
+
+    constraint = Constraint::New<Vector3>( mesh.GetPropertyIndex(j+3,  AnimatableVertex::Property::POSITION), VertexPositionConstraint(-0.5f, LAYER_HEIGHTS[i]) );
+    constraint.AddSource( Source(meshActor, bouncePropertyIndex) );
+    mesh.ApplyConstraint( constraint );
   }
 
   return meshActor;

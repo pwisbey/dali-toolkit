@@ -80,25 +80,21 @@ public:
 
   /**
    * @param[in] current The current visibility of this Actor
-   * @param[in] positionProperty The Actor's Position.
-   * @param[in] scaleProperty The Actor's Scale.
-   * @param[in] sizeProperty The Actor's Size
-   * @param[in] scrollPositionProperty The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
-   * @param[in] scrollSizeProperty The size of the scroll-view (scrollView SIZE)
+   * @param[in] inputs Contains:
+   *                    The Actor's Position
+   *                    The Actor's Scale
+   *                    The Actor's Size
+   *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
+   *                    The size of the scroll-view (scrollView SIZE)
    * @return The new visibility of this Actor.
    */
-  bool VisibilityConstraint(const bool& current,
-                                  const PropertyInput& positionProperty,
-                                  const PropertyInput& scaleProperty,
-                                  const PropertyInput& sizeProperty,
-                                  const PropertyInput& scrollPositionProperty,
-                                  const PropertyInput& scrollSizeProperty)
+  bool VisibilityConstraint( const bool& current, const PropertyInputContainer& inputs )
   {
     const Vector2& anchor(AnchorPoint::CENTER.GetVectorXY());
-    Vector2 position(positionProperty.GetVector3() + scrollPositionProperty.GetVector3());
-    Vector2 scaledSize(sizeProperty.GetVector3() * scaleProperty.GetVector3());
+    Vector2 position( inputs[0]->GetVector3() + inputs[3]->GetVector3());
+    Vector2 scaledSize( inputs[2]->GetVector3() * inputs[1]->GetVector3());
 
-    Vector2 domain(scrollSizeProperty.GetVector3());
+    Vector2 domain( inputs[4]->GetVector3() );
 
     position -= (anchor - mVisibilityThreshold) * scaledSize;
     domain -= (Vector2::ONE - mVisibilityThreshold * 2.0f) * scaledSize;
@@ -111,23 +107,18 @@ public:
 
   /**
    * @param[in] current The current orientation of this Actor
-   * @param[in] positionProperty The Actor's Position.
-   * @param[in] scaleProperty The Actor's Scale.
-   * @param[in] sizeProperty The Actor's Size
-   * @param[in] scrollPositionProperty The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
-   * @param[in] scrollSizeProperty The size of the scroll-view (scrollView SIZE)
-   * @param[in] activateProperty Activation value (0 - normal, 1.0 - full effect)
+   * @param[in] inputs Contains:
+   *                    The Actor's Position.
+   *                    The Actor's Scale.
+   *                    The Actor's Size
+   *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
+   *                    The size of the scroll-view (scrollView SIZE)
+   *                    Activation value (0 - normal, 1.0 - full effect)
    * @return The new orientation of this Actor.
    */
-  Quaternion RotationConstraint(const Quaternion& current,
-                                const PropertyInput& positionProperty,
-                                const PropertyInput& scaleProperty,
-                                const PropertyInput& sizeProperty,
-                                const PropertyInput& scrollPositionProperty,
-                                const PropertyInput& scrollSizeProperty,
-                                const PropertyInput& activateProperty)
+  Quaternion RotationConstraint( const Quaternion& current, const PropertyInputContainer& inputs )
   {
-    const float activate(activateProperty.GetFloat());
+    const float activate(inputs[5]->GetFloat());
 
     if(activate <= Math::MACHINE_EPSILON_0)
     {
@@ -135,9 +126,9 @@ public:
     }
 
     const Vector2& anchor(AnchorPoint::CENTER.GetVectorXY());
-    Vector2 position(positionProperty.GetVector3() + scrollPositionProperty.GetVector3());
-    Vector2 scaledSize(sizeProperty.GetVector3() * scaleProperty.GetVector3());
-    Vector2 domain(scrollSizeProperty.GetVector3());
+    Vector2 position(inputs[0]->GetVector3() + inputs[3]->GetVector3());
+    Vector2 scaledSize(inputs[2]->GetVector3() * inputs[1]->GetVector3());
+    Vector2 domain(inputs[4]->GetVector3());
 
     position -= (anchor - mCanvasMargin) * scaledSize;
     domain -= (Vector2::ONE - mCanvasMargin * 2.0f) * scaledSize;
@@ -162,22 +153,18 @@ public:
 
   /**
    * @param[in] current The current position of this Actor
-   * @param[in] scaleProperty The Actor's Scale.
-   * @param[in] sizeProperty The Actor's Size
-   * @param[in] scrollPositionProperty The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
-   * @param[in] scrollSizeProperty The size of the scroll-view (scrollView SIZE)
-   * @param[in] activateProperty Activation value (0 - normal, 1.0 - full effect)
+   * @param[in] inputs Contains:
+   *                    The Actor's Scale.
+   *                    The Actor's Size
+   *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
+   *                    The size of the scroll-view (scrollView SIZE)
+   *                    Activation value (0 - normal, 1.0 - full effect)
    * @return The new position of this Actor.
    */
-  Vector3 PositionConstraint(const Vector3& current,
-                             const PropertyInput& scaleProperty,
-                             const PropertyInput& sizeProperty,
-                             const PropertyInput& scrollPositionProperty,
-                             const PropertyInput& scrollSizeProperty,
-                             const PropertyInput& activateProperty)
+  Vector3 PositionConstraint( const Vector3& current, const PropertyInputContainer& inputs )
   {
-    const float activate(activateProperty.GetFloat());
-    Vector3 position(current + scrollPositionProperty.GetVector3());
+    const float activate(inputs[4]->GetFloat());
+    Vector3 position(current + inputs[2]->GetVector3());
 
     if(activate <= Math::MACHINE_EPSILON_0)
     {
@@ -185,8 +172,8 @@ public:
     }
 
     const Vector2& anchor(AnchorPoint::CENTER.GetVectorXY());
-    Vector2 scaledSize(sizeProperty.GetVector3() * scaleProperty.GetVector3());
-    Vector2 domain(scrollSizeProperty.GetVector3());
+    Vector2 scaledSize(inputs[1]->GetVector3() * inputs[0]->GetVector3());
+    Vector2 domain(inputs[3]->GetVector3());
 
     position.GetVectorXY() -= (anchor - mCanvasMargin) * scaledSize;
     domain -= (Vector2::ONE - mCanvasMargin * 2.0f) * scaledSize;
@@ -230,36 +217,32 @@ void ApplyScrollCarouselConstraints(Toolkit::ScrollView scrollView,
   // Apply constraints to this actor //
   Constraint constraint;
 
-  constraint = Constraint::New<bool>( Actor::Property::VISIBLE,
-                                      LocalSource( Actor::Property::POSITION ),
-                                      LocalSource( Actor::Property::SCALE ),
-                                      LocalSource( Actor::Property::SIZE ),
-                                      Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ),
-                                      Source(scrollView, Actor::Property::SIZE ),
-                                      Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ),
-                                      boost::bind( &ScrollCarouselEffectInfo::VisibilityConstraint, info, _1, _2, _3, _4, _5, _6) );
+  constraint = Constraint::New<bool>( Actor::Property::VISIBLE, boost::bind( &ScrollCarouselEffectInfo::VisibilityConstraint, info, _1, _2 ) );
+  constraint.AddSource( LocalSource( Actor::Property::POSITION ) );
+  constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
+  constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
+  constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
+  constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
+  constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
   child.ApplyConstraint( constraint );
 
-  constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION,
-                                            LocalSource( Actor::Property::POSITION ),
-                                            LocalSource( Actor::Property::SCALE ),
-                                            LocalSource( Actor::Property::SIZE ),
-                                            Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ),
-                                            Source(scrollView, Actor::Property::SIZE ),
-                                            Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ),
-                                            boost::bind( &ScrollCarouselEffectInfo::RotationConstraint, info, _1, _2, _3, _4, _5, _6, _7) );
+  constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, boost::bind( &ScrollCarouselEffectInfo::RotationConstraint, info, _1, _2 ) );
+  constraint.AddSource( LocalSource( Actor::Property::POSITION ) );
+  constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
+  constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
+  constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
+  constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
+  constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
   child.ApplyConstraint( constraint );
 
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION,
-                                         LocalSource( Actor::Property::SCALE ),
-                                         LocalSource( Actor::Property::SIZE ),
-                                         Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ),
-                                         Source(scrollView, Actor::Property::SIZE ),
-                                         Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ),
-                                         boost::bind( &ScrollCarouselEffectInfo::PositionConstraint, info, _1, _2, _3, _4, _5, _6) );
-
+  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, boost::bind( &ScrollCarouselEffectInfo::PositionConstraint, info, _1, _2 ) );
+  constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
+  constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
+  constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
+  constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
+  constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
   child.ApplyConstraint( constraint );
 }

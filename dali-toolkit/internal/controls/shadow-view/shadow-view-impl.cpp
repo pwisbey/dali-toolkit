@@ -106,19 +106,6 @@ const char* const RENDER_SHADOW_FRAGMENT_SOURCE =
   "  gl_FragColor = vec4(uShadowColor.rgb, uShadowColor.a * alpha);\n"
   "}\n";
 
-// TODO: Add this to dali-core constraints.h
-/**
- * EqualToConstraintMatrix
- *
- * f(current, property) = property
- */
-struct EqualToConstraintMatrix
-{
-  EqualToConstraintMatrix(){}
-
-  Dali::Matrix operator()(const Dali::Matrix& current, const PropertyInput& property) {return property.GetMatrix();}
-};
-
 } // namespace
 
 ShadowView::ShadowView( float downsampleWidthScale, float downsampleHeightScale )
@@ -314,17 +301,14 @@ void ShadowView::ConstrainCamera()
     // Constrain camera to look directly at center of shadow plane. (mPointLight position
     // is under control of application, can't use transform inheritance)
 
-    Constraint cameraOrientationConstraint =
-      Constraint::New<Quaternion> ( Actor::Property::ORIENTATION,
-                                    Source( mShadowPlane, Actor::Property::WORLD_POSITION ),
-                                    Source( mPointLight,  Actor::Property::WORLD_POSITION ),
-                                    Source( mShadowPlane, Actor::Property::WORLD_ORIENTATION ),
-                                    &LookAt );
-
+    Constraint cameraOrientationConstraint = Constraint::New<Quaternion> ( Actor::Property::ORIENTATION, &LookAt );
+    cameraOrientationConstraint.AddSource( Source( mShadowPlane, Actor::Property::WORLD_POSITION ) );
+    cameraOrientationConstraint.AddSource( Source( mPointLight,  Actor::Property::WORLD_POSITION ) );
+    cameraOrientationConstraint.AddSource( Source( mShadowPlane, Actor::Property::WORLD_ORIENTATION ) );
     mCameraActor.ApplyConstraint( cameraOrientationConstraint );
 
-    Constraint pointLightPositionConstraint = Constraint::New<Vector3>( Actor::Property::POSITION, Source( mPointLight, Actor::Property::WORLD_POSITION ), EqualToConstraint() );
-
+    Constraint pointLightPositionConstraint = Constraint::New<Vector3>( Actor::Property::POSITION, EqualToConstraint() );
+    pointLightPositionConstraint.AddSource( Source( mPointLight, Actor::Property::WORLD_POSITION ) );
     mCameraActor.ApplyConstraint( pointLightPositionConstraint );
   }
 }
@@ -371,23 +355,29 @@ void ShadowView::SetShaderConstants()
   Property::Index lightCameraProjectionMatrixPropertyIndex = mShadowRenderShader.GetPropertyIndex(SHADER_LIGHT_CAMERA_PROJECTION_MATRIX_PROPERTY_NAME);
   Property::Index lightCameraViewMatrixPropertyIndex = mShadowRenderShader.GetPropertyIndex(SHADER_LIGHT_CAMERA_VIEW_MATRIX_PROPERTY_NAME);
 
-  Constraint projectionMatrixConstraint = Constraint::New<Dali::Matrix>( lightCameraProjectionMatrixPropertyIndex, Source( mCameraActor, CameraActor::Property::PROJECTION_MATRIX ), EqualToConstraintMatrix());
-  Constraint viewMatrixConstraint = Constraint::New<Dali::Matrix>( lightCameraViewMatrixPropertyIndex, Source( mCameraActor, CameraActor::Property::VIEW_MATRIX ), EqualToConstraintMatrix());
+  Constraint projectionMatrixConstraint = Constraint::New<Dali::Matrix>( lightCameraProjectionMatrixPropertyIndex, EqualToConstraint() );
+  projectionMatrixConstraint.AddSource( Source( mCameraActor, CameraActor::Property::PROJECTION_MATRIX ) );
+
+  Constraint viewMatrixConstraint = Constraint::New<Dali::Matrix>( lightCameraViewMatrixPropertyIndex, EqualToConstraint() );
+  viewMatrixConstraint.AddSource( Source( mCameraActor, CameraActor::Property::VIEW_MATRIX ) );
 
   mShadowRenderShader.ApplyConstraint(projectionMatrixConstraint);
   mShadowRenderShader.ApplyConstraint(viewMatrixConstraint);
 
   // Register a property that the user can use to control the blur in the internal object
   mBlurStrengthPropertyIndex = self.RegisterProperty(BLUR_STRENGTH_PROPERTY_NAME, BLUR_STRENGTH_DEFAULT);
-  mBlurFilter.GetHandleForAnimateBlurStrength().ApplyConstraint( Constraint::New<float>( mBlurFilter.GetBlurStrengthPropertyIndex() ,
-                                                                           Source( self, mBlurStrengthPropertyIndex),
-                                                                           EqualToConstraint()) );
+
+  Constraint blurStrengthConstraint = Constraint::New<float>( mBlurFilter.GetBlurStrengthPropertyIndex(), EqualToConstraint() );
+  blurStrengthConstraint.AddSource( Source( self, mBlurStrengthPropertyIndex) );
+  mBlurFilter.GetHandleForAnimateBlurStrength().ApplyConstraint( blurStrengthConstraint );
 
   //  Register a property that the user can use to control the color of the shadow.
   Property::Index index = mShadowRenderShader.GetPropertyIndex(SHADER_SHADOW_COLOR_PROPERTY_NAME);
   mShadowColorPropertyIndex = self.RegisterProperty(SHADOW_COLOR_PROPERTY_NAME, mCachedShadowColor);
 
-  mShadowRenderShader.ApplyConstraint(Constraint::New<Dali::Vector4>( index, Source( self, mShadowColorPropertyIndex ), EqualToConstraint()) );
+  Constraint shadowRenderShaderConstraint = Constraint::New<Dali::Vector4>( index, EqualToConstraint() );
+  shadowRenderShaderConstraint.AddSource( Source( self, mShadowColorPropertyIndex ) );
+  mShadowRenderShader.ApplyConstraint( shadowRenderShaderConstraint );
 }
 
 } // namespace Internal

@@ -80,9 +80,9 @@ struct OriginalCenterConstraint
     mDirection = offset  / mDistance;
   }
 
-  Vector2 operator()(const Vector2& current, const PropertyInput& panDisplacement)
+  Vector2 operator()(const Vector2& current, const PropertyInputContainer& inputs )
   {
-    float displacement = panDisplacement.GetFloat();
+    float displacement = inputs[0]->GetFloat();
 
     if( displacement < mDistance )
     {
@@ -117,9 +117,9 @@ struct RotationConstraint
     mRotation = isTurnBack ? Quaternion( -Math::PI, Vector3::YAXIS ) : Quaternion( 0.f, Vector3::YAXIS );
   }
 
-  Quaternion operator()( const Quaternion& current, const PropertyInput& panDisplacement )
+  Quaternion operator()( const Quaternion& current, const PropertyInputContainer& inputs )
   {
-    float displacement = panDisplacement.GetFloat();
+    float displacement = inputs[0]->GetFloat();
     float angle;
     if( displacement < mDistance)
     {
@@ -148,22 +148,22 @@ struct RotationConstraint
  */
 struct CurrentCenterConstraint
 {
-  CurrentCenterConstraint( float pageWidth)
+  CurrentCenterConstraint( float pageWidth )
   : mPageWidth( pageWidth )
   {
     mThres = pageWidth * PAGE_TURN_OVER_THRESHOLD_RATIO * 0.5f;
   }
 
-  Vector2 operator()( const Vector2& current, const PropertyInput& center, const PropertyInput& originalCenter )
+  Vector2 operator()( const Vector2& current, const PropertyInputContainer& inputs )
   {
-    Vector2 centerPosition = center.GetVector2();
+    const Vector2& centerPosition = inputs[0]->GetVector2();
     if( centerPosition.x > 0.f )
     {
       return Vector2( mThres+centerPosition.x*0.5f , centerPosition.y);
     }
     else
     {
-      Vector2 centerOrigin = originalCenter.GetVector2();
+      const Vector2& centerOrigin = inputs[1]->GetVector2();
       Vector2 direction = centerOrigin - Vector2(mThres, centerPosition.y);
       float coef = 1.f+(centerPosition.x*2.f / mPageWidth);
       // Todo: when coef <= 0, the page is flat, slow down the last moment of the page stretch by 10 times to avoid a small bounce
@@ -185,14 +185,14 @@ struct ShadowBlurStrengthConstraint
   : mThres( thres )
   {}
 
-  float operator()( const float current,  const PropertyInput& currentCenter, const PropertyInput& originalCenter, const PropertyInput& panDisplacement)
+  float operator()( const float current,  const PropertyInputContainer& inputs )
   {
-    float displacement = panDisplacement.GetFloat();
-    float blurStrength;
+    float displacement = inputs[2]->GetFloat();
+    float blurStrength = 0.0f;
     if( EqualsZero(displacement))
     {
-      Vector2 cur = currentCenter.GetVector2();
-      Vector2 ori = originalCenter.GetVector2();
+      const Vector2& cur = inputs[0]->GetVector2();
+      const Vector2& ori = inputs[1]->GetVector2();
       blurStrength =  5.f*(ori-cur).Length() / mThres;
     }
     else
@@ -807,11 +807,11 @@ void PageTurnView::PanContinuing( const Vector2& gesturePosition )
       mShadowView.RemoveConstraints();
       Actor self = Self();
       self.SetProperty( mPropertyPanDisplacement[mIndex], 0.f );
-      Constraint shadowBlurStrengthConstraint = Constraint::New<float>( mShadowView.GetBlurStrengthPropertyIndex(),
-                                                                        Source(mTurnEffect[mIndex],  mTurnEffect[mIndex].GetPropertyIndex(mTurnEffect[mIndex].PageTurnEffect::GetCurrentCenterPropertyName())),
-                                                                        Source(mTurnEffect[mIndex],  mTurnEffect[mIndex].GetPropertyIndex(mTurnEffect[mIndex].PageTurnEffect::GetOriginalCenterPropertyName())),
-                                                                        Source( self, mPropertyPanDisplacement[mIndex] ),
-                                                                        ShadowBlurStrengthConstraint( mPageSize.width*PAGE_TURN_OVER_THRESHOLD_RATIO ) );
+
+      Constraint shadowBlurStrengthConstraint = Constraint::New<float>( mShadowView.GetBlurStrengthPropertyIndex(), ShadowBlurStrengthConstraint( mPageSize.width*PAGE_TURN_OVER_THRESHOLD_RATIO ) );
+      shadowBlurStrengthConstraint.AddSource( Source(mTurnEffect[mIndex],  mTurnEffect[mIndex].GetPropertyIndex(mTurnEffect[mIndex].PageTurnEffect::GetCurrentCenterPropertyName())) );
+      shadowBlurStrengthConstraint.AddSource( Source(mTurnEffect[mIndex],  mTurnEffect[mIndex].GetPropertyIndex(mTurnEffect[mIndex].PageTurnEffect::GetOriginalCenterPropertyName())) );
+      shadowBlurStrengthConstraint.AddSource( Source( self, mPropertyPanDisplacement[mIndex] ) );
       mShadowView.ApplyConstraint( shadowBlurStrengthConstraint  );
     }
   }
@@ -874,27 +874,23 @@ void PageTurnView::PanContinuing( const Vector2& gesturePosition )
                    /( offset.x*offset.x + offset.y*offset.y );
         offset *= k;
         Actor self = Self();
-        Source source(self, mPropertyPanDisplacement[mIndex]);
 
         Property::Index shaderOriginalCenterPropertyIndex = mTurnEffect[mIndex].GetPropertyIndex(mTurnEffect[mIndex].PageTurnEffect::GetOriginalCenterPropertyName());
-        Constraint originalCenterConstraint = Constraint::New<Vector2>( shaderOriginalCenterPropertyIndex ,
-                                                                        source,
-                                                                        OriginalCenterConstraint( mOriginalCenter, offset ));
+        Constraint originalCenterConstraint = Constraint::New<Vector2>( shaderOriginalCenterPropertyIndex, OriginalCenterConstraint( mOriginalCenter, offset ));
+        originalCenterConstraint.AddSource( Source( self, mPropertyPanDisplacement[mIndex] ) );
         mTurnEffect[mIndex].ApplyConstraint( originalCenterConstraint );
 
         Property::Index shaderCurrentCenterPropertyIndex = mTurnEffect[mIndex].GetPropertyIndex(mTurnEffect[mIndex].PageTurnEffect::GetCurrentCenterPropertyName());
-        Constraint currentCenterConstraint = Constraint::New<Vector2>( shaderCurrentCenterPropertyIndex,
-                                                                       Source(self, mPropertyCurrentCenter[mIndex]),
-                                                                       Source(mTurnEffect[mIndex], shaderOriginalCenterPropertyIndex),
-                                                                       CurrentCenterConstraint(mPageSize.width));
+        Constraint currentCenterConstraint = Constraint::New<Vector2>( shaderCurrentCenterPropertyIndex, CurrentCenterConstraint(mPageSize.width));
+        currentCenterConstraint.AddSource( Source(self, mPropertyCurrentCenter[mIndex]) );
+        currentCenterConstraint.AddSource( Source(mTurnEffect[mIndex], shaderOriginalCenterPropertyIndex) );
         mTurnEffect[mIndex].ApplyConstraint( currentCenterConstraint );
 
         GetImpl( mTurnEffect[mIndex] ).ApplyInternalConstraint();
 
         float distance = offset.Length();
-        Constraint rotationConstraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION,
-                                                                     Source( self, mPropertyPanDisplacement[mIndex] ),
-                                                                     RotationConstraint(distance, mPageSize.width, mIsTurnBack[mPanActor]));
+        Constraint rotationConstraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, RotationConstraint(distance, mPageSize.width, mIsTurnBack[mPanActor]));
+        rotationConstraint.AddSource( Source( self, mPropertyPanDisplacement[mIndex] ) );
         mPanActor.ApplyConstraint( rotationConstraint );
 
         mConstraints = false;

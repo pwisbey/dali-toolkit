@@ -214,9 +214,8 @@ void SetupBackgroundActor( Actor actor, Property::Index constrainingIndex, const
   actor.SetColorMode( USE_OWN_MULTIPLY_PARENT_COLOR );
   actor.SetZ( BACKGROUND_ACTOR_Z_POSITION );
 
-  Constraint constraint = Constraint::New<Vector3>( constrainingIndex,
-                                                    ParentSource( Actor::Property::SIZE ),
-                                                    EqualToConstraint() );
+  Constraint constraint = Constraint::New<Vector3>( constrainingIndex, EqualToConstraint() );
+  constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
   actor.ApplyConstraint( constraint );
 }
 

@@ -30,31 +30,24 @@ namespace Dali
 namespace Toolkit
 {
 
-Vector3 MoveActorConstraint(const Vector3&    current,
-                            const PropertyInput& scrollPositionProperty)
+Vector3 MoveActorConstraint( const Vector3& current, const PropertyInputContainer& inputs )
 {
-  return current + scrollPositionProperty.GetVector3();
+  return current + inputs[0]->GetVector3();
 }
 
-Vector3 WrapActorConstraint(const Vector3&    current,
-                            const PropertyInput& actorScaleProperty,
-                            const PropertyInput& actorAnchorPointProperty,
-                            const PropertyInput& actorSizeProperty,
-                            const PropertyInput& scrollPositionMin,
-                            const PropertyInput& scrollPositionMax,
-                            const PropertyInput& scrollWrap)
+Vector3 WrapActorConstraint( const Vector3& current, const PropertyInputContainer& inputs )
 {
   Vector3 position = current;
-  bool wrap = scrollWrap.GetBoolean();
+  bool wrap = inputs[5]->GetBoolean();
 
   if(wrap)
   {
-    const Vector3& min = scrollPositionMin.GetVector3();
-    const Vector3& max = scrollPositionMax.GetVector3();
+    const Vector3& min = inputs[3]->GetVector3();
+    const Vector3& max = inputs[4]->GetVector3();
 
-    const Vector3& anchor = actorAnchorPointProperty.GetVector3();
-    const Vector3 scale = actorScaleProperty.GetVector3();
-    const Vector3 size = actorSizeProperty.GetVector3();
+    const Vector3& anchor = inputs[1]->GetVector3();
+    const Vector3 scale = inputs[0]->GetVector3();
+    const Vector3 size = inputs[2]->GetVector3();
 
     if(fabsf(min.x - max.x) > Math::MACHINE_EPSILON_1)
     {

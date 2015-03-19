@@ -54,9 +54,9 @@ struct ActorOpacityConstraint
     mRange = Vector2( index*rangeLength, (index+1.f)*rangeLength );
   }
 
-  float operator()( float current, const PropertyInput& blurProperty )
+  float operator()( float current, const PropertyInputContainer& inputs )
   {
-    float blurStrength = blurProperty.GetFloat();
+    float blurStrength = inputs[0]->GetFloat();
     if(blurStrength <= mRange.x)
     {
       return 1.f;
@@ -152,7 +152,9 @@ void SuperBlurView::OnInitialize()
 
   for(unsigned int i=0; i < mBlurLevels; i++)
   {
-    mImageActors[i].ApplyConstraint( Constraint::New<float>( Actor::Property::COLOR_ALPHA, ParentSource( mBlurStrengthPropertyIndex ), ActorOpacityConstraint(mBlurLevels, i) ) );
+    Constraint constraint = Constraint::New<float>( Actor::Property::COLOR_ALPHA, ActorOpacityConstraint(mBlurLevels, i) );
+    constraint.AddSource( ParentSource( mBlurStrengthPropertyIndex ) );
+    mImageActors[i].ApplyConstraint( constraint );
   }
 
   Self().SetSize(Stage::GetCurrent().GetSize());
