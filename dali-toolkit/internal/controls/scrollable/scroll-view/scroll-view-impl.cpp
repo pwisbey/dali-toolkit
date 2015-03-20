@@ -168,7 +168,7 @@ float ConstantDecelerationAlphaFunction(float progress)
  * scroll domain. This is a value from 0.0f to 1.0f in each
  * scroll position axis.
  */
-Vector3 InternalRelativePositionConstraint(const Vector3& current, const PropertyInputContainer& inputs)
+void InternalRelativePositionConstraint( Vector3& relativePosition, const PropertyInputContainer& inputs)
 {
   Vector3 position = inputs[0]->GetVector3();
   const Vector3& min = inputs[1]->GetVector3();
@@ -178,13 +178,11 @@ Vector3 InternalRelativePositionConstraint(const Vector3& current, const Propert
   position.x = WrapInDomain(position.x, min.x, max.x);
   position.y = WrapInDomain(position.y, min.y, max.y);
 
-  Vector3 relativePosition;
   Vector3 domainSize = (max - min) - size;
 
   relativePosition.x = domainSize.x > Math::MACHINE_EPSILON_1 ? fabsf((position.x - min.x) / domainSize.x) : 0.0f;
   relativePosition.y = domainSize.y > Math::MACHINE_EPSILON_1 ? fabsf((position.y - min.y) / domainSize.y) : 0.0f;
-
-  return relativePosition;
+  relativePosition.z = 0.0f;
 }
 
 } // unnamed namespace
@@ -277,14 +275,13 @@ struct InternalPrePositionConstraint
   {
   }
 
-  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& scrollPostPosition, const PropertyInputContainer& inputs )
   {
-    Vector3 scrollPostPosition = current;
     const Vector2& panPosition = inputs[0]->GetVector2();
 
     if(!mWasPanning)
     {
-      mPrePosition = current;
+      mPrePosition = scrollPostPosition;
       mCurrentPanMask = mInitialPanMask;
       mWasPanning = true;
     }
@@ -339,8 +336,6 @@ struct InternalPrePositionConstraint
       }
       scrollPostPosition.y = newYPosition;
     }
-
-    return scrollPostPosition;
   }
 
   Vector3 mPrePosition;
@@ -378,9 +373,9 @@ struct InternalPositionConstraint
   {
   }
 
-  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& position, const PropertyInputContainer& inputs )
   {
-    Vector3 position = inputs[0]->GetVector3();
+    position = inputs[0]->GetVector3();
     const Vector2& size = inputs[3]->GetVector3().GetVectorXY();
     const Vector3& min = inputs[1]->GetVector3();
     const Vector3& max = inputs[2]->GetVector3();
@@ -396,8 +391,6 @@ struct InternalPositionConstraint
       position.x = mClampX ? Clamp(position.x, mDomainMax.x + size.x, mDomainMin.x ) : position.x;
       position.y = mClampY ? Clamp(position.y, mDomainMax.y + size.y, mDomainMin.y ) : position.y;
     }
-
-    return position;
   }
 
   Vector2 mDomainMin;
@@ -416,16 +409,19 @@ struct OvershootXConstraint
 {
   OvershootXConstraint(float maxOvershoot) : mMaxOvershoot(maxOvershoot) {}
 
-  float operator()( const float& current, const PropertyInputContainer& inputs )
+  void operator()( float& current, const PropertyInputContainer& inputs )
   {
     if( inputs[2]->GetBoolean() )
     {
       const Vector3& scrollPrePosition = inputs[0]->GetVector3();
       const Vector3& scrollPostPosition = inputs[1]->GetVector3();
       float newOvershoot = scrollPrePosition.x - scrollPostPosition.x;
-      return (newOvershoot > 0.0f ? std::min(newOvershoot, mMaxOvershoot) : std::max(newOvershoot, -mMaxOvershoot)) / mMaxOvershoot;
+      current = (newOvershoot > 0.0f ? std::min(newOvershoot, mMaxOvershoot) : std::max(newOvershoot, -mMaxOvershoot)) / mMaxOvershoot;
     }
-    return 0.0f;
+    else
+    {
+      current = 0.0f;
+    }
   }
 
   float mMaxOvershoot;
@@ -439,16 +435,19 @@ struct OvershootYConstraint
 {
   OvershootYConstraint(float maxOvershoot) : mMaxOvershoot(maxOvershoot) {}
 
-  float operator()(const float& current, const PropertyInputContainer& inputs)
+  void operator()( float& current, const PropertyInputContainer& inputs )
   {
     if( inputs[2]->GetBoolean() )
     {
       const Vector3& scrollPrePosition = inputs[0]->GetVector3();
       const Vector3& scrollPostPosition = inputs[1]->GetVector3();
       float newOvershoot = scrollPrePosition.y - scrollPostPosition.y;
-      return (newOvershoot > 0.0f ? std::min(newOvershoot, mMaxOvershoot) : std::max(newOvershoot, -mMaxOvershoot)) / mMaxOvershoot;
+      current = (newOvershoot > 0.0f ? std::min(newOvershoot, mMaxOvershoot) : std::max(newOvershoot, -mMaxOvershoot)) / mMaxOvershoot;
     }
-    return 0.0f;
+    else
+    {
+      current = 0.0f;
+    }
   }
 
   float mMaxOvershoot;
@@ -459,12 +458,12 @@ struct OvershootYConstraint
  *
  * Generates position-delta property based on scroll-position + scroll-offset properties.
  */
-Vector3 InternalPositionDeltaConstraint(const Vector3& current, const PropertyInputContainer& inputs)
+void InternalPositionDeltaConstraint( Vector3& current, const PropertyInputContainer& inputs )
 {
   const Vector3& scrollPosition = inputs[0]->GetVector3();
   const Vector3& scrollOffset = inputs[1]->GetVector3();
 
-  return scrollPosition + scrollOffset;
+  current = scrollPosition + scrollOffset;
 }
 
 /**
@@ -483,7 +482,7 @@ struct InternalFinalConstraint
   {
   }
 
-  Vector3 operator()(const Vector3& current, const PropertyInputContainer& inputs)
+  void operator()( Vector3& current, const PropertyInputContainer& inputs )
   {
     const float& overshootx = inputs[1]->GetFloat();
     const float& overshooty = inputs[2]->GetFloat();
@@ -491,7 +490,7 @@ struct InternalFinalConstraint
                     mFunctionY(overshooty),
                     0.0f);
 
-    return inputs[0]->GetVector3() - offset;
+    current = inputs[0]->GetVector3() - offset;
   }
 
   AlphaFunction mFunctionX;

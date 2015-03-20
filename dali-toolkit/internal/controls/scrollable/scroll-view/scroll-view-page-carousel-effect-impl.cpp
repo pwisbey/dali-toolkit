@@ -66,7 +66,7 @@ public:
   }
 
   /**
-   * @param[in] current The current color of this Actor
+   * @param[in,out] current The current color of this Actor
    * @param[in] inputs Contains:
    *                    The page's position.
    *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
@@ -76,7 +76,7 @@ public:
    *                    Whether scroll wrap has been enabled or not (SCROLL_WRAP_PROPERTY_NAME)
    * @return The new color of this Actor.
    */
-  Vector4 ColorConstraint( const Vector4& current, const PropertyInputContainer& inputs )
+  void ColorConstraint( Vector4& current, const PropertyInputContainer& inputs )
   {
     const Vector3& pagePosition = inputs[0]->GetVector3();
     const Vector3& scrollPosition = inputs[1]->GetVector3();
@@ -87,7 +87,7 @@ public:
     // short circuit: if we're looking straight on at the page.
     if( IsStraightOnView( position ) )
     {
-      return current;
+      return;
     }
 
     const Vector3& pageSize = inputs[4]->GetVector3();
@@ -102,18 +102,16 @@ public:
     {
       // note preserve color channels incase there is a shader/further constraint
       // that wishes to do something with that information.
-      return Vector4(current.r, current.g, current.b, 0.0f);
+      current.a = 0.0f;
+      return;
     }
 
-    Vector4 color( current );
     Vector2 distance( position / pageSize * PAGE_SIZE_MULTIPLIER );
-    color.a = Clamp( 1.0f - distance.Length(), 0.0f, 1.0f );
-
-    return color;
+    current.a = Clamp( 1.0f - distance.Length(), 0.0f, 1.0f );
   }
 
   /**
-   * @param[in] current The current position
+   * @param[in,out] current The current position
    * @param[in] inputs Contains:
    *                    The page's position.
    *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
@@ -123,7 +121,7 @@ public:
    *                    Whether scroll wrap has been enabled or not (SCROLL_WRAP_PROPERTY_NAME)
    * @return The new position of this Actor.
    */
-  Vector3 PositionConstraint( const Vector3& current, const PropertyInputContainer& inputs )
+  void PositionConstraint( Vector3& current, const PropertyInputContainer& inputs )
   {
     const Vector3& pagePosition = inputs[0]->GetVector3();
     const Vector3& scrollPosition = inputs[1]->GetVector3();
@@ -134,7 +132,8 @@ public:
     // short circuit: if we're looking straight on at the page.
     if( IsStraightOnView( position ) )
     {
-      return current + scrollPosition;
+      current += scrollPosition;
+      return;
     }
 
     const Vector3& pageSize = inputs[4]->GetVector3();
@@ -149,7 +148,8 @@ public:
     {
       // position actors at: scrollposition (Property) + pagePosition (Parent) + current (this)
       // they will be invisible so doesn't have to be precise, just away from stage.
-      return current + scrollPosition;
+      current += scrollPosition;
+      return;
     }
 
     Vector3 angle( position / pageSize * PAGE_SIZE_MULTIPLIER );
@@ -161,7 +161,7 @@ public:
     zMovement *= mPositionToPageSizeRatio;
     position.z = - ( ( zMovement.x - ( zMovement.x * cos( angle.x ) ) ) + ( zMovement.y - ( zMovement.y * cos( angle.y ) ) ) );
 
-    return position;
+    current = position;
   }
 
   const Vector2 mPositionToPageSizeRatio; ///< The page will move its position according to this ratio.

@@ -89,16 +89,14 @@ struct ScrollViewWobbleEffectConstraint
   }
 
   /**
-   * @param[out] current The new wobble value
+   * @param[in,out] direction The new wobble value
    * @param[in] inputs Contains:
    *                    The current time since the wobble effect started
    *                    The scroll-position
    *                    The scroll-overshoot x & y
    */
-  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& direction, const PropertyInputContainer& inputs )
   {
-    Vector3 dir;
-
     if(mStabilized)
     {
       // check if animation cycle id has changed (if so then this spells
@@ -156,11 +154,9 @@ struct ScrollViewWobbleEffectConstraint
         }
       }
 
-      dir.x = position.x - mChase.x;
-      dir.y = position.y - mChase.y;
+      direction.x = position.x - mChase.x;
+      direction.y = position.y - mChase.y;
     } // end else
-
-    return dir;
   }
 
   Vector3 mChase;                                 ///< Chaser position

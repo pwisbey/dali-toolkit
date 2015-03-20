@@ -79,7 +79,7 @@ public:
   }
 
   /**
-   * @param[in] current The current visibility of this Actor
+   * @param[in,out] current The current visibility of this Actor
    * @param[in] inputs Contains:
    *                    The Actor's Position
    *                    The Actor's Scale
@@ -88,7 +88,7 @@ public:
    *                    The size of the scroll-view (scrollView SIZE)
    * @return The new visibility of this Actor.
    */
-  bool VisibilityConstraint( const bool& current, const PropertyInputContainer& inputs )
+  void VisibilityConstraint( bool& current, const PropertyInputContainer& inputs )
   {
     const Vector2& anchor(AnchorPoint::CENTER.GetVectorXY());
     Vector2 position( inputs[0]->GetVector3() + inputs[3]->GetVector3());
@@ -99,14 +99,14 @@ public:
     position -= (anchor - mVisibilityThreshold) * scaledSize;
     domain -= (Vector2::ONE - mVisibilityThreshold * 2.0f) * scaledSize;
 
-    return ( position.x >= 0 &&
-             position.x <= domain.x &&
-             position.y >= 0 &&
-             position.y <= domain.y );
+    current = ( position.x >= 0 &&
+                position.x <= domain.x &&
+                position.y >= 0 &&
+                position.y <= domain.y );
   }
 
   /**
-   * @param[in] current The current orientation of this Actor
+   * @param[in,out] current The current orientation of this Actor
    * @param[in] inputs Contains:
    *                    The Actor's Position.
    *                    The Actor's Scale.
@@ -116,13 +116,13 @@ public:
    *                    Activation value (0 - normal, 1.0 - full effect)
    * @return The new orientation of this Actor.
    */
-  Quaternion RotationConstraint( const Quaternion& current, const PropertyInputContainer& inputs )
+  void RotationConstraint( Quaternion& current, const PropertyInputContainer& inputs )
   {
     const float activate(inputs[5]->GetFloat());
 
     if(activate <= Math::MACHINE_EPSILON_0)
     {
-      return current;
+      return;
     }
 
     const Vector2& anchor(AnchorPoint::CENTER.GetVectorXY());
@@ -146,13 +146,13 @@ public:
 
     angle *= activate;
 
-    return Quaternion(-angle.x, Vector3::YAXIS) *
-           Quaternion(angle.y, Vector3::XAXIS) *
-           current;
+    current = Quaternion(-angle.x, Vector3::YAXIS) *
+              Quaternion(angle.y, Vector3::XAXIS) *
+              current;
   }
 
   /**
-   * @param[in] current The current position of this Actor
+   * @param[in,out] current The current position of this Actor
    * @param[in] inputs Contains:
    *                    The Actor's Scale.
    *                    The Actor's Size
@@ -161,15 +161,16 @@ public:
    *                    Activation value (0 - normal, 1.0 - full effect)
    * @return The new position of this Actor.
    */
-  Vector3 PositionConstraint( const Vector3& current, const PropertyInputContainer& inputs )
+  void PositionConstraint( Vector3& position, const PropertyInputContainer& inputs )
   {
     const float activate(inputs[4]->GetFloat());
-    Vector3 position(current + inputs[2]->GetVector3());
 
     if(activate <= Math::MACHINE_EPSILON_0)
     {
-      return position;
+      return;
     }
+
+    position += inputs[2]->GetVector3();
 
     const Vector2& anchor(AnchorPoint::CENTER.GetVectorXY());
     Vector2 scaledSize(inputs[1]->GetVector3() * inputs[0]->GetVector3());
@@ -194,8 +195,6 @@ public:
     }
 
     position.GetVectorXY() += (anchor - mCanvasMargin) * scaledSize;
-
-    return position;
   }
 
   Vector2 mAngleSwing;                                    ///< Maximum amount in X and Y axes to rotate.

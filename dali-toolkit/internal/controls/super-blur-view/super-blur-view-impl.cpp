@@ -54,20 +54,20 @@ struct ActorOpacityConstraint
     mRange = Vector2( index*rangeLength, (index+1.f)*rangeLength );
   }
 
-  float operator()( float current, const PropertyInputContainer& inputs )
+  void operator()( float& current, const PropertyInputContainer& inputs )
   {
     float blurStrength = inputs[0]->GetFloat();
     if(blurStrength <= mRange.x)
     {
-      return 1.f;
+      current = 1.f;
     }
     else if(blurStrength > mRange.y)
     {
-      return 0.f;
+      current = 0.f;
     }
     else
     {
-      return (mRange.y - blurStrength)/(mRange.y-mRange.x);
+      current = ( mRange.y - blurStrength) / ( mRange.y - mRange.x );
     }
   }
 

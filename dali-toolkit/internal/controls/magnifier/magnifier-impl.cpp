@@ -35,27 +35,6 @@ const char* DEFAULT_FRAME_IMAGE_PATH = DALI_IMAGE_DIR "magnifier-image-frame.png
 
 const float IMAGE_BORDER_INDENT = 14.0f;            ///< Indent of border in pixels.
 
-/**
- * ImageBorderSizeConstraint
- */
-struct ImageBorderSizeConstraint
-{
-  ImageBorderSizeConstraint()
-  : mSizeOffset(Vector3(IMAGE_BORDER_INDENT - 1, IMAGE_BORDER_INDENT - 1, 0.0f) * 2.0f)
-  {
-  }
-
-  Vector3 operator()(const Vector3&    current,
-                     const PropertyInput& referenceSizeProperty)
-  {
-    const Vector3& referenceSize = referenceSizeProperty.GetVector3();
-
-    return referenceSize + mSizeOffset;
-  }
-
-  Vector3 mSizeOffset;                        ///< The amount to offset the size from referenceSize
-};
-
 struct CameraActorPositionConstraint
 {
   CameraActorPositionConstraint(const Vector2& stageSize, float defaultCameraDistance = 0.0f)
@@ -64,13 +43,13 @@ struct CameraActorPositionConstraint
   {
   }
 
-  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& current, const PropertyInputContainer& inputs )
   {
     const Vector3& sourcePosition = inputs[0]->GetVector3();
 
-    return Vector3( sourcePosition.x + mStageSize.x * 0.5f,
-                    sourcePosition.y + mStageSize.y * 0.5f,
-                    sourcePosition.z + mDefaultCameraDistance);
+    current.x = sourcePosition.x + mStageSize.x * 0.5f;
+    current.y = sourcePosition.y + mStageSize.y * 0.5f;
+    current.z = sourcePosition.z + mDefaultCameraDistance;
   }
 
   Vector2 mStageSize;
@@ -85,11 +64,9 @@ struct RenderTaskViewportPositionConstraint
   {
   }
 
-  Vector2 operator()(const Vector2& current, const PropertyInputContainer& inputs )
+  void operator()( Vector2& current, const PropertyInputContainer& inputs )
   {
-    Vector2 position( inputs[0]->GetVector3() ); // World position?
-
-    //position -= mStageSize * 0.5f;
+    current = inputs[0]->GetVector3(); // World position?
 
     // should be updated when:
     // Magnifier's world position/size/scale/parentorigin/anchorpoint changes.
@@ -97,10 +74,8 @@ struct RenderTaskViewportPositionConstraint
     Vector3 size = inputs[1]->GetVector3() * inputs[2]->GetVector3(); /* magnifier-size * magnifier-scale */
 
     // Reposition, and resize viewport to reflect the world bounds of this Magnifier actor.
-    position.x += (mStageSize.width - size.width) * 0.5f;
-    position.y += (mStageSize.height - size.height) * 0.5f;
-
-    return position;
+    current.x += ( mStageSize.width - size.width ) * 0.5f;
+    current.y += ( mStageSize.height - size.height ) * 0.5f;
   }
 
   Vector2 mStageSize;
@@ -112,9 +87,9 @@ struct RenderTaskViewportSizeConstraint
   {
   }
 
-  Vector2 operator()(const Vector2& current, const PropertyInputContainer& inputs )
+  void operator()( Vector2& current, const PropertyInputContainer& inputs )
   {
-    return Vector2( inputs[0]->GetVector3() * inputs[1]->GetVector3() ); /* magnifier-size * magnifier-scale */
+    current = inputs[0]->GetVector3() * inputs[1]->GetVector3(); /* magnifier-size * magnifier-scale */
   }
 };
 

@@ -87,29 +87,25 @@ float CalculateScrollDistance(Vector2 panDistance, Toolkit::ItemLayout& layout)
 }
 
 // Overshoot overlay constraints
-Vector3 OvershootOverlaySizeConstraint( const Vector3& current, const PropertyInputContainer& inputs )
+void OvershootOverlaySizeConstraint( Vector3& current, const PropertyInputContainer& inputs )
 {
   const Vector3& parentScrollDirection = inputs[0]->GetVector3();
   const Vector3& parentSize = inputs[1]->GetVector3();
   const Toolkit::ControlOrientation::Type& parentOrientation = static_cast<Toolkit::ControlOrientation::Type>(parentScrollDirection.z);
 
-  float overlayWidth;
-
   if(Toolkit::IsVertical(parentOrientation))
   {
-    overlayWidth = fabsf(parentScrollDirection.y) > Math::MACHINE_EPSILON_1 ? parentSize.x : parentSize.y;
+    current.width = fabsf(parentScrollDirection.y) > Math::MACHINE_EPSILON_1 ? parentSize.x : parentSize.y;
   }
   else
   {
-    overlayWidth = fabsf(parentScrollDirection.x) > Math::MACHINE_EPSILON_1 ? parentSize.y : parentSize.x;
+    current.width = fabsf(parentScrollDirection.x) > Math::MACHINE_EPSILON_1 ? parentSize.y : parentSize.x;
   }
 
-  float overlayHeight = (overlayWidth > OVERSHOOT_BOUNCE_ACTOR_RESIZE_THRESHOLD) ? OVERSHOOT_BOUNCE_ACTOR_DEFAULT_SIZE.height : OVERSHOOT_BOUNCE_ACTOR_DEFAULT_SIZE.height*0.5f;
-
-  return Vector3( overlayWidth, overlayHeight, current.depth );
+  current.height = ( current.width > OVERSHOOT_BOUNCE_ACTOR_RESIZE_THRESHOLD ) ? OVERSHOOT_BOUNCE_ACTOR_DEFAULT_SIZE.height : OVERSHOOT_BOUNCE_ACTOR_DEFAULT_SIZE.height*0.5f;
 }
 
-Quaternion OvershootOverlayRotationConstraint( const Quaternion& current, const PropertyInputContainer& inputs )
+void OvershootOverlayRotationConstraint( Quaternion& current, const PropertyInputContainer& inputs )
 {
   const Vector3& parentScrollDirection = inputs[0]->GetVector3();
   const float parentOvershoot = inputs[1]->GetFloat();
@@ -165,12 +161,10 @@ Quaternion OvershootOverlayRotationConstraint( const Quaternion& current, const 
     }
   }
 
-  Quaternion rotation( Radian( multiplier * Math::PI ), Vector3::ZAXIS );
-
-  return rotation;
+  current = Quaternion( Radian( multiplier * Math::PI ), Vector3::ZAXIS );
 }
 
-Vector3 OvershootOverlayPositionConstraint( const Vector3& current, const PropertyInputContainer& inputs )
+void OvershootOverlayPositionConstraint( Vector3& current, const PropertyInputContainer& inputs )
 {
   const Vector3& parentSize = inputs[0]->GetVector3();
   const Vector3& parentScrollDirection = inputs[1]->GetVector3();
@@ -228,14 +222,12 @@ Vector3 OvershootOverlayPositionConstraint( const Vector3& current, const Proper
     }
   }
 
-  return relativeOffset * parentSize;
-
+  current = relativeOffset * parentSize;
 }
 
-bool OvershootOverlayVisibilityConstraint( const bool& current, const PropertyInputContainer& inputs )
+void OvershootOverlayVisibilityConstraint( bool& current, const PropertyInputContainer& inputs )
 {
-  const bool parentLayoutScrollable = inputs[0]->GetBoolean();
-  return parentLayoutScrollable;
+  current = inputs[0]->GetBoolean();
 }
 
 /**
@@ -243,19 +235,17 @@ bool OvershootOverlayVisibilityConstraint( const bool& current, const PropertyIn
  * Generates the relative position value of the item view based on the layout position,
  * and it's relation to the layout domain. This is a value from 0.0f to 1.0f in each axis.
  */
-Vector3 RelativePositionConstraint(const Vector3& current, const PropertyInputContainer& inputs)
+void RelativePositionConstraint( Vector3& current, const PropertyInputContainer& inputs )
 {
   const Vector3& position = Vector3(0.0f, inputs[0]->GetFloat(), 0.0f);
   const Vector3& min = inputs[1]->GetVector3();
   const Vector3& max = inputs[2]->GetVector3();
 
-  Vector3 relativePosition;
   Vector3 domainSize = max - min;
 
-  relativePosition.x = fabsf(domainSize.x) > Math::MACHINE_EPSILON_1 ? ((min.x - position.x) / fabsf(domainSize.x)) : 0.0f;
-  relativePosition.y = fabsf(domainSize.y) > Math::MACHINE_EPSILON_1 ? ((min.y - position.y) / fabsf(domainSize.y)) : 0.0f;
-
-  return relativePosition;
+  current.x = fabsf(domainSize.x) > Math::MACHINE_EPSILON_1 ? ((min.x - position.x) / fabsf(domainSize.x)) : 0.0f;
+  current.y = fabsf(domainSize.y) > Math::MACHINE_EPSILON_1 ? ((min.y - position.y) / fabsf(domainSize.y)) : 0.0f;
+  current.z = 0.0f;
 }
 
 } // unnamed namespace

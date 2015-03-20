@@ -80,17 +80,17 @@ struct OriginalCenterConstraint
     mDirection = offset  / mDistance;
   }
 
-  Vector2 operator()(const Vector2& current, const PropertyInputContainer& inputs )
+  void operator()( Vector2& current, const PropertyInputContainer& inputs )
   {
     float displacement = inputs[0]->GetFloat();
 
     if( displacement < mDistance )
     {
-      return mOldCenter + mDirection * displacement;
+      current = mOldCenter + mDirection * displacement;
     }
     else
     {
-      return mNewCenter + Vector2(0.25f*(displacement-mDistance), 0.f);
+      current = mNewCenter + Vector2(0.25f*(displacement-mDistance), 0.f);
     }
   }
 
@@ -117,19 +117,18 @@ struct RotationConstraint
     mRotation = isTurnBack ? Quaternion( -Math::PI, Vector3::YAXIS ) : Quaternion( 0.f, Vector3::YAXIS );
   }
 
-  Quaternion operator()( const Quaternion& current, const PropertyInputContainer& inputs )
+  void operator()( Quaternion& current, const PropertyInputContainer& inputs )
   {
     float displacement = inputs[0]->GetFloat();
-    float angle;
     if( displacement < mDistance)
     {
-      return mRotation;
+      current = mRotation;
     }
     else
     {
       float coef = std::max(-1.0f, mStep*(mDistance-displacement));
-      angle = Math::PI*( mConst + mSign*coef );
-      return Quaternion( angle, Vector3::YAXIS );
+      float angle = Math::PI * ( mConst + mSign * coef );
+      current = Quaternion( angle, Vector3::YAXIS );
     }
   }
 
@@ -154,12 +153,13 @@ struct CurrentCenterConstraint
     mThres = pageWidth * PAGE_TURN_OVER_THRESHOLD_RATIO * 0.5f;
   }
 
-  Vector2 operator()( const Vector2& current, const PropertyInputContainer& inputs )
+  void operator()( Vector2& current, const PropertyInputContainer& inputs )
   {
     const Vector2& centerPosition = inputs[0]->GetVector2();
     if( centerPosition.x > 0.f )
     {
-      return Vector2( mThres+centerPosition.x*0.5f , centerPosition.y);
+      current.x = mThres+centerPosition.x * 0.5f;
+      current.y = centerPosition.y;
     }
     else
     {
@@ -171,7 +171,7 @@ struct CurrentCenterConstraint
       {
         coef = (coef+0.225f)/10.0f;
       }
-      return centerOrigin - direction * coef;
+      current = centerOrigin - direction * coef;
     }
   }
 
@@ -185,10 +185,9 @@ struct ShadowBlurStrengthConstraint
   : mThres( thres )
   {}
 
-  float operator()( const float current,  const PropertyInputContainer& inputs )
+  void operator()( float& blurStrength,  const PropertyInputContainer& inputs )
   {
     float displacement = inputs[2]->GetFloat();
-    float blurStrength = 0.0f;
     if( EqualsZero(displacement))
     {
       const Vector2& cur = inputs[0]->GetVector2();
@@ -201,7 +200,6 @@ struct ShadowBlurStrengthConstraint
     }
 
     blurStrength = blurStrength > 1.f ? 1.f : ( blurStrength < 0.f ? 0.f : blurStrength );
-    return blurStrength;
   }
 
   float mThres;

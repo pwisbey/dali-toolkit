@@ -71,11 +71,11 @@ struct IndicatorPositionConstraint
 
   /**
    * Constraint operator
-   * @param[in] current The current indicator position
+   * @param[in,out] current The current indicator position
    * @param[in] inputs Contains the size of indicator, the size of indicator's parent, and the scroll position of the scrollable container (from 0.0 -> 1.0 in each axis)
    * @return The new indicator position is returned.
    */
-  Vector3 operator()(const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& current, const PropertyInputContainer& inputs )
   {
     const Vector3& indicatorSize = inputs[0]->GetVector3();
     const Vector3& parentSize = inputs[1]->GetVector3();
@@ -83,7 +83,9 @@ struct IndicatorPositionConstraint
 
     const float domainSize = fabs(mMaxPosition - mMinPosition);
     float relativePosition = (mMaxPosition - scrollPosition) / domainSize;
-    return Vector3(current.x, relativePosition * (parentSize.height - indicatorSize.height), DEFAULT_SLIDER_DEPTH);
+
+    current.y = relativePosition * ( parentSize.height - indicatorSize.height );
+    current.z = DEFAULT_SLIDER_DEPTH;
   }
 
   float mMinPosition;  ///< The minimum scroll position

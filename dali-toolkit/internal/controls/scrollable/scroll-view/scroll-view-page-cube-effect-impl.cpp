@@ -69,7 +69,7 @@ public:
   }
 
   /**
-   * @param[in] current The current orientation of this Actor
+   * @param[in,out] current The current orientation of this Actor
    * @param[in] inputs Contains:
    *                    The page's position.
    *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
@@ -79,7 +79,7 @@ public:
    *                    Whether scroll wrap has been enabled or not (SCROLL_WRAP_PROPERTY_NAME)
    * @return The new orientation of this Actor.
    */
-  Quaternion RotationConstraint( const Quaternion& current, const PropertyInputContainer& inputs )
+  void RotationConstraint( Quaternion& current, const PropertyInputContainer& inputs )
   {
     const Vector3& pagePosition = inputs[0]->GetVector3();
     const Vector3& scrollPosition = inputs[1]->GetVector3();
@@ -90,7 +90,7 @@ public:
     // short circuit: if we're looking straight on at the page.
     if( IsStraightOnView( position ) )
     {
-      return current;
+      return;
     }
 
     const Vector3& pageSize = inputs[4]->GetVector3();
@@ -103,22 +103,20 @@ public:
     // short circuit: for pages outside of view.
     if( IsOutsideView( position, pageSize ) )
     {
-      return current;
+      return;
     }
 
     // Our target is a 90 degree (PI/2) rotation per page, so calculate the angle we should be rotate
     // our page by calculating the amount we've moved as a fraction of the total size of the page.
     Vector2 angle( position / pageSize * Dali::Math::PI_2 );
 
-    Quaternion rotation = Quaternion( -angle.x * mAngleSwing.x, Vector3::YAXIS ) *
-                          Quaternion(  angle.y * mAngleSwing.y, Vector3::XAXIS ) *
-                          current;
-
-    return rotation;
+    current = Quaternion( -angle.x * mAngleSwing.x, Vector3::YAXIS ) *
+              Quaternion(  angle.y * mAngleSwing.y, Vector3::XAXIS ) *
+              current;
   }
 
   /**
-   * @param[in] current The current color of this Actor
+   * @param[in,out] current The current color of this Actor
    * @param[in] inputs Contains:
    *                    The page's position.
    *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
@@ -128,7 +126,7 @@ public:
    *                    Whether scroll wrap has been enabled or not (SCROLL_WRAP_PROPERTY_NAME)
    * @return The new color of this Actor.
    */
-  Vector4 ColorConstraint( const Vector4& current, const PropertyInputContainer& inputs )
+  void ColorConstraint( Vector4& current, const PropertyInputContainer& inputs )
   {
     const Vector3& pagePosition = inputs[0]->GetVector3();
     const Vector3& scrollPosition = inputs[1]->GetVector3();
@@ -139,7 +137,7 @@ public:
     // short circuit: if we're looking straight on at the page.
     if( IsStraightOnView( position ) )
     {
-      return current;
+      return;
     }
 
     const Vector3& pageSize = inputs[4]->GetVector3();
@@ -154,7 +152,8 @@ public:
     {
       // note preserve color channels incase there is a shader/further constraint
       // that wishes to do something with that information.
-      return Vector4(current.r, current.g, current.b, 0.0f);
+      current.a = 0.0f;
+      return;
     }
 
     // Calculate the distance of this page from our view and ensure it falls within the appropriate
@@ -166,14 +165,12 @@ public:
 
     if ( distanceFactor > 1.0f )
     {
-      return Vector4(current.r, current.g, current.b, 0.0f);
+      current.a = 0.0f;
     }
-
-    return current;
   }
 
   /**
-   * @param[in] current The current position
+   * @param[in,out] current The current position
    * @param[in] inputs Contains:
    *                    The page's position.
    *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
@@ -183,7 +180,7 @@ public:
    *                    Whether scroll wrap has been enabled or not (SCROLL_WRAP_PROPERTY_NAME)
    * @return The new position of this Actor.
    */
-  Vector3 PositionConstraint( const Vector3& current, const PropertyInputContainer& inputs )
+  void PositionConstraint( Vector3& current, const PropertyInputContainer& inputs )
   {
     const Vector3& pagePosition = inputs[0]->GetVector3();
     const Vector3& scrollPosition = inputs[1]->GetVector3();
@@ -194,7 +191,8 @@ public:
     // short circuit: if we're looking straight on at the page.
     if( IsStraightOnView( position ) )
     {
-      return current + scrollPosition;
+      current += scrollPosition;
+      return;
     }
 
     const Vector3& pageSize = inputs[4]->GetVector3();
@@ -209,7 +207,8 @@ public:
     {
       // position actors at: scrollposition (Property) + pagePosition (Parent) + current (this)
       // they will be invisible so doesn't have to be precise, just away from stage.
-      return current + scrollPosition;
+      current += scrollPosition;
+      return;
     }
 
     // Our target when scrolling is moving from the origin to the following points around a curve:
@@ -221,11 +220,9 @@ public:
     Vector2 angle( position / pageSize * Dali::Math::PI_2 );
     Vector2 radius( pageSize * 0.5 );
 
-    position.x = radius.x * sin( angle.x );
-    position.y = radius.y * sin( angle.y );
-    position.z = ( radius.x - ( radius.x * cos( angle.x ) ) ) + ( radius.y - ( radius.y * cos( angle.y ) ) );
-
-    return position;
+    current.x = radius.x * sin( angle.x );
+    current.y = radius.y * sin( angle.y );
+    current.z = ( radius.x - ( radius.x * cos( angle.x ) ) ) + ( radius.y - ( radius.y * cos( angle.y ) ) );
   }
 
   Vector2 mAngleSwing;                                    ///< Maximum amount in X and Y axes to rotate.

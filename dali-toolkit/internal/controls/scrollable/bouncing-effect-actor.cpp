@@ -58,10 +58,9 @@ struct VertexPositionConstraint
   {
   }
 
-  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& current, const PropertyInputContainer& inputs )
   {
-    float positionY = mInitialY + mRange * fabsf(inputs[0]->GetFloat());
-    return Vector3( current.x, positionY, current.z );
+    current.y = mInitialY + mRange * fabsf( inputs[0]->GetFloat() );
   }
 
   float mInitialY;

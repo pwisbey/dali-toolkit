@@ -30,14 +30,13 @@ namespace Dali
 namespace Toolkit
 {
 
-Vector3 MoveActorConstraint( const Vector3& current, const PropertyInputContainer& inputs )
+void MoveActorConstraint( Vector3& current, const PropertyInputContainer& inputs )
 {
-  return current + inputs[0]->GetVector3();
+  current += inputs[0]->GetVector3();
 }
 
-Vector3 WrapActorConstraint( const Vector3& current, const PropertyInputContainer& inputs )
+void WrapActorConstraint( Vector3& position, const PropertyInputContainer& inputs )
 {
-  Vector3 position = current;
   bool wrap = inputs[5]->GetBoolean();
 
   if(wrap)
@@ -63,8 +62,6 @@ Vector3 WrapActorConstraint( const Vector3& current, const PropertyInputContaine
       position.y = WrapInDomain(position.y + offsetY, min.y, max.y) - offsetY;
     }
   }
-
-  return position;
 }
 
 } // namespace Toolkit

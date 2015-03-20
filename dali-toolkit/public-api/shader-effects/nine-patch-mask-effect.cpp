@@ -37,10 +37,11 @@ namespace NinePatchMaskEffect
 namespace
 {
 
-Vector2 NinePatchMaskEffectSizeConstraint( const Vector2& current, const PropertyInputContainer& inputs )
+void NinePatchMaskEffectSizeConstraint( Vector2& current, const PropertyInputContainer& inputs )
 {
   const Vector3& actorSize = inputs[0]->GetVector3();
-  return Vector2( actorSize.x, actorSize.y );
+  current.x = actorSize.x;
+  current.y = actorSize.y;
 }
 
 } // unnamed namespace

@@ -59,10 +59,9 @@ const int SECOND_UNIT(1000);
  * ScrollBarInternal Visibility Constraint
  * Returns whether scroll bar is visible
  */
-bool ScrollBarInternalVisibilityConstraint( const bool& current, const PropertyInputContainer& inputs )
+void ScrollBarInternalVisibilityConstraint( bool& current, const PropertyInputContainer& inputs )
 {
-  bool canScroll = inputs[0]->GetBoolean();
-  return canScroll;
+  current = inputs[0]->GetBoolean();
 }
 
 /**
@@ -82,11 +81,11 @@ struct ScrollBarInternalSizeConstraint
 
   /**
    * Constraint operator
-   * @param[in] current The current ScrollBarInternal size
+   * @param[in,out] current The current ScrollBarInternal size
    * @param[in] inputs Contains the container's minimum position, its maximum position, its scroll direction & its size of viewport.
    * @return The new ScrollBarInternal position is returned.
    */
-  Vector3 operator()(const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& current, const PropertyInputContainer& inputs )
   {
     const Vector3& min = inputs[0]->GetVector3();
     const Vector3& max = inputs[1]->GetVector3();
@@ -97,13 +96,11 @@ struct ScrollBarInternalSizeConstraint
 
     if (mVertical && Toolkit::IsVertical(orientation))
     {
-      float mod = fabsf(domainSize.height) > size.height ? size.height * ( size.height / fabsf(domainSize.height) ) : size.height * ( (size.height - fabsf(domainSize.height * 0.5f)) / size.height);
-      return Vector3( current.width, mod, current.depth );
+      current.height = fabsf(domainSize.height) > size.height ? size.height * ( size.height / fabsf(domainSize.height) ) : size.height * ( (size.height - fabsf(domainSize.height * 0.5f)) / size.height);
     }
     else
     {
-      float mod = fabsf(domainSize.height) > size.width ? size.width * ( size.width / fabsf(domainSize.height) ) : size.width * ( (size.width - fabsf(domainSize.height * 0.5f)) / size.width);
-      return Vector3( current.width, mod, current.depth );
+      current.height = fabsf(domainSize.height) > size.width ? size.width * ( size.width / fabsf(domainSize.height) ) : size.width * ( (size.width - fabsf(domainSize.height * 0.5f)) / size.width);
     }
   }
 
@@ -127,22 +124,22 @@ struct ScrollBarInternalRotationConstraint
 
   /**
    * Constraint operator
-   * @param[in] current The current ScrollBarInternal rotation
+   * @param[in,out] current The current ScrollBarInternal rotation
    * @param[in] scrollDirectionProperty The container's scroll direction.
    * @return The new ScrollBarInternal rotation is returned.
    */
-  Quaternion operator()(const Quaternion& current, const PropertyInputContainer& inputs)
+  void operator()( Quaternion& current, const PropertyInputContainer& inputs )
   {
     const Vector3& scrollDirection = inputs[0]->GetVector3();
     const Toolkit::ControlOrientation::Type& orientation = static_cast<Toolkit::ControlOrientation::Type>(scrollDirection.z);
 
     if( (mVertical && Toolkit::IsVertical(orientation)) || (!mVertical && Toolkit::IsHorizontal(orientation)) )
     {
-      return Quaternion(0.0f, Vector3::ZAXIS);
+      current = Quaternion(0.0f, Vector3::ZAXIS);
     }
     else
     {
-      return Quaternion(0.5f * Math::PI, Vector3::ZAXIS);
+      current = Quaternion(0.5f * Math::PI, Vector3::ZAXIS);
     }
   }
 
@@ -169,7 +166,7 @@ struct ScrollBarInternalPositionConstraint
 
   /**
    * Constraint operator
-   * @param[in] current The current ScrollBarInternal position
+   * @param[in] finalPosition The current ScrollBarInternal position
    * @param[in] inputs Contains:
    *                    The ScrollBarInternal size,
    *                    The container's relative position (from 0.0 -> 1.0 in each axis),
@@ -179,7 +176,7 @@ struct ScrollBarInternalPositionConstraint
    *                    The container's size of viewport.
    * @return The new ScrollBarInternal position is returned.
    */
-  Vector3 operator()(const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& finalPosition, const PropertyInputContainer& inputs )
   {
     const Vector3& barSize = inputs[0]->GetVector3();
     const Vector3& relativePosition = inputs[1]->GetVector3();
@@ -242,7 +239,7 @@ struct ScrollBarInternalPositionConstraint
     Vector3 maskedRelativePosition = Toolkit::IsVertical(orientation) ? Vector3(relativePosition.x * (size.x-barSize.y), relativePosition.y * (size.y-barSize.y), 0.0f) * mask
                                    : Vector3(relativePosition.y * (size.x-barSize.y), relativePosition.x * (size.y-barSize.y), 0.0f) * mask;
 
-    Vector3 finalPosition = relativeOffset * size + absoluteOffset + maskedRelativePosition;
+    finalPosition = relativeOffset * size + absoluteOffset + maskedRelativePosition;
 
     // If Wrapped Slider, then position 1 domain either before or after current slider.
     if(mWrap)
@@ -265,8 +262,6 @@ struct ScrollBarInternalPositionConstraint
         finalPosition.y -= size.y;
       }
     }
-
-    return finalPosition;
   }
 
   bool mVertical;           ///< Whether vertical or horizontal.
@@ -297,7 +292,7 @@ struct ScrollBarInternalHitSizeConstraint
    * @param[in] inputs Contains the container's scroll direction and size of its viewport.
    * @return The new ScrollBarInternal Hit Area size is returned.
    */
-  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& current, const PropertyInputContainer& inputs )
   {
     const Vector3& scrollDirection = inputs[0]->GetVector3();
     const Toolkit::ControlOrientation::Type& orientation = static_cast<Toolkit::ControlOrientation::Type>(scrollDirection.z);
@@ -317,7 +312,7 @@ struct ScrollBarInternalHitSizeConstraint
       offset = Vector3::YAXIS * mThickness;
     }
 
-    return size * mask + offset;
+    current = size * mask + offset;
   }
 
   bool mVertical;           ///< Whether vertical or horizontal.

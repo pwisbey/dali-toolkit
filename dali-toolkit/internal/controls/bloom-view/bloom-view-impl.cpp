@@ -467,9 +467,9 @@ struct RecipOneMinusConstraint
 {
   RecipOneMinusConstraint(){}
 
-  float operator()( const float current, const PropertyInputContainer& inputs )
+  void operator()( float& current, const PropertyInputContainer& inputs )
   {
-    return 1.0f / (1.0f - inputs[0]->GetFloat());
+    current = 1.0f / ( 1.0f - inputs[0]->GetFloat() );
   }
 };
 

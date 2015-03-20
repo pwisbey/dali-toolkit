@@ -38,11 +38,11 @@ struct WrappedQuaternionConstraint
   {
   }
 
-  Dali::Quaternion operator()( const Dali::Quaternion& current, const Dali::PropertyInputContainer& inputs )
+  void operator()( Dali::Quaternion& current, const Dali::PropertyInputContainer& inputs )
   {
     float offsetLayoutPosition = inputs[0]->GetFloat() + static_cast<float>(mItemId);
 
-    return mWrapMe(current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3());
+    current = mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() );
   }
 
   Dali::Toolkit::ItemLayout::QuaternionFunction mWrapMe;
@@ -57,11 +57,11 @@ struct WrappedVector3Constraint
   {
   }
 
-  Dali::Vector3 operator()( const Dali::Vector3& current, const Dali::PropertyInputContainer& inputs )
+  void operator()( Dali::Vector3& current, const Dali::PropertyInputContainer& inputs )
   {
     float offsetLayoutPosition = inputs[0]->GetFloat() + static_cast<float>(mItemId);
 
-    return mWrapMe(current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3());
+    current = mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() );
   }
 
   Dali::Toolkit::ItemLayout::Vector3Function mWrapMe;
@@ -76,11 +76,11 @@ struct WrappedVector4Constraint
   {
   }
 
-  Dali::Vector4 operator()( const Dali::Vector4& current, const Dali::PropertyInputContainer& inputs )
+  void operator()( Dali::Vector4& current, const Dali::PropertyInputContainer& inputs )
   {
     float offsetLayoutPosition = inputs[0]->GetFloat() + static_cast<float>(mItemId);
 
-    return mWrapMe(current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3());
+    current = mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() );
   }
 
   Dali::Toolkit::ItemLayout::Vector4Function mWrapMe;
@@ -95,11 +95,11 @@ struct WrappedBoolConstraint
   {
   }
 
-  bool operator()( const bool& current, const Dali::PropertyInputContainer& inputs )
+  void operator()( bool& current, const Dali::PropertyInputContainer& inputs )
   {
     float offsetLayoutPosition = inputs[0]->GetFloat() + static_cast<float>(mItemId);
 
-    return mWrapMe(current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3());
+    current = mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() );
   }
 
   Dali::Toolkit::ItemLayout::BoolFunction mWrapMe;

@@ -54,7 +54,7 @@ const Vector2 DEFAULT_SPINE_SHADOW_PARAMETER(50.0f, 20.0f);
 // when the vanishing point is very far away(pageHeight*THRESHOLD), make it infinitely, in this case, the page bent horizontally
 const float THRESHOLD(20.0);
 
-Matrix CommonParametersConstraint( const Matrix& current, const PropertyInputContainer& inputs )
+void CommonParametersConstraint( Matrix& current, const PropertyInputContainer& inputs )
 {
   const Vector2& originalCenter = inputs[0]->GetVector2();
   Vector2 currentCenter = inputs[1]->GetVector2();
@@ -100,8 +100,7 @@ Matrix CommonParametersConstraint( const Matrix& current, const PropertyInputCon
   float currentLength = fabs(currentCenter.x/curveDirection.x);
   float curveHeight = 0.45f*sqrt(originalLength*originalLength - currentLength*currentLength);
 
-  Matrix commonParameters( false );
-  float* parameterArray = commonParameters.AsFloat();
+  float* parameterArray = current.AsFloat();
   parameterArray[0] = cosTheta;
   parameterArray[1] = -sinTheta;
   parameterArray[2] = originalCenter.x;
@@ -118,8 +117,6 @@ Matrix CommonParametersConstraint( const Matrix& current, const PropertyInputCon
   parameterArray[13] = curveDirection.y;
   parameterArray[14] = curveHeight;
   parameterArray[15] = currentLength;
-
-  return commonParameters;
 }
 
 }//namespace

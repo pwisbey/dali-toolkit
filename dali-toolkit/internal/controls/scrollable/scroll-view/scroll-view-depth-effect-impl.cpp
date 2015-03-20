@@ -91,7 +91,7 @@ struct ScrollDepthScaleConstraint
   }
 
   /**
-   * @param[in] current The current scale
+   * @param[in,out] current The current scale
    * @param[in] inputs Contains:
    *                    The page's position.
    *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
@@ -101,7 +101,7 @@ struct ScrollDepthScaleConstraint
    *                    Whether scroll wrap has been enabled or not (SCROLL_WRAP_PROPERTY_NAME)
    * @return The new scale of this Actor.
    */
-  Vector3 operator()(const Vector3& currentScale, const PropertyInputContainer& inputs)
+  void operator()( Vector3& currentScale, const PropertyInputContainer& inputs )
   {
     const Vector3& currentPosition = inputs[0]->GetVector3();
     const Vector3& pagePosition = inputs[1]->GetVector3();
@@ -113,7 +113,7 @@ struct ScrollDepthScaleConstraint
     // short circuit: for orthognal view.
     if( (fabsf(position.x) < Math::MACHINE_EPSILON_1) && (fabsf(position.y) < Math::MACHINE_EPSILON_1) )
     {
-      return currentScale;
+      return;
     }
 
     const Vector3& pageSize = inputs[5]->GetVector3();
@@ -138,7 +138,7 @@ struct ScrollDepthScaleConstraint
     // short circuit: for pages outside of view.
     if( (fabsf(position.x) >= pageSize.x) || (fabsf(position.y) >= pageSize.y) )
     {
-      return currentScale;
+      return;
     }
 
     // Calculate scale ////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ struct ScrollDepthScaleConstraint
 
     float f = mScaleExtent + cos(position.x * Math::PI_2) * cos(position.y * Math::PI_2) * (1.0f - mScaleExtent);
 
-    return currentScale * f;
+    currentScale *= f;
   }
 
   const Vector2 mPositionExtent;                                ///< Determines how much of the Actor's X and Y position affects exponent value.
@@ -211,7 +211,7 @@ struct ScrollDepthPositionConstraint
   }
 
   /**
-   * @param[in] current The current position
+   * @param[in,out] current The current position
    * @param[in] inputs Contains:
    *                    The page's position.
    *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
@@ -221,7 +221,7 @@ struct ScrollDepthPositionConstraint
    *                    Whether scroll wrap has been enabled or not (SCROLL_WRAP_PROPERTY_NAME)
    * @return The new position of this Actor.
    */
-  Vector3 operator()( const Vector3& currentPosition, const PropertyInputContainer& inputs )
+  void operator()( Vector3& currentPosition, const PropertyInputContainer& inputs )
   {
     const Vector3& pagePosition = inputs[0]->GetVector3();
     const Vector3& scrollPosition = inputs[1]->GetVector3();
@@ -232,7 +232,8 @@ struct ScrollDepthPositionConstraint
     // short circuit: for orthognal view.
     if( (fabsf(position.x) < Math::MACHINE_EPSILON_1) && (fabsf(position.y) < Math::MACHINE_EPSILON_1) )
     {
-      return currentPosition + scrollPosition;
+      currentPosition += scrollPosition;
+      return;
     }
 
     const Vector3& pageSize = inputs[4]->GetVector3();
@@ -261,7 +262,8 @@ struct ScrollDepthPositionConstraint
     {
       // position actors at: scrollposition (Property) + pagePosition (Parent) + current (this)
       // they will be invisible so doesn't have to be precise, just away from stage.
-      return currentPosition + scrollPosition;
+      currentPosition += scrollPosition;
+      return;
     }
 
     // Calculate position /////////////////////////////////////////////////////
@@ -270,8 +272,6 @@ struct ScrollDepthPositionConstraint
     position.y /= pageSize.y;
 
     position *= mPositionScale;
-
-    Vector3 finalPosition(currentPosition - pagePosition);
 
     Vector3 relCurrentPosition = currentPosition;
     relCurrentPosition.x = relCurrentPosition.x / pageSize.x + 0.5f;
@@ -293,9 +293,8 @@ struct ScrollDepthPositionConstraint
     position.x = RampFunction(position.x, mOffsetExtent.x + extent.x);
     position.y = RampFunction(position.y, mOffsetExtent.y + extent.y);
 
-    finalPosition += pageSize * position;
-
-    return finalPosition;
+    currentPosition -= pagePosition;
+    currentPosition += pageSize * position;
   }
 
   const Vector2 mPositionExtent;                                ///< Determines how much of the Actor's X and Y position affects exponent value.

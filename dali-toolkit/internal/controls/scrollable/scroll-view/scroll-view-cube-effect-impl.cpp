@@ -62,7 +62,7 @@ public:
   }
 
   /**
-   * @param[in] current The current orientation of this Actor
+   * @param[in,out] current The current orientation of this Actor
    * @param[in] inputs Contains:
    *                    The page's position.
    *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
@@ -72,7 +72,7 @@ public:
    *                    Whether scroll wrap has been enabled or not (SCROLL_WRAP_PROPERTY_NAME)
    * @return The new orientation of this Actor.
    */
-  Quaternion RotationConstraint(const Quaternion& current, const PropertyInputContainer& inputs)
+  void RotationConstraint( Quaternion& current, const PropertyInputContainer& inputs )
   {
     const Vector3& pagePosition = inputs[0]->GetVector3();
     const Vector3& scrollPosition = inputs[1]->GetVector3();
@@ -83,7 +83,7 @@ public:
     // short circuit: for orthognal view.
     if( (fabsf(position.x) < Math::MACHINE_EPSILON_1) && (fabsf(position.y) < Math::MACHINE_EPSILON_1) )
     {
-      return current;
+      return;
     }
 
     const Vector3& pageSize = inputs[4]->GetVector3();
@@ -110,7 +110,7 @@ public:
     // short circuit: for pages outside of view.
     if( (fabsf(position.x) >= pageSize.x) || (fabsf(position.y) >= pageSize.y) )
     {
-      return current;
+      return;
     }
 
     position.x /= pageSize.x;
@@ -119,15 +119,13 @@ public:
     Vector2 angle( Clamp(position.x, -1.0f,1.0f),
                    Clamp(position.y, -1.0f,1.0f) );
 
-    Quaternion rotation = Quaternion(angle.x * mAngleSwing.x, Vector3::YAXIS) *
+    current = Quaternion( angle.x * mAngleSwing.x, Vector3::YAXIS) *
                           Quaternion(-angle.y * mAngleSwing.y, Vector3::XAXIS) *
                           current;
-
-    return rotation;
   }
 
   /**
-   * @param[in] current The current color of this Actor
+   * @param[in,out] current The current color of this Actor
    * @param[in] inputs Contains:
    *                    The page's position.
    *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
@@ -137,7 +135,7 @@ public:
    *                    Whether scroll wrap has been enabled or not (SCROLL_WRAP_PROPERTY_NAME)
    * @return The new color of this Actor.
    */
-  Vector4 ColorConstraint( const Vector4& current, const PropertyInputContainer& inputs )
+  void ColorConstraint( Vector4& current, const PropertyInputContainer& inputs )
   {
     const Vector3& pagePosition = inputs[0]->GetVector3();
     const Vector3& scrollPosition = inputs[1]->GetVector3();
@@ -148,7 +146,7 @@ public:
     // short circuit: for orthognal view.
     if( (fabsf(position.x) < Math::MACHINE_EPSILON_1) && (fabsf(position.y) < Math::MACHINE_EPSILON_1) )
     {
-      return current;
+      return;
     }
 
     const Vector3& pageSize = inputs[4]->GetVector3();
@@ -177,7 +175,8 @@ public:
     {
       // note preserve color channels incase there is a shader/further constraint
       // that wishes to do something with that information.
-      return Vector4(current.r, current.g, current.b, 0.0f);
+      current.a = 0.0f;
+      return;
     }
 
     position.x /= pageSize.x;
@@ -189,14 +188,11 @@ public:
     float f = (1.0f - fabsf(angle.x)) * (1.0f - fabsf(angle.y));
     f = f*f;
 
-    Vector4 color = current;
-    color.a *= f;
-
-    return color;
+    current.a *= f;
   }
 
   /**
-   * @param[in] current The current position
+   * @param[in,out] current The current position
    * @param[in] inputs Contains:
    *                    The page's position.
    *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
@@ -206,7 +202,7 @@ public:
    *                    Whether scroll wrap has been enabled or not (SCROLL_WRAP_PROPERTY_NAME)
    * @return The new position of this Actor.
    */
-  Vector3 PositionConstraint( const Vector3& current, const PropertyInputContainer& inputs )
+  void PositionConstraint( Vector3& current, const PropertyInputContainer& inputs )
   {
     const Vector3& pagePosition = inputs[0]->GetVector3();
     const Vector3& scrollPosition = inputs[1]->GetVector3();
@@ -217,7 +213,8 @@ public:
     // short circuit: for orthognal view.
     if( (fabsf(relativePosition.x) < Math::MACHINE_EPSILON_1) && (fabsf(relativePosition.y) < Math::MACHINE_EPSILON_1) )
     {
-      return current + scrollPosition;
+      current += scrollPosition;
+      return;
     }
 
     const Vector3& pageSize = inputs[4]->GetVector3();
@@ -246,7 +243,8 @@ public:
     {
       // position actors at: scrollposition (Property) + pagePosition (Parent) + current (this)
       // they will be invisible so doesn't have to be precise, just away from stage.
-      return current + scrollPosition;
+      current += scrollPosition;
+      return;
     }
 
     relativePosition.x /= pageSize.x;
@@ -266,7 +264,7 @@ public:
     position += mAnchor;
     position += relativePosition * mPositionSwing;
 
-    return position - pagePosition;
+    current = position - pagePosition;
   }
 
   Vector3 mAnchor;                                        ///< Anchor point where Actor should rotate about.
