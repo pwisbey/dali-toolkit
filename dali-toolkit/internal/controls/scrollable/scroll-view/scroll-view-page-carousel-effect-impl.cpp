@@ -19,7 +19,6 @@
 #include <dali-toolkit/internal/controls/scrollable/scroll-view/scroll-view-page-carousel-effect-impl.h>
 
 // EXTERNAL INCLUDES
-#include <boost/bind.hpp>
 #include <dali/public-api/animation/active-constraint.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/object/property-input.h>
@@ -180,7 +179,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
 {
   // Apply constraints to this actor //
   Constraint constraint;
-  constraint = Constraint::New<Vector4>( Actor::Property::COLOR, boost::bind( &ScrollPageCarouselEffectInfo::ColorConstraint, info, _1, _2 ) );
+  constraint = Constraint::New<Vector4>( Actor::Property::COLOR, info, &ScrollPageCarouselEffectInfo::ColorConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -190,7 +189,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
   constraint.SetRemoveAction( Constraint::Discard );
   child.ApplyConstraint( constraint );
 
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, boost::bind( &ScrollPageCarouselEffectInfo::PositionConstraint, info, _1, _2 ) );
+  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, info, &ScrollPageCarouselEffectInfo::PositionConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );

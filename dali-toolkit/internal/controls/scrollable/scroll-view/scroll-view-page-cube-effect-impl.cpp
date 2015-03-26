@@ -19,7 +19,6 @@
 #include <dali-toolkit/internal/controls/scrollable/scroll-view/scroll-view-page-cube-effect-impl.h>
 
 // EXTERNAL INCLUDES
-#include <boost/bind.hpp>
 #include <dali/public-api/animation/active-constraint.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/object/property-input.h>
@@ -241,7 +240,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
 {
   // Apply constraints to this actor //
   Constraint constraint;
-  constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, boost::bind( &ScrollPageCubeEffectInfo::RotationConstraint, info, _1, _2 ) );
+  constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, info, &ScrollPageCubeEffectInfo::RotationConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -251,7 +250,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
   constraint.SetRemoveAction( Constraint::Discard );
   child.ApplyConstraint( constraint );
 
-  constraint = Constraint::New<Vector4>( Actor::Property::COLOR, boost::bind( &ScrollPageCubeEffectInfo::ColorConstraint, info, _1, _2 ) );
+  constraint = Constraint::New<Vector4>( Actor::Property::COLOR, info, &ScrollPageCubeEffectInfo::ColorConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -261,7 +260,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
   constraint.SetRemoveAction( Constraint::Discard );
   child.ApplyConstraint( constraint );
 
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, boost::bind( &ScrollPageCubeEffectInfo::PositionConstraint, info, _1, _2 ) );
+  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, info, &ScrollPageCubeEffectInfo::PositionConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );

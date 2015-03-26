@@ -18,9 +18,6 @@
 // CLASS HEADER
 #include <dali-toolkit/internal/controls/scrollable/scroll-view/scroll-view-page-spiral-effect-impl.h>
 
-// EXTERNAL INCLUDES
-#include <boost/bind.hpp>
-
 // INTERNAL INCLUDES
 #include <dali-toolkit/internal/controls/scrollable/scroll-view/scroll-view-helper-functions.h>
 #include <dali-toolkit/internal/controls/scrollable/scroll-view/scroll-view-impl.h>
@@ -332,7 +329,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
 {
   // Apply constraints to this actor //
   Constraint constraint;
-  constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, boost::bind( &ScrollPageSpiralEffectInfo::RotationConstraint, info, _1, _2 ) );
+  constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, info, &ScrollPageSpiralEffectInfo::RotationConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -342,7 +339,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
   constraint.SetRemoveAction( Constraint::Discard );
   child.ApplyConstraint( constraint );
 
-  constraint = Constraint::New<Vector4>( Actor::Property::COLOR, boost::bind( &ScrollPageSpiralEffectInfo::ColorConstraint, info, _1, _2 ) );
+  constraint = Constraint::New<Vector4>( Actor::Property::COLOR, info, &ScrollPageSpiralEffectInfo::ColorConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -352,7 +349,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
   constraint.SetRemoveAction( Constraint::Discard );
   child.ApplyConstraint( constraint );
 
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, boost::bind( &ScrollPageSpiralEffectInfo::PositionConstraint, info, _1, _2 ) );
+  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, info, &ScrollPageSpiralEffectInfo::PositionConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );

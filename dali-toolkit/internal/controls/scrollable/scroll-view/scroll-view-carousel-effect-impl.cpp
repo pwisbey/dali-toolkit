@@ -16,7 +16,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <boost/bind.hpp>
 #include <dali/public-api/animation/active-constraint.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/object/property-input.h>
@@ -216,7 +215,7 @@ void ApplyScrollCarouselConstraints(Toolkit::ScrollView scrollView,
   // Apply constraints to this actor //
   Constraint constraint;
 
-  constraint = Constraint::New<bool>( Actor::Property::VISIBLE, boost::bind( &ScrollCarouselEffectInfo::VisibilityConstraint, info, _1, _2 ) );
+  constraint = Constraint::New<bool>( Actor::Property::VISIBLE, info, &ScrollCarouselEffectInfo::VisibilityConstraint );
   constraint.AddSource( LocalSource( Actor::Property::POSITION ) );
   constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
   constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
@@ -226,7 +225,7 @@ void ApplyScrollCarouselConstraints(Toolkit::ScrollView scrollView,
   constraint.SetRemoveAction( Constraint::Discard );
   child.ApplyConstraint( constraint );
 
-  constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, boost::bind( &ScrollCarouselEffectInfo::RotationConstraint, info, _1, _2 ) );
+  constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, info, &ScrollCarouselEffectInfo::RotationConstraint );
   constraint.AddSource( LocalSource( Actor::Property::POSITION ) );
   constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
   constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
@@ -236,7 +235,7 @@ void ApplyScrollCarouselConstraints(Toolkit::ScrollView scrollView,
   constraint.SetRemoveAction( Constraint::Discard );
   child.ApplyConstraint( constraint );
 
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, boost::bind( &ScrollCarouselEffectInfo::PositionConstraint, info, _1, _2 ) );
+  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, info, &ScrollCarouselEffectInfo::PositionConstraint );
   constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
   constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
