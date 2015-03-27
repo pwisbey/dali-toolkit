@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/animation/active-constraint.h>
+#include <dali/public-api/animation/animation.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/animation/time-period.h>
 
@@ -28,6 +29,13 @@
 
 namespace
 {
+
+// Lerps between current and target using the progress
+template< typename Type >
+void Lerp( Type& current, const Type& target, float progress )
+{
+  current += ((target - current) * progress);
+}
 
 // Functors which wrap constraint functions with stored item IDs
 struct WrappedQuaternionConstraint
@@ -41,8 +49,9 @@ struct WrappedQuaternionConstraint
   void operator()( Dali::Quaternion& current, const Dali::PropertyInputContainer& inputs )
   {
     float offsetLayoutPosition = inputs[0]->GetFloat() + static_cast<float>(mItemId);
+    float weight = inputs[3]->GetFloat();
 
-    current = mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() );
+    current = Dali::Quaternion::Slerp( current, mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() ), weight );
   }
 
   Dali::Toolkit::ItemLayout::QuaternionFunction mWrapMe;
@@ -60,8 +69,9 @@ struct WrappedVector3Constraint
   void operator()( Dali::Vector3& current, const Dali::PropertyInputContainer& inputs )
   {
     float offsetLayoutPosition = inputs[0]->GetFloat() + static_cast<float>(mItemId);
+    float weight = inputs[3]->GetFloat();
 
-    current = mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() );
+    Lerp( current, mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() ), weight );
   }
 
   Dali::Toolkit::ItemLayout::Vector3Function mWrapMe;
@@ -79,8 +89,9 @@ struct WrappedVector4Constraint
   void operator()( Dali::Vector4& current, const Dali::PropertyInputContainer& inputs )
   {
     float offsetLayoutPosition = inputs[0]->GetFloat() + static_cast<float>(mItemId);
+    float weight = inputs[3]->GetFloat();
 
-    current = mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() );
+    Lerp( current, mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() ), weight );
   }
 
   Dali::Toolkit::ItemLayout::Vector4Function mWrapMe;
@@ -97,9 +108,13 @@ struct WrappedBoolConstraint
 
   void operator()( bool& current, const Dali::PropertyInputContainer& inputs )
   {
-    float offsetLayoutPosition = inputs[0]->GetFloat() + static_cast<float>(mItemId);
+    float weight = inputs[3]->GetFloat();
 
-    current = mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() );
+    if ( weight >= 1.0f )
+    {
+      float offsetLayoutPosition = inputs[0]->GetFloat() + static_cast<float>(mItemId);
+      current = mWrapMe( current, offsetLayoutPosition, inputs[1]->GetFloat(), inputs[2]->GetVector3() );
+    }
   }
 
   Dali::Toolkit::ItemLayout::BoolFunction mWrapMe;
@@ -115,8 +130,9 @@ namespace Toolkit
 {
 
 ItemLayout::ItemLayout()
-: mOrientation(ControlOrientation::Up),
-  mAlphaFunction(Dali::Constraint::DEFAULT_ALPHA_FUNCTION)
+: mOrientation( ControlOrientation::Up ),
+  mAlphaFunction( AlphaFunctions::Linear ),
+  mWeightObject()
 {
 }
 
@@ -196,6 +212,12 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
     Property::Index scrollSpeedProperty = itemView.GetPropertyIndex("item-view-scroll-speed");
     Property::Index scrollPositionProperty = scrollPositionObject.GetPropertyIndex("scroll-position");
 
+    // We want to animate the layout in so use a weight object to do this
+    if ( !mWeightObject )
+    {
+      mWeightObject = WeightObject::New();
+    }
+
     ItemLayout::Vector3Function positionConstraint;
     if (GetPositionConstraint(itemId, positionConstraint))
     {
@@ -204,8 +226,7 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
       constraint.AddSource( Source( scrollPositionObject, scrollPositionProperty ) );
       constraint.AddSource( ParentSource( scrollSpeedProperty ) );
       constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
-      constraint.SetApplyTime(durationSeconds);
-      constraint.SetAlphaFunction(mAlphaFunction);
+      constraint.AddSource( Source( mWeightObject, WeightObject::WEIGHT ) );
       actor.ApplyConstraint(constraint);
     }
 
@@ -218,8 +239,7 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
       constraint.AddSource( Source( scrollPositionObject, scrollPositionProperty ) );
       constraint.AddSource( ParentSource( scrollSpeedProperty ) );
       constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
-      constraint.SetApplyTime(durationSeconds);
-      constraint.SetAlphaFunction(mAlphaFunction);
+      constraint.AddSource( Source( mWeightObject, WeightObject::WEIGHT ) );
 
       actor.ApplyConstraint(constraint);
     }
@@ -233,8 +253,7 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
       constraint.AddSource( Source( scrollPositionObject, scrollPositionProperty ) );
       constraint.AddSource( ParentSource( scrollSpeedProperty ) );
       constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
-      constraint.SetApplyTime(durationSeconds);
-      constraint.SetAlphaFunction(mAlphaFunction);
+      constraint.AddSource( Source( mWeightObject, WeightObject::WEIGHT ) );
 
       actor.ApplyConstraint(constraint);
     }
@@ -248,9 +267,8 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
       constraint.AddSource( Source( scrollPositionObject, scrollPositionProperty ) );
       constraint.AddSource( ParentSource( scrollSpeedProperty ) );
       constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
+      constraint.AddSource( Source( mWeightObject, WeightObject::WEIGHT ) );
 
-      constraint.SetApplyTime(durationSeconds);
-      constraint.SetAlphaFunction(mAlphaFunction);
       constraint.SetRemoveAction(Dali::Constraint::Discard);
 
       actor.ApplyConstraint(constraint);
@@ -265,15 +283,21 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
       constraint.AddSource( Source( scrollPositionObject, scrollPositionProperty ) );
       constraint.AddSource( ParentSource( scrollSpeedProperty ) );
       constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
-
-      constraint.SetApplyTime(durationSeconds);
-      constraint.SetAlphaFunction(mAlphaFunction);
+      constraint.AddSource( Source( mWeightObject, WeightObject::WEIGHT ) );
 
       // Release visibility constraints the same time as the color constraint
       constraint.SetRemoveAction(Dali::Constraint::Discard);
 
       actor.ApplyConstraint(constraint);
     }
+
+    KeyFrames keyFrames = KeyFrames::New();
+    keyFrames.Add( 0.0f, 0.0f );
+    keyFrames.Add( 1.0f, 1.0f );
+
+    Animation applyAnimation = Dali::Animation::New( durationSeconds );
+    applyAnimation.AnimateBetween( Property( mWeightObject, WeightObject::WEIGHT ), keyFrames, mAlphaFunction, durationSeconds );
+    applyAnimation.Play();
   }
 }
 
