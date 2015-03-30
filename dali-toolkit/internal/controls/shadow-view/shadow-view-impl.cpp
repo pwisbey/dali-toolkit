@@ -169,9 +169,9 @@ void ShadowView::SetShadowPlane(Actor shadowPlane)
 
   ConstrainCamera();
 
-  mShadowPlane.SetSizeMode( SIZE_EQUAL_TO_PARENT );
+  mShadowPlane.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
 
-  mBlurRootActor.SetSizeMode( SIZE_EQUAL_TO_PARENT );
+  mBlurRootActor.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
 }
 
 void ShadowView::SetPointLight(Actor pointLight)
@@ -226,7 +226,8 @@ void ShadowView::OnInitialize()
 {
   // root actor to parent all user added actors. Used as source actor for shadow render task.
   mChildrenRoot.SetPositionInheritanceMode( Dali::USE_PARENT_POSITION );
-  mChildrenRoot.SetSizeMode( SIZE_EQUAL_TO_PARENT );
+  mChildrenRoot.SetRelayoutEnabled( true );
+  mChildrenRoot.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
 
   Vector2 stageSize = Stage::GetCurrent().GetSize();
   mCameraActor = CameraActor::New(stageSize);
@@ -262,6 +263,7 @@ void ShadowView::OnInitialize()
 
   mBlurRootActor = Actor::New();
 
+  mBlurRootActor.SetRelayoutEnabled( true );
   // Turn off inheritance to ensure filter renders properly
   mBlurRootActor.SetPositionInheritanceMode(USE_PARENT_POSITION);
   mBlurRootActor.SetInheritOrientation(false);
