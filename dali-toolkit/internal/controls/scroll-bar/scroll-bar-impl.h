@@ -21,7 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <dali/public-api/actors/image-actor.h>
-#include <dali/public-api/animation/active-constraint.h>
+#include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/object/property-notification.h>
 
@@ -258,8 +258,8 @@ private:
 
   ScrollPositionNotifiedSignalType mScrollPositionNotifiedSignal;
 
-  ActiveConstraint mIndicatorSizeConstraint;
-  ActiveConstraint mIndicatorPositionConstraint;
+  Constraint mIndicatorSizeConstraint;
+  Constraint mIndicatorPositionConstraint;
 };
 
 } // namespace Internal

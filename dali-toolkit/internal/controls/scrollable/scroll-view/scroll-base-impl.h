@@ -21,7 +21,6 @@
 // EXTERNAL INCLUDES
 // TODO - Replace list with dali-vector.h
 #include <list>
-#include <dali/public-api/animation/active-constraint.h>
 #include <dali/public-api/animation/constraint.h>
 
 // INTERNAL INCLUDES
@@ -79,8 +78,7 @@ public:
      */
     void ApplyConstraint(Constraint constraint)
     {
-      ActiveConstraint activeConstraint = mActor.ApplyConstraint( constraint );
-      mConstraints.push_back( activeConstraint );
+      mConstraints.push_back( mActor.ApplyConstraint( constraint ) );
     }
 
     /**
@@ -90,8 +88,8 @@ public:
      */
     void RemoveConstraints()
     {
-      std::vector<ActiveConstraint>::iterator it = mConstraints.begin();
-      std::vector<ActiveConstraint>::iterator end = mConstraints.end();
+      std::vector<Constraint>::iterator it = mConstraints.begin();
+      std::vector<Constraint>::iterator end = mConstraints.end();
       for(;it!=end;++it)
       {
         mActor.RemoveConstraint(*it);
@@ -100,7 +98,7 @@ public:
     }
 
     Actor mActor;                                     ///< The Actor that this ActorInfo represents.
-    std::vector<ActiveConstraint> mConstraints;       ///< A list keeping track of constraints applied to the actor via this delegate.
+    std::vector<Constraint> mConstraints;       ///< A list keeping track of constraints applied to the actor via this delegate.
   };
 
   typedef IntrusivePtr<ActorInfo> ActorInfoPtr;
