@@ -78,7 +78,9 @@ public:
      */
     void ApplyConstraint(Constraint constraint)
     {
-      mConstraints.push_back( mActor.ApplyConstraint( constraint ) );
+      Constraint clone = constraint.Clone();
+      mActor.ApplyConstraint( clone );
+      mConstraints.push_back( clone );
     }
 
     /**

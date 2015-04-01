@@ -20,7 +20,6 @@
 
 // EXTERNAL HEADERS
 #include <sstream>
-#include <dali/public-api/animation/active-constraint.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/common/stage.h>
 
@@ -392,11 +391,8 @@ Toolkit::PageTurnEffect PageTurnEffect::CreateShaderEffect( bool enableBlending 
 
   shaderImpl->mOriginalCenterPropertyIndex = handle.RegisterProperty( ORIGINAL_CENTER_PROPERTY_NAME, Vector2( defaultPageSize[0], defaultPageSize[1]*0.5f ) );
   shaderImpl->mCurrentCenterPropertyIndex = handle.RegisterProperty( CURRENT_CENTER_PROPERTY_NAME, Vector2( defaultPageSize[0], defaultPageSize[1]*0.5f ) );
-  shaderImpl->mInternalConstraint = Constraint::New<Matrix>( handle.GetPropertyIndex( "uCommonParameters" ), CommonParametersConstraint );
-  shaderImpl->mInternalConstraint.AddSource( LocalSource( shaderImpl->mOriginalCenterPropertyIndex ) );
-  shaderImpl->mInternalConstraint.AddSource( LocalSource( shaderImpl->mCurrentCenterPropertyIndex ) );
-  shaderImpl->mInternalConstraint.AddSource( LocalSource( handle.GetPropertyIndex( PAGE_SIZE_PROPERTY_NAME ) ) );
-  handle.ApplyConstraint( shaderImpl->mInternalConstraint );
+
+  shaderImpl->ApplyInternalConstraint();
 
   // setting isTurningBack to -1.0f here means turning page forward
   handle.SetUniform( IS_TURNING_BACK_PROPERTY_NAME, -1.0f );
@@ -437,7 +433,11 @@ void PageTurnEffect::SetSpineShadowParameter(const Vector2& spineShadowParameter
 
 void PageTurnEffect::ApplyInternalConstraint()
 {
-  mShaderEffect.ApplyConstraint( mInternalConstraint );
+  Constraint constraint = Constraint::New<Matrix>( mShaderEffect.GetPropertyIndex( "uCommonParameters" ), CommonParametersConstraint );
+  constraint.AddSource( LocalSource( mOriginalCenterPropertyIndex ) );
+  constraint.AddSource( LocalSource( mCurrentCenterPropertyIndex ) );
+  constraint.AddSource( LocalSource( mShaderEffect.GetPropertyIndex( PAGE_SIZE_PROPERTY_NAME ) ) );
+  mShaderEffect.ApplyConstraint( constraint );
 }
 
 const std::string& PageTurnEffect::GetPageSizePropertyName() const

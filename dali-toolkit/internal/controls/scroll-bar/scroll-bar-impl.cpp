@@ -195,8 +195,6 @@ void ScrollBar::ApplyConstraints()
 {
   if( mScrollConnector )
   {
-    Constraint constraint;
-
     if(mIndicatorSizeConstraint)
     {
       mIndicator.RemoveConstraint(mIndicatorSizeConstraint);
@@ -217,11 +215,11 @@ void ScrollBar::ApplyConstraints()
       mIndicator.RemoveConstraint(mIndicatorPositionConstraint);
     }
 
-    constraint = Constraint::New<Vector3>( Actor::Property::POSITION, IndicatorPositionConstraint( mScrollConnector.GetMinLimit(), mScrollConnector.GetMaxLimit() ) );
-    constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
-    constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
-    constraint.AddSource( Source( mScrollPositionObject, Toolkit::ScrollConnector::SCROLL_POSITION ) );
-    mIndicatorPositionConstraint = mIndicator.ApplyConstraint( constraint );
+    mIndicatorPositionConstraint = Constraint::New<Vector3>( Actor::Property::POSITION, IndicatorPositionConstraint( mScrollConnector.GetMinLimit(), mScrollConnector.GetMaxLimit() ) );
+    mIndicatorPositionConstraint.AddSource( LocalSource( Actor::Property::SIZE ) );
+    mIndicatorPositionConstraint.AddSource( ParentSource( Actor::Property::SIZE ) );
+    mIndicatorPositionConstraint.AddSource( Source( mScrollPositionObject, Toolkit::ScrollConnector::SCROLL_POSITION ) );
+    mIndicator.ApplyConstraint( mIndicatorPositionConstraint );
   }
 }
 

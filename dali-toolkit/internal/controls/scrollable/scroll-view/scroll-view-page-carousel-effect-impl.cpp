@@ -19,7 +19,6 @@
 #include <dali-toolkit/internal/controls/scrollable/scroll-view/scroll-view-page-carousel-effect-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/animation/active-constraint.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/object/property-input.h>
 

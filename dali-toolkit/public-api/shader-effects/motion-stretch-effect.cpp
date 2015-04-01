@@ -19,7 +19,6 @@
 #include <dali-toolkit/public-api/shader-effects/motion-stretch-effect.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/animation/active-constraint.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/animation/constraints.h>
 

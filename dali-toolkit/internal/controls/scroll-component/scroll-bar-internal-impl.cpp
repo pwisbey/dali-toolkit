@@ -19,7 +19,6 @@
 #include <dali-toolkit/internal/controls/scroll-component/scroll-bar-internal-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/animation/active-constraint.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/object/property-input.h>
 #include <dali/public-api/object/type-registry.h>
@@ -374,7 +373,7 @@ ScrollBarInternal::ScrollBarInternal(Toolkit::Scrollable& container, bool vertic
   constraint.AddSource( Source( target, vertical ? target.GetPropertyIndex(Scrollable::SCROLLABLE_CAN_SCROLL_VERTICAL) : target.GetPropertyIndex(Scrollable::SCROLLABLE_CAN_SCROLL_HORIZONTAL)) );
 
   mSlider.ApplyConstraint( constraint );
-  mSliderWrap.ApplyConstraint( constraint );
+  mSliderWrap.ApplyConstraint( constraint.Clone() );
 
   constraint = Constraint::New<Vector3>( Actor::Property::SIZE, ScrollBarInternalSizeConstraint( vertical ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -383,13 +382,13 @@ ScrollBarInternal::ScrollBarInternal(Toolkit::Scrollable& container, bool vertic
   constraint.AddSource( Source( target, Actor::Property::SIZE ) );
 
   mSlider.ApplyConstraint( constraint );
-  mSliderWrap.ApplyConstraint( constraint );
+  mSliderWrap.ApplyConstraint( constraint.Clone() );
 
   constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, ScrollBarInternalRotationConstraint( vertical ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
 
   mSlider.ApplyConstraint( constraint );
-  mSliderWrap.ApplyConstraint( constraint );
+  mSliderWrap.ApplyConstraint( constraint.Clone() );
 
   constraint = Constraint::New<Vector3>( Actor::Property::POSITION, ScrollBarInternalPositionConstraint(vertical) );
   constraint.AddSource( Source( mSlider, Actor::Property::SIZE) );
@@ -407,7 +406,7 @@ ScrollBarInternal::ScrollBarInternal(Toolkit::Scrollable& container, bool vertic
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MAX_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, Actor::Property::SIZE ) );
-  mSliderWrap.ApplyConstraint( constraint );
+  mSliderWrap.ApplyConstraint( constraint.Clone() );
 
   // Add Sliders to internal Actor, to avoid mixing up with regular
   // Actors added by user.
