@@ -433,11 +433,11 @@ void PageTurnEffect::SetSpineShadowParameter(const Vector2& spineShadowParameter
 
 void PageTurnEffect::ApplyInternalConstraint()
 {
-  Constraint constraint = Constraint::New<Matrix>( mShaderEffect.GetPropertyIndex( "uCommonParameters" ), CommonParametersConstraint );
+  Constraint constraint = Constraint::New<Matrix>( mShaderEffect, mShaderEffect.GetPropertyIndex( "uCommonParameters" ), CommonParametersConstraint );
   constraint.AddSource( LocalSource( mOriginalCenterPropertyIndex ) );
   constraint.AddSource( LocalSource( mCurrentCenterPropertyIndex ) );
   constraint.AddSource( LocalSource( mShaderEffect.GetPropertyIndex( PAGE_SIZE_PROPERTY_NAME ) ) );
-  mShaderEffect.ApplyConstraint( constraint );
+  constraint.Apply();
 }
 
 const std::string& PageTurnEffect::GetPageSizePropertyName() const

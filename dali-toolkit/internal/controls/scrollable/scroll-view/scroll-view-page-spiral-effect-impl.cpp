@@ -329,7 +329,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
 {
   // Apply constraints to this actor //
   Constraint constraint;
-  constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, info, &ScrollPageSpiralEffectInfo::RotationConstraint );
+  constraint = Constraint::New<Quaternion>( child, Actor::Property::ORIENTATION, info, &ScrollPageSpiralEffectInfo::RotationConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -337,9 +337,9 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_START_PAGE_POSITION_PROPERTY_NAME ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
-  child.ApplyConstraint( constraint );
+  constraint.Apply();
 
-  constraint = Constraint::New<Vector4>( Actor::Property::COLOR, info, &ScrollPageSpiralEffectInfo::ColorConstraint );
+  constraint = Constraint::New<Vector4>( child, Actor::Property::COLOR, info, &ScrollPageSpiralEffectInfo::ColorConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -347,9 +347,9 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_START_PAGE_POSITION_PROPERTY_NAME ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
-  child.ApplyConstraint( constraint );
+  constraint.Apply();
 
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, info, &ScrollPageSpiralEffectInfo::PositionConstraint );
+  constraint = Constraint::New<Vector3>( child, Actor::Property::POSITION, info, &ScrollPageSpiralEffectInfo::PositionConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -357,7 +357,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_START_PAGE_POSITION_PROPERTY_NAME ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
-  child.ApplyConstraint( constraint );
+  constraint.Apply();
 }
 
 } // unnamed namespace

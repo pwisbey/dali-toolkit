@@ -214,7 +214,7 @@ void ApplyScrollCarouselConstraints(Toolkit::ScrollView scrollView,
   // Apply constraints to this actor //
   Constraint constraint;
 
-  constraint = Constraint::New<bool>( Actor::Property::VISIBLE, info, &ScrollCarouselEffectInfo::VisibilityConstraint );
+  constraint = Constraint::New<bool>( child, Actor::Property::VISIBLE, info, &ScrollCarouselEffectInfo::VisibilityConstraint );
   constraint.AddSource( LocalSource( Actor::Property::POSITION ) );
   constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
   constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
@@ -222,9 +222,9 @@ void ApplyScrollCarouselConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
-  child.ApplyConstraint( constraint );
+  constraint.Apply();
 
-  constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, info, &ScrollCarouselEffectInfo::RotationConstraint );
+  constraint = Constraint::New<Quaternion>( child, Actor::Property::ORIENTATION, info, &ScrollCarouselEffectInfo::RotationConstraint );
   constraint.AddSource( LocalSource( Actor::Property::POSITION ) );
   constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
   constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
@@ -232,16 +232,16 @@ void ApplyScrollCarouselConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
-  child.ApplyConstraint( constraint );
+  constraint.Apply();
 
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, info, &ScrollCarouselEffectInfo::PositionConstraint );
+  constraint = Constraint::New<Vector3>( child, Actor::Property::POSITION, info, &ScrollCarouselEffectInfo::PositionConstraint );
   constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
   constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
-  child.ApplyConstraint( constraint );
+  constraint.Apply();
 }
 
 } // unnamed namespace

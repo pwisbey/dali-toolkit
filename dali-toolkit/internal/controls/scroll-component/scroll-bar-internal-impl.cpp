@@ -369,44 +369,47 @@ ScrollBarInternal::ScrollBarInternal(Toolkit::Scrollable& container, bool vertic
 
   // target the container to observe for scrolling
   Actor target = mContainer.Self();
-  Constraint constraint = Constraint::New<bool>( Actor::Property::VISIBLE, ScrollBarInternalVisibilityConstraint );
+  Constraint constraint = Constraint::New<bool>( mSlider, Actor::Property::VISIBLE, ScrollBarInternalVisibilityConstraint );
   constraint.AddSource( Source( target, vertical ? target.GetPropertyIndex(Scrollable::SCROLLABLE_CAN_SCROLL_VERTICAL) : target.GetPropertyIndex(Scrollable::SCROLLABLE_CAN_SCROLL_HORIZONTAL)) );
+  constraint.Apply();
 
-  mSlider.ApplyConstraint( constraint );
-  mSliderWrap.ApplyConstraint( constraint.Clone() );
+  constraint = constraint.CloneForObject( mSliderWrap );
+  constraint.Apply();
 
-  constraint = Constraint::New<Vector3>( Actor::Property::SIZE, ScrollBarInternalSizeConstraint( vertical ) );
+  constraint = Constraint::New<Vector3>( mSlider, Actor::Property::SIZE, ScrollBarInternalSizeConstraint( vertical ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MAX_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, Actor::Property::SIZE ) );
+  constraint.Apply();
 
-  mSlider.ApplyConstraint( constraint );
-  mSliderWrap.ApplyConstraint( constraint.Clone() );
+  constraint = constraint.CloneForObject( mSliderWrap );
+  constraint.Apply();
 
-  constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, ScrollBarInternalRotationConstraint( vertical ) );
+  constraint = Constraint::New<Quaternion>( mSlider, Actor::Property::ORIENTATION, ScrollBarInternalRotationConstraint( vertical ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
+  constraint.Apply();
 
-  mSlider.ApplyConstraint( constraint );
-  mSliderWrap.ApplyConstraint( constraint.Clone() );
+  constraint = constraint.CloneForObject( mSliderWrap );
+  constraint.Apply();
 
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, ScrollBarInternalPositionConstraint(vertical) );
+  constraint = Constraint::New<Vector3>( mSlider, Actor::Property::POSITION, ScrollBarInternalPositionConstraint(vertical) );
   constraint.AddSource( Source( mSlider, Actor::Property::SIZE) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_RELATIVE_POSITION_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MAX_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, Actor::Property::SIZE ) );
-  mSlider.ApplyConstraint( constraint );
+  constraint.Apply();
 
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, ScrollBarInternalPositionConstraint(vertical, true) );
+  constraint = Constraint::New<Vector3>( mSliderWrap, Actor::Property::POSITION, ScrollBarInternalPositionConstraint(vertical, true) );
   constraint.AddSource( Source( mSlider, Actor::Property::SIZE) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_RELATIVE_POSITION_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MAX_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, Actor::Property::SIZE ) );
-  mSliderWrap.ApplyConstraint( constraint.Clone() );
+  constraint.Apply();
 
   // Add Sliders to internal Actor, to avoid mixing up with regular
   // Actors added by user.
@@ -420,10 +423,10 @@ ScrollBarInternal::ScrollBarInternal(Toolkit::Scrollable& container, bool vertic
   mHitArea.SetPosition(0.0f, 0.0f, 0.2f);
 
   mContainer.AddOverlay( mHitArea );
-  constraint = Constraint::New<Vector3>( Actor::Property::SIZE, ScrollBarInternalHitSizeConstraint(vertical, BAR_TAB_SIZE.width) );
+  constraint = Constraint::New<Vector3>( mHitArea, Actor::Property::SIZE, ScrollBarInternalHitSizeConstraint(vertical, BAR_TAB_SIZE.width) );
   constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
   constraint.AddSource( Source( target, Actor::Property::SIZE ) );
-  mHitArea.ApplyConstraint( constraint );
+  constraint.Apply();
 
   if(vertical)
   {

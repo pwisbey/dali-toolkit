@@ -78,8 +78,8 @@ public:
      */
     void ApplyConstraint(Constraint constraint)
     {
-      Constraint clone = constraint.Clone();
-      mActor.ApplyConstraint( clone );
+      Constraint clone = constraint.CloneForObject( mActor );
+      clone.Apply();
       mConstraints.push_back( clone );
     }
 
@@ -94,7 +94,7 @@ public:
       std::vector<Constraint>::iterator end = mConstraints.end();
       for(;it!=end;++it)
       {
-        mActor.RemoveConstraint(*it);
+        it->Remove();
       }
       mConstraints.clear();
     }

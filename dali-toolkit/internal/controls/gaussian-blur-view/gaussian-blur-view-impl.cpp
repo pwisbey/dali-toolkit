@@ -287,9 +287,9 @@ void GaussianBlurView::OnInitialize()
     mImageActorComposite.ScaleBy( Vector3(1.0f, -1.0f, 1.0f) ); // FIXME
     mImageActorComposite.SetOpacity(GAUSSIAN_BLUR_VIEW_DEFAULT_BLUR_STRENGTH); // ensure alpha is enabled for this object and set default value
 
-    Constraint blurStrengthConstraint = Constraint::New<float>( Actor::Property::COLOR_ALPHA, EqualToConstraint());
+    Constraint blurStrengthConstraint = Constraint::New<float>( mImageActorComposite, Actor::Property::COLOR_ALPHA, EqualToConstraint());
     blurStrengthConstraint.AddSource( ParentSource(mBlurStrengthPropertyIndex) );
-    mImageActorComposite.ApplyConstraint(blurStrengthConstraint);
+    blurStrengthConstraint.Apply();
 
     // Create an ImageActor for holding final result, i.e. the blurred image. This will get rendered to screen later, via default / user render task
     mTargetActor = ImageActor::New();

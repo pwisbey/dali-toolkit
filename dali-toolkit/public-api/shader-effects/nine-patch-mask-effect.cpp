@@ -93,9 +93,9 @@ static void DoApply( ImageActor actor, const std::string& maskImage, const Vecto
 
   maskEffect.SetUniform( "uImageSize", Vector2(0,0) /*Constrained to actor size*/ );
 
-  Constraint constraint = Constraint::New<Vector2>( maskEffect.GetPropertyIndex("uImageSize"), NinePatchMaskEffectSizeConstraint );
+  Constraint constraint = Constraint::New<Vector2>( maskEffect, maskEffect.GetPropertyIndex("uImageSize"), NinePatchMaskEffectSizeConstraint );
   constraint.AddSource( Source(actor, Actor::Property::SIZE) );
-  maskEffect.ApplyConstraint( constraint );
+  constraint.Apply();
 
   maskEffect.SetUniform( "uMaskSize", maskSize );
 

@@ -151,9 +151,9 @@ void SuperBlurView::OnInitialize()
 
   for(unsigned int i=0; i < mBlurLevels; i++)
   {
-    Constraint constraint = Constraint::New<float>( Actor::Property::COLOR_ALPHA, ActorOpacityConstraint(mBlurLevels, i) );
+    Constraint constraint = Constraint::New<float>( mImageActors[i], Actor::Property::COLOR_ALPHA, ActorOpacityConstraint(mBlurLevels, i) );
     constraint.AddSource( ParentSource( mBlurStrengthPropertyIndex ) );
-    mImageActors[i].ApplyConstraint( constraint );
+    constraint.Apply();
   }
 
   Self().SetSize(Stage::GetCurrent().GetSize());

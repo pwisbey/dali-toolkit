@@ -195,11 +195,6 @@ void ScrollBar::ApplyConstraints()
 {
   if( mScrollConnector )
   {
-    if(mIndicatorSizeConstraint)
-    {
-      mIndicator.RemoveConstraint(mIndicatorSizeConstraint);
-    }
-
     // Set indicator height according to the indicator's height policy
     if(mIndicatorHeightPolicy == Toolkit::ScrollBar::Fixed)
     {
@@ -212,14 +207,14 @@ void ScrollBar::ApplyConstraints()
 
     if(mIndicatorPositionConstraint)
     {
-      mIndicator.RemoveConstraint(mIndicatorPositionConstraint);
+      mIndicatorPositionConstraint.Remove();
     }
 
-    mIndicatorPositionConstraint = Constraint::New<Vector3>( Actor::Property::POSITION, IndicatorPositionConstraint( mScrollConnector.GetMinLimit(), mScrollConnector.GetMaxLimit() ) );
+    mIndicatorPositionConstraint = Constraint::New<Vector3>( mIndicator, Actor::Property::POSITION, IndicatorPositionConstraint( mScrollConnector.GetMinLimit(), mScrollConnector.GetMaxLimit() ) );
     mIndicatorPositionConstraint.AddSource( LocalSource( Actor::Property::SIZE ) );
     mIndicatorPositionConstraint.AddSource( ParentSource( Actor::Property::SIZE ) );
     mIndicatorPositionConstraint.AddSource( Source( mScrollPositionObject, Toolkit::ScrollConnector::SCROLL_POSITION ) );
-    mIndicator.ApplyConstraint( mIndicatorPositionConstraint );
+    mIndicatorPositionConstraint.Apply();
   }
 }
 

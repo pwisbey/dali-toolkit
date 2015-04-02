@@ -324,7 +324,7 @@ void ApplyScrollDepthConstraints(Toolkit::ScrollView scrollView,
                                  float scaleExtent)
 {
   // Scale Constraint
-  Constraint constraint = Constraint::New<Vector3>( Actor::Property::SCALE, ScrollDepthScaleConstraint( positionExtent, offsetExtent, positionScale, scaleExtent ) );
+  Constraint constraint = Constraint::New<Vector3>( child, Actor::Property::SCALE, ScrollDepthScaleConstraint( positionExtent, offsetExtent, positionScale, scaleExtent ) );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( ParentSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
@@ -332,10 +332,10 @@ void ApplyScrollDepthConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MAX_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
   constraint.SetRemoveAction( Constraint::Discard );
-  child.ApplyConstraint( constraint );
+  constraint.Apply();
 
   // Position Constraint (apply last as other constraints use Actor::POSITION as a function input)
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, ScrollDepthPositionConstraint( positionExtent, offsetExtent, positionScale ) );
+  constraint = Constraint::New<Vector3>( child, Actor::Property::POSITION, ScrollDepthPositionConstraint( positionExtent, offsetExtent, positionScale ) );
   constraint.AddSource( ParentSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -343,7 +343,7 @@ void ApplyScrollDepthConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_WRAP_PROPERTY_NAME ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
-  child.ApplyConstraint( constraint );
+  constraint.Apply();
 }
 
 } // unnamed namespace

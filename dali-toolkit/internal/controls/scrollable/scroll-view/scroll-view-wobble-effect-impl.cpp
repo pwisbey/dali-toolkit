@@ -237,12 +237,12 @@ void ScrollViewWobbleEffect::AttachActor(Actor actor)
 
   Actor scrollView = GetScrollView();
 
-  Constraint constraint = Constraint::New<Vector3>( propertyEffectOvershoot, ScrollViewWobbleEffectConstraint(*this) );
+  Constraint constraint = Constraint::New<Vector3>( actor, propertyEffectOvershoot, ScrollViewWobbleEffectConstraint(*this) );
   constraint.AddSource( Source(scrollView, mPropertyTime) );
   constraint.AddSource( Source(actor, propertyPosition) );
   constraint.AddSource( Source(actor, propertyOvershootX) );
   constraint.AddSource( Source(actor, propertyOvershootY) );
-  actor.ApplyConstraint(constraint);
+  constraint.Apply();
 }
 
 void ScrollViewWobbleEffect::DetachActor(Actor actor)

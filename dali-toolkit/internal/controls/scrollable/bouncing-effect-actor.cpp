@@ -105,13 +105,13 @@ Actor CreateBouncingEffectActor( Property::Index& bouncePropertyIndex )
   for( size_t i=0;i<NUM_LAYERS;i++ )
   {
     size_t j=i*4;
-    Constraint constraint = Constraint::New<Vector3>( mesh.GetPropertyIndex(j+2, AnimatableVertex::Property::POSITION ), VertexPositionConstraint(-0.5f, LAYER_HEIGHTS[i]) );
+    Constraint constraint = Constraint::New<Vector3>( mesh, mesh.GetPropertyIndex(j+2, AnimatableVertex::Property::POSITION ), VertexPositionConstraint(-0.5f, LAYER_HEIGHTS[i]) );
     constraint.AddSource( Source(meshActor, bouncePropertyIndex) );
-    mesh.ApplyConstraint( constraint );
+    constraint.Apply();
 
-    constraint = Constraint::New<Vector3>( mesh.GetPropertyIndex(j+3,  AnimatableVertex::Property::POSITION), VertexPositionConstraint(-0.5f, LAYER_HEIGHTS[i]) );
+    constraint = Constraint::New<Vector3>( mesh, mesh.GetPropertyIndex(j+3,  AnimatableVertex::Property::POSITION), VertexPositionConstraint(-0.5f, LAYER_HEIGHTS[i]) );
     constraint.AddSource( Source(meshActor, bouncePropertyIndex) );
-    mesh.ApplyConstraint( constraint );
+    constraint.Apply();
   }
 
   return meshActor;

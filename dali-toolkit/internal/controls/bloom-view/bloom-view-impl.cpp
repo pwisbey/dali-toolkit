@@ -489,15 +489,15 @@ void BloomView::SetupProperties()
   // Register a property that the user can control to change the bloom threshold
   mBloomThresholdPropertyIndex = self.RegisterProperty(BLOOM_THRESHOLD_PROPERTY_NAME, BLOOM_THRESHOLD_DEFAULT);
   Property::Index shaderBloomThresholdPropertyIndex = mBloomExtractShader.GetPropertyIndex(BLOOM_THRESHOLD_PROPERTY_NAME);
-  Constraint bloomThresholdConstraint = Constraint::New<float>(shaderBloomThresholdPropertyIndex, EqualToConstraint());
+  Constraint bloomThresholdConstraint = Constraint::New<float>( mBloomExtractShader, shaderBloomThresholdPropertyIndex, EqualToConstraint());
   bloomThresholdConstraint.AddSource( Source(self, mBloomThresholdPropertyIndex) );
-  mBloomExtractShader.ApplyConstraint(bloomThresholdConstraint);
+  bloomThresholdConstraint.Apply();
 
   // precalc 1.0 / (1.0 - threshold) on CPU to save shader insns, using constraint to tie to the normal threshold property
   Property::Index shaderRecipOneMinusBloomThresholdPropertyIndex = mBloomExtractShader.GetPropertyIndex(RECIP_ONE_MINUS_BLOOM_THRESHOLD_PROPERTY_NAME);
-  Constraint thresholdConstraint = Constraint::New<float>( shaderRecipOneMinusBloomThresholdPropertyIndex, RecipOneMinusConstraint());
+  Constraint thresholdConstraint = Constraint::New<float>( mBloomExtractShader, shaderRecipOneMinusBloomThresholdPropertyIndex, RecipOneMinusConstraint());
   thresholdConstraint.AddSource( LocalSource(shaderBloomThresholdPropertyIndex) );
-  mBloomExtractShader.ApplyConstraint(thresholdConstraint);
+  thresholdConstraint.Apply();
 
 
   ////////////////////////////////////////////
@@ -505,9 +505,9 @@ void BloomView::SetupProperties()
 
   // Register a property that the user can control to fade the blur in / out via internal GaussianBlurView object
   mBlurStrengthPropertyIndex = self.RegisterProperty(BLOOM_BLUR_STRENGTH_PROPERTY_NAME, BLOOM_BLUR_STRENGTH_DEFAULT);
-  Constraint blurStrengthConstraint = Constraint::New<float>( mGaussianBlurView.GetBlurStrengthPropertyIndex(), EqualToConstraint());
+  Constraint blurStrengthConstraint = Constraint::New<float>( mGaussianBlurView, mGaussianBlurView.GetBlurStrengthPropertyIndex(), EqualToConstraint());
   blurStrengthConstraint.AddSource( Source(self, mBlurStrengthPropertyIndex) );
-  mGaussianBlurView.ApplyConstraint(blurStrengthConstraint);
+  blurStrengthConstraint.Apply();
 
 
   ////////////////////////////////////////////
@@ -517,9 +517,9 @@ void BloomView::SetupProperties()
   mBloomIntensityPropertyIndex = self.RegisterProperty(BLOOM_INTENSITY_PROPERTY_NAME, BLOOM_INTENSITY_DEFAULT);
   mCompositeShader.SetUniform( BLOOM_INTENSITY_PROPERTY_NAME, BLOOM_INTENSITY_DEFAULT );
   Property::Index shaderBloomIntensityPropertyIndex = mCompositeShader.GetPropertyIndex(BLOOM_INTENSITY_PROPERTY_NAME);
-  Constraint bloomIntensityConstraint = Constraint::New<float>( shaderBloomIntensityPropertyIndex, EqualToConstraint());
+  Constraint bloomIntensityConstraint = Constraint::New<float>( mCompositeShader, shaderBloomIntensityPropertyIndex, EqualToConstraint());
   bloomIntensityConstraint.AddSource( Source(self, mBloomIntensityPropertyIndex) );
-  mCompositeShader.ApplyConstraint(bloomIntensityConstraint);
+  bloomIntensityConstraint.Apply();
 
 
   ////////////////////////////////////////////
@@ -529,9 +529,9 @@ void BloomView::SetupProperties()
   mBloomSaturationPropertyIndex = self.RegisterProperty(BLOOM_SATURATION_PROPERTY_NAME, BLOOM_SATURATION_DEFAULT);
   mCompositeShader.SetUniform( BLOOM_SATURATION_PROPERTY_NAME, BLOOM_SATURATION_DEFAULT );
   Property::Index shaderBloomSaturationPropertyIndex = mCompositeShader.GetPropertyIndex(BLOOM_SATURATION_PROPERTY_NAME);
-  Constraint bloomSaturationConstraint = Constraint::New<float>( shaderBloomSaturationPropertyIndex, EqualToConstraint());
+  Constraint bloomSaturationConstraint = Constraint::New<float>( mCompositeShader, shaderBloomSaturationPropertyIndex, EqualToConstraint());
   bloomSaturationConstraint.AddSource( Source(self, mBloomSaturationPropertyIndex) );
-  mCompositeShader.ApplyConstraint(bloomSaturationConstraint);
+  bloomSaturationConstraint.Apply();
 
 
   ////////////////////////////////////////////
@@ -541,9 +541,9 @@ void BloomView::SetupProperties()
   mImageIntensityPropertyIndex = self.RegisterProperty(IMAGE_INTENSITY_PROPERTY_NAME, IMAGE_INTENSITY_DEFAULT);
   mCompositeShader.SetUniform( IMAGE_INTENSITY_PROPERTY_NAME, IMAGE_INTENSITY_DEFAULT );
   Property::Index shaderImageIntensityPropertyIndex = mCompositeShader.GetPropertyIndex(IMAGE_INTENSITY_PROPERTY_NAME);
-  Constraint imageIntensityConstraint = Constraint::New<float>( shaderImageIntensityPropertyIndex, EqualToConstraint());
+  Constraint imageIntensityConstraint = Constraint::New<float>( mCompositeShader, shaderImageIntensityPropertyIndex, EqualToConstraint());
   imageIntensityConstraint.AddSource( Source(self, mImageIntensityPropertyIndex) );
-  mCompositeShader.ApplyConstraint(imageIntensityConstraint);
+  imageIntensityConstraint.Apply();
 
 
   ////////////////////////////////////////////
@@ -553,9 +553,9 @@ void BloomView::SetupProperties()
   mImageSaturationPropertyIndex = self.RegisterProperty(IMAGE_SATURATION_PROPERTY_NAME, IMAGE_SATURATION_DEFAULT);
   mCompositeShader.SetUniform( IMAGE_SATURATION_PROPERTY_NAME, IMAGE_SATURATION_DEFAULT );
   Property::Index shaderImageSaturationPropertyIndex = mCompositeShader.GetPropertyIndex(IMAGE_SATURATION_PROPERTY_NAME);
-  Constraint imageSaturationConstraint = Constraint::New<float>( shaderImageSaturationPropertyIndex, EqualToConstraint());
+  Constraint imageSaturationConstraint = Constraint::New<float>( mCompositeShader, shaderImageSaturationPropertyIndex, EqualToConstraint());
   imageSaturationConstraint.AddSource( Source(self, mImageSaturationPropertyIndex) );
-  mCompositeShader.ApplyConstraint(imageSaturationConstraint);
+  imageSaturationConstraint.Apply();
 }
 
 } // namespace Internal

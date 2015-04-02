@@ -221,12 +221,12 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
     if (GetPositionConstraint(itemId, positionConstraint))
     {
       WrappedVector3Constraint wrapped(positionConstraint, itemId);
-      Constraint constraint = Constraint::New<Vector3>( Actor::Property::POSITION, wrapped );
+      Constraint constraint = Constraint::New<Vector3>( actor, Actor::Property::POSITION, wrapped );
       constraint.AddSource( Source( scrollPositionObject, scrollPositionProperty ) );
       constraint.AddSource( ParentSource( scrollSpeedProperty ) );
       constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
       constraint.AddSource( Source( mWeightObject, WeightObject::WEIGHT ) );
-      actor.ApplyConstraint(constraint);
+      constraint.Apply();
     }
 
     ItemLayout::QuaternionFunction rotationConstraint;
@@ -234,13 +234,12 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
     {
       WrappedQuaternionConstraint wrapped(rotationConstraint, itemId);
 
-      Constraint constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, wrapped );
+      Constraint constraint = Constraint::New<Quaternion>( actor, Actor::Property::ORIENTATION, wrapped );
       constraint.AddSource( Source( scrollPositionObject, scrollPositionProperty ) );
       constraint.AddSource( ParentSource( scrollSpeedProperty ) );
       constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
       constraint.AddSource( Source( mWeightObject, WeightObject::WEIGHT ) );
-
-      actor.ApplyConstraint(constraint);
+      constraint.Apply();
     }
 
     ItemLayout::Vector3Function scaleConstraint;
@@ -248,13 +247,12 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
     {
       WrappedVector3Constraint wrapped(scaleConstraint, itemId);
 
-      Constraint constraint = Constraint::New<Vector3>( Actor::Property::SCALE, wrapped );
+      Constraint constraint = Constraint::New<Vector3>( actor, Actor::Property::SCALE, wrapped );
       constraint.AddSource( Source( scrollPositionObject, scrollPositionProperty ) );
       constraint.AddSource( ParentSource( scrollSpeedProperty ) );
       constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
       constraint.AddSource( Source( mWeightObject, WeightObject::WEIGHT ) );
-
-      actor.ApplyConstraint(constraint);
+      constraint.Apply();
     }
 
     ItemLayout::Vector4Function colorConstraint;
@@ -262,15 +260,13 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
     {
       WrappedVector4Constraint wrapped(colorConstraint, itemId);
 
-      Constraint constraint = Constraint::New<Vector4>( Actor::Property::COLOR, wrapped );
+      Constraint constraint = Constraint::New<Vector4>( actor, Actor::Property::COLOR, wrapped );
       constraint.AddSource( Source( scrollPositionObject, scrollPositionProperty ) );
       constraint.AddSource( ParentSource( scrollSpeedProperty ) );
       constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
       constraint.AddSource( Source( mWeightObject, WeightObject::WEIGHT ) );
-
       constraint.SetRemoveAction(Dali::Constraint::Discard);
-
-      actor.ApplyConstraint(constraint);
+      constraint.Apply();
     }
 
     ItemLayout::BoolFunction visibilityConstraint;
@@ -278,7 +274,7 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
     {
       WrappedBoolConstraint wrapped(visibilityConstraint, itemId);
 
-      Constraint constraint = Constraint::New<bool>( Actor::Property::VISIBLE, wrapped );
+      Constraint constraint = Constraint::New<bool>( actor, Actor::Property::VISIBLE, wrapped );
       constraint.AddSource( Source( scrollPositionObject, scrollPositionProperty ) );
       constraint.AddSource( ParentSource( scrollSpeedProperty ) );
       constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
@@ -287,7 +283,7 @@ void ItemLayout::ApplyConstraints( Actor& actor, const int itemId, const float d
       // Release visibility constraints the same time as the color constraint
       constraint.SetRemoveAction(Dali::Constraint::Discard);
 
-      actor.ApplyConstraint(constraint);
+      constraint.Apply();
     }
 
     KeyFrames keyFrames = KeyFrames::New();

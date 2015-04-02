@@ -258,7 +258,6 @@ private:
 
   ScrollPositionNotifiedSignalType mScrollPositionNotifiedSignal;
 
-  Constraint mIndicatorSizeConstraint;
   Constraint mIndicatorPositionConstraint;
 };
 

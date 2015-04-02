@@ -178,7 +178,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
 {
   // Apply constraints to this actor //
   Constraint constraint;
-  constraint = Constraint::New<Vector4>( Actor::Property::COLOR, info, &ScrollPageCarouselEffectInfo::ColorConstraint );
+  constraint = Constraint::New<Vector4>( child, Actor::Property::COLOR, info, &ScrollPageCarouselEffectInfo::ColorConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -186,9 +186,9 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_WRAP_PROPERTY_NAME ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
-  child.ApplyConstraint( constraint );
+  constraint.Apply();
 
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, info, &ScrollPageCarouselEffectInfo::PositionConstraint );
+  constraint = Constraint::New<Vector3>( child, Actor::Property::POSITION, info, &ScrollPageCarouselEffectInfo::PositionConstraint );
   constraint.AddSource( LocalSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_FINAL_PROPERTY_NAME ) ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
@@ -196,7 +196,7 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_WRAP_PROPERTY_NAME ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
-  child.ApplyConstraint( constraint );
+  constraint.Apply();
 }
 
 } // unnamed namespace

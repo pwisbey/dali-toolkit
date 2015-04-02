@@ -160,9 +160,9 @@ void Magnifier::Initialize()
   mSourceActor = Actor::New();
   Stage().GetCurrent().Add(mSourceActor);
   mSourceActor.SetParentOrigin(ParentOrigin::CENTER);
-  Constraint constraint = Constraint::New<Vector3>( Actor::Property::POSITION, EqualToConstraint() );
+  Constraint constraint = Constraint::New<Vector3>( mSourceActor, Actor::Property::POSITION, EqualToConstraint() );
   constraint.AddSource( Source( self, mPropertySourcePosition ) );
-  mSourceActor.ApplyConstraint(constraint);
+  constraint.Apply();
 
   // create the render task this will render content on top of everything
   // based on camera source position.
@@ -191,22 +191,22 @@ void Magnifier::Initialize()
   // at the end of the update cycle i.e. after constraints have been applied.)
   //Property::Index propertySourcePositionDelayed = mCameraActor.RegisterProperty("delayed-source-position", Vector3::ZERO);
 
-  constraint = Constraint::New<Vector3>( Actor::Property::POSITION, CameraActorPositionConstraint(stageSize, mDefaultCameraDistance) );
+  constraint = Constraint::New<Vector3>( mCameraActor, Actor::Property::POSITION, CameraActorPositionConstraint(stageSize, mDefaultCameraDistance) );
   constraint.AddSource( Source( mSourceActor, Actor::Property::WORLD_POSITION ) );
-  mCameraActor.ApplyConstraint(constraint);
+  constraint.Apply();
 
   // Apply constraint to render-task viewport position
-  constraint = Constraint::New<Vector2>( RenderTask::Property::VIEWPORT_POSITION, RenderTaskViewportPositionConstraint(stageSize) );
+  constraint = Constraint::New<Vector2>( mTask, RenderTask::Property::VIEWPORT_POSITION, RenderTaskViewportPositionConstraint(stageSize) );
   constraint.AddSource( Source( self, Actor::Property::WORLD_POSITION ) );
   constraint.AddSource( Source( self, Actor::Property::SIZE ) );
   constraint.AddSource( Source( self, Actor::Property::WORLD_SCALE ) );
-  mTask.ApplyConstraint(constraint);
+  constraint.Apply();
 
   // Apply constraint to render-task viewport position
-  constraint = Constraint::New<Vector2>( RenderTask::Property::VIEWPORT_SIZE, RenderTaskViewportSizeConstraint() );
+  constraint = Constraint::New<Vector2>( mTask, RenderTask::Property::VIEWPORT_SIZE, RenderTaskViewportSizeConstraint() );
   constraint.AddSource( Source( self, Actor::Property::SIZE ) );
   constraint.AddSource( Source( self, Actor::Property::WORLD_SCALE ) );
-  mTask.ApplyConstraint(constraint);
+  constraint.Apply();
 }
 
 Magnifier::~Magnifier()
@@ -253,9 +253,9 @@ void Magnifier::SetFrameVisibility(bool visible)
     mFrame.SetPositionInheritanceMode(DONT_INHERIT_POSITION);
     mFrame.SetInheritScale(true);
 
-    Constraint constraint = Constraint::New<Vector3>( Actor::Property::POSITION, EqualToConstraint() );
+    Constraint constraint = Constraint::New<Vector3>( mFrame, Actor::Property::POSITION, EqualToConstraint() );
     constraint.AddSource( ParentSource( Actor::Property::WORLD_POSITION ) );
-    mFrame.ApplyConstraint( constraint );
+    constraint.Apply();
 
     mFrame.SetNinePatchBorder( Vector4::ONE * IMAGE_BORDER_INDENT );
     self.Add(mFrame);
