@@ -2625,7 +2625,7 @@ void ScrollView::UpdateMainInternalConstraint()
   mScrollMainInternalDeltaConstraint.AddSource( LocalSource( Toolkit::ScrollView::Property::SCROLL_DOMAIN_OFFSET ) );
   mScrollMainInternalDeltaConstraint.Apply();
 
-  mScrollMainInternalFinalConstraint = Constraint::New<Vector3>( self, Toolkit::ScrollView::Property::SCROLL_FINAL,,
+  mScrollMainInternalFinalConstraint = Constraint::New<Vector3>( self, Toolkit::ScrollView::Property::SCROLL_FINAL,
                                                                  InternalFinalConstraint( FinalDefaultAlphaFunction,
                                                                                           FinalDefaultAlphaFunction ) );
   mScrollMainInternalFinalConstraint .AddSource( LocalSource( Toolkit::ScrollView::Property::SCROLL_POSITION ) );

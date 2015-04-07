@@ -328,8 +328,8 @@ void ApplyScrollDepthConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( LocalSource( Actor::Property::POSITION ) );
   constraint.AddSource( ParentSource( Actor::Property::POSITION ) );
   constraint.AddSource( Source( scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION ) );
-  constraint.AddSource( Source( scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION_MIN ) );
-  constraint.AddSource( Source( scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION_MAX ) );
+  constraint.AddSource( Source( scrollView, Toolkit::Scrollable::Property::SCROLL_POSITION_MIN ) );
+  constraint.AddSource( Source( scrollView, Toolkit::Scrollable::Property::SCROLL_POSITION_MAX ) );
   constraint.AddSource( Source( scrollView, Actor::Property::SIZE ) );
   constraint.SetRemoveAction( Constraint::Discard );
   constraint.Apply();
@@ -338,10 +338,10 @@ void ApplyScrollDepthConstraints(Toolkit::ScrollView scrollView,
   constraint = Constraint::New<Vector3>( child, Actor::Property::POSITION, ScrollDepthPositionConstraint( positionExtent, offsetExtent, positionScale ) );
   constraint.AddSource( ParentSource(Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION_MIN ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION_MAX ) );
+  constraint.AddSource( Source(scrollView, Toolkit::Scrollable::Property::SCROLL_POSITION_MIN ) );
+  constraint.AddSource( Source(scrollView, Toolkit::Scrollable::Property::SCROLL_POSITION_MAX ) );
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_WRAP ) );
+  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::WRAP ) );
   constraint.SetRemoveAction( Constraint::Discard );
   constraint.Apply();
 }

@@ -139,10 +139,11 @@ void SetupBackgroundActor( Actor actor, Property::Index constrainingIndex, const
   actor.SetZ( BACKGROUND_ACTOR_Z_POSITION );
   actor.SetRelayoutEnabled( false );
 
-  Constraint constraint = Constraint::New<Vector3>( constrainingIndex,
-                                                    ParentSource( Actor::Property::SIZE ),
+  Constraint constraint = Constraint::New<Vector3>( actor,
+                                                    constrainingIndex,
                                                     EqualToConstraint() );
-  actor.ApplyConstraint( constraint );
+  constraint.AddSource( ParentSource( Actor::Property::SIZE ) );
+  constraint.Apply();
 }
 
 } // unnamed namespace

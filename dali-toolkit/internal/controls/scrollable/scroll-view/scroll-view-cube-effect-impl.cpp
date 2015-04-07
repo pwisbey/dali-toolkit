@@ -287,30 +287,30 @@ void ApplyScrollCubeConstraints(Toolkit::ScrollView scrollView,
   constraint = Constraint::New<Quaternion>( child, Actor::Property::ORIENTATION, info, &ScrollCubeEffectInfo::RotationConstraint );
   constraint.AddSource( Source(parentPage, Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_FINAL ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION_MIN ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION_MAX ) );
+  constraint.AddSource( Source(scrollView, Toolkit::Scrollable::Property::SCROLL_POSITION_MIN ) );
+  constraint.AddSource( Source(scrollView, Toolkit::Scrollable::Property::SCROLL_POSITION_MAX ) );
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_WRAP ) );
+  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::WRAP ) );
   constraint.SetRemoveAction( Constraint::Discard );
   constraint.Apply();
 
   constraint = Constraint::New<Vector4>( child, Actor::Property::COLOR, info, &ScrollCubeEffectInfo::ColorConstraint );
   constraint.AddSource( Source(parentPage, Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_FINAL ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION_MIN ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION_MAX ) );
+  constraint.AddSource( Source(scrollView, Toolkit::Scrollable::Property::SCROLL_POSITION_MIN ) );
+  constraint.AddSource( Source(scrollView, Toolkit::Scrollable::Property::SCROLL_POSITION_MAX ) );
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_WRAP ) );
+  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::WRAP ) );
   constraint.SetRemoveAction( Constraint::Discard );
   constraint.Apply();
 
   constraint = Constraint::New<Vector3>( child, Actor::Property::POSITION, info, &ScrollCubeEffectInfo::PositionConstraint );
   constraint.AddSource( Source(parentPage, Actor::Property::POSITION) );
   constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_FINAL ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION_MIN ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION_MAX ) );
+  constraint.AddSource( Source(scrollView, Toolkit::Scrollable::Property::SCROLL_POSITION_MIN ) );
+  constraint.AddSource( Source(scrollView, Toolkit::Scrollable::Property::SCROLL_POSITION_MAX ) );
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
-  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_WRAP ) );
+  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::WRAP ) );
   constraint.SetRemoveAction( Constraint::Discard );
   constraint.Apply();
 }
