@@ -82,7 +82,7 @@ public:
    *                    The Actor's Position
    *                    The Actor's Scale
    *                    The Actor's Size
-   *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
+   *                    The scroll-view's position property (SCROLL_POSITION)
    *                    The size of the scroll-view (scrollView SIZE)
    * @return The new visibility of this Actor.
    */
@@ -109,7 +109,7 @@ public:
    *                    The Actor's Position.
    *                    The Actor's Scale.
    *                    The Actor's Size
-   *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
+   *                    The scroll-view's position property (SCROLL_POSITION)
    *                    The size of the scroll-view (scrollView SIZE)
    *                    Activation value (0 - normal, 1.0 - full effect)
    * @return The new orientation of this Actor.
@@ -154,7 +154,7 @@ public:
    * @param[in] inputs Contains:
    *                    The Actor's Scale.
    *                    The Actor's Size
-   *                    The scroll-view's position property (SCROLL_POSITION_PROPERTY_NAME)
+   *                    The scroll-view's position property (SCROLL_POSITION)
    *                    The size of the scroll-view (scrollView SIZE)
    *                    Activation value (0 - normal, 1.0 - full effect)
    * @return The new position of this Actor.
@@ -218,9 +218,9 @@ void ApplyScrollCarouselConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( LocalSource( Actor::Property::POSITION ) );
   constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
   constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
-  constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
-  constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
-  constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ) );
+  constraint.AddSource( Source( scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION ) );
+  constraint.AddSource( Source( scrollView, Actor::Property::SIZE ) );
+  constraint.AddSource( Source( scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
   constraint.Apply();
 
@@ -228,16 +228,16 @@ void ApplyScrollCarouselConstraints(Toolkit::ScrollView scrollView,
   constraint.AddSource( LocalSource( Actor::Property::POSITION ) );
   constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
   constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
-  constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
-  constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
-  constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ) );
+  constraint.AddSource( Source( scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION ) );
+  constraint.AddSource( Source( scrollView, Actor::Property::SIZE ) );
+  constraint.AddSource( Source( scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ) );
   constraint.SetRemoveAction( Constraint::Discard );
   constraint.Apply();
 
   constraint = Constraint::New<Vector3>( child, Actor::Property::POSITION, info, &ScrollCarouselEffectInfo::PositionConstraint );
   constraint.AddSource( LocalSource( Actor::Property::SCALE ) );
   constraint.AddSource( LocalSource( Actor::Property::SIZE ) );
-  constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
+  constraint.AddSource( Source(scrollView, Toolkit::ScrollView::Property::SCROLL_POSITION ) );
   constraint.AddSource( Source(scrollView, Actor::Property::SIZE ) );
   constraint.AddSource( Source(scrollView, scrollView.GetPropertyIndex( Toolkit::ScrollViewCarouselEffect::EFFECT_ACTIVATE ) ) );
   constraint.SetRemoveAction( Constraint::Discard );

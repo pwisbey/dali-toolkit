@@ -370,16 +370,16 @@ ScrollBarInternal::ScrollBarInternal(Toolkit::Scrollable& container, bool vertic
   // target the container to observe for scrolling
   Actor target = mContainer.Self();
   Constraint constraint = Constraint::New<bool>( mSlider, Actor::Property::VISIBLE, ScrollBarInternalVisibilityConstraint );
-  constraint.AddSource( Source( target, vertical ? target.GetPropertyIndex(Scrollable::SCROLLABLE_CAN_SCROLL_VERTICAL) : target.GetPropertyIndex(Scrollable::SCROLLABLE_CAN_SCROLL_HORIZONTAL)) );
+  constraint.AddSource( Source( target, vertical ? Toolkit::Scrollable::Property::CAN_SCROLL_VERTICAL : Toolkit::Scrollable::Property::CAN_SCROLL_HORIZONTAL ) );
   constraint.Apply();
 
   constraint = constraint.CloneForObject( mSliderWrap );
   constraint.Apply();
 
   constraint = Constraint::New<Vector3>( mSlider, Actor::Property::SIZE, ScrollBarInternalSizeConstraint( vertical ) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MAX_PROPERTY_NAME ) ) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_POSITION_MIN ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_POSITION_MAX ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_DIRECTION ) );
   constraint.AddSource( Source( target, Actor::Property::SIZE ) );
   constraint.Apply();
 
@@ -387,7 +387,7 @@ ScrollBarInternal::ScrollBarInternal(Toolkit::Scrollable& container, bool vertic
   constraint.Apply();
 
   constraint = Constraint::New<Quaternion>( mSlider, Actor::Property::ORIENTATION, ScrollBarInternalRotationConstraint( vertical ) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_DIRECTION ) );
   constraint.Apply();
 
   constraint = constraint.CloneForObject( mSliderWrap );
@@ -395,19 +395,19 @@ ScrollBarInternal::ScrollBarInternal(Toolkit::Scrollable& container, bool vertic
 
   constraint = Constraint::New<Vector3>( mSlider, Actor::Property::POSITION, ScrollBarInternalPositionConstraint(vertical) );
   constraint.AddSource( Source( mSlider, Actor::Property::SIZE) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_RELATIVE_POSITION_PROPERTY_NAME ) ) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MAX_PROPERTY_NAME ) ) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_RELATIVE_POSITION ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_POSITION_MIN ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_POSITION_MAX ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_DIRECTION ) );
   constraint.AddSource( Source( target, Actor::Property::SIZE ) );
   constraint.Apply();
 
   constraint = Constraint::New<Vector3>( mSliderWrap, Actor::Property::POSITION, ScrollBarInternalPositionConstraint(vertical, true) );
   constraint.AddSource( Source( mSlider, Actor::Property::SIZE) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_RELATIVE_POSITION_PROPERTY_NAME ) ) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MIN_PROPERTY_NAME ) ) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_POSITION_MAX_PROPERTY_NAME ) ) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_RELATIVE_POSITION ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_POSITION_MIN ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_POSITION_MAX ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_DIRECTION ) );
   constraint.AddSource( Source( target, Actor::Property::SIZE ) );
   constraint.Apply();
 
@@ -424,7 +424,7 @@ ScrollBarInternal::ScrollBarInternal(Toolkit::Scrollable& container, bool vertic
 
   mContainer.AddOverlay( mHitArea );
   constraint = Constraint::New<Vector3>( mHitArea, Actor::Property::SIZE, ScrollBarInternalHitSizeConstraint(vertical, BAR_TAB_SIZE.width) );
-  constraint.AddSource( Source( target, target.GetPropertyIndex( Toolkit::Scrollable::SCROLL_DIRECTION_PROPERTY_NAME ) ) );
+  constraint.AddSource( Source( target, Toolkit::Scrollable::Property::SCROLL_DIRECTION ) );
   constraint.AddSource( Source( target, Actor::Property::SIZE ) );
   constraint.Apply();
 
@@ -534,8 +534,8 @@ void ScrollBarInternal::Show()
   }
 
   mAnimation = Animation::New( BAR_SHOW_TIME );
-  mAnimation.OpacityTo( mSlider, 1.0f, AlphaFunctions::EaseIn );
-  mAnimation.OpacityTo( mSliderWrap, 1.0f, AlphaFunctions::EaseIn );
+  mAnimation.AnimateTo( Property( mSlider, Actor::Property::COLOR_ALPHA ), 1.0f, AlphaFunctions::EaseIn );
+  mAnimation.AnimateTo( Property( mSliderWrap, Actor::Property::COLOR_ALPHA ), 1.0f, AlphaFunctions::EaseIn );
   mAnimation.Play();
 
   DestructTimer();
@@ -551,8 +551,8 @@ void ScrollBarInternal::Hide()
   }
 
   mAnimation = Animation::New( BAR_HIDE_TIME );
-  mAnimation.OpacityTo( mSlider, 0.0f, AlphaFunctions::EaseIn );
-  mAnimation.OpacityTo( mSliderWrap, 0.0f, AlphaFunctions::EaseIn );
+  mAnimation.AnimateTo( Property( mSlider, Actor::Property::COLOR_ALPHA ), 0.0f, AlphaFunctions::EaseIn );
+  mAnimation.AnimateTo( Property( mSliderWrap, Actor::Property::COLOR_ALPHA ), 0.0f, AlphaFunctions::EaseIn );
   mAnimation.Play();
 }
 
