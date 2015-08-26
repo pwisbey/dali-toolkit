@@ -52,7 +52,8 @@ struct Vertex
  */
 float RandomRange(float f0, float f1)
 {
-  return f0 + (rand() & 0xfff) * (f1-f0) * (1.0f/4095.0f);
+  unsigned int seed = time( NULL );
+  return f0 + (rand_r( &seed ) & 0xfff) * (f1-f0) * (1.0f/4095.0f);
 }
 
 }
@@ -340,7 +341,8 @@ void BubbleEmitter::SetBubbleParameter( BubbleActorPtr bubbleActor, unsigned int
 
   int halfRange = displacement.x / 2;
   // for the y coordinate, always negative, so bubbles always go upwards
-  Vector2 randomVec(rand()%static_cast<int>(displacement.x) - halfRange, -rand()%static_cast<int>(displacement.y));
+  unsigned int seed = time( NULL );
+  Vector2 randomVec( rand_r( &seed ) % static_cast<int>(displacement.x) - halfRange, -rand_r( &seed ) % static_cast<int>(displacement.y) );
   dir.Normalize();
   randomVec.x -= dir.x*halfRange;
   randomVec.y *= 1.0f - fabsf(dir.x)*0.33f;
