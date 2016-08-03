@@ -43,8 +43,9 @@ struct Base::Impl
   {
     IS_ON_STAGE = 1,
     IS_FROM_CACHE = 1 << 1,
-    IS_PREMULTIPLIED_ALPHA = 1 << 2,
-    IS_SYNCHRONOUS_RESOURCE_LOADING = 1 << 3
+    IS_ATLASING_APPLIED = 1<<2,
+    IS_PREMULTIPLIED_ALPHA = 1 << 3,
+    IS_SYNCHRONOUS_RESOURCE_LOADING = 1 << 4
   };
 
   struct CustomShader
@@ -64,7 +65,6 @@ struct Base::Impl
   CustomShader* mCustomShader;
 
   Vector2   mSize;
-  Vector2   mOffset;
   float     mDepthIndex;
   int       mFlags;
 

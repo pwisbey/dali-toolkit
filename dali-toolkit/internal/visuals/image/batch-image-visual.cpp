@@ -27,11 +27,9 @@
 #include <dali/public-api/images/pixel-data.h>
 #include <dali/public-api/rendering/texture.h>
 #include <dali/public-api/rendering/texture-set.h>
-#include <dali/public-api/shader-effects/shader-effect.h>
 #include <dali/public-api/rendering/texture-set.h>
 
 // INTERNAL HEADER
-#include <dali-toolkit/public-api/visuals/batch-image-visual-properties.h>
 #include <dali-toolkit/public-api/visuals/image-visual-properties.h>
 #include <dali-toolkit/internal/visuals/visual-factory-impl.h>
 #include <dali-toolkit/internal/visuals/visual-factory-cache.h>
@@ -89,9 +87,8 @@ const char* FRAGMENT_SHADER = DALI_COMPOSE_SHADER(
 
 } //unnamed namespace
 
-BatchImageVisual::BatchImageVisual( VisualFactoryCache& factoryCache, ImageAtlasManager& atlasManager )
+BatchImageVisual::BatchImageVisual( VisualFactoryCache& factoryCache )
   : Visual::Base( factoryCache ),
-    mAtlasManager( atlasManager ),
     mDesiredSize()
 {
 }
@@ -103,21 +100,21 @@ BatchImageVisual::~BatchImageVisual()
 void BatchImageVisual::DoInitialize( Actor& actor, const Property::Map& propertyMap )
 {
   std::string oldImageUrl = mImageUrl;
-  Property::Value* imageURLValue = propertyMap.Find( Dali::Toolkit::BatchImageVisual::Property::URL, Dali::Toolkit::Internal::IMAGE_URL_NAME );
+  Property::Value* imageURLValue = propertyMap.Find( Dali::Toolkit::ImageVisual::Property::URL, Dali::Toolkit::Internal::IMAGE_URL_NAME );
 
   if( imageURLValue )
   {
     imageURLValue->Get( mImageUrl );
 
     int desiredWidth = 0;
-    Property::Value* desiredWidthValue = propertyMap.Find( Dali::Toolkit::BatchImageVisual::Property::DESIRED_WIDTH, DESIRED_WIDTH );
+    Property::Value* desiredWidthValue = propertyMap.Find( Dali::Toolkit::ImageVisual::Property::DESIRED_WIDTH, DESIRED_WIDTH );
     if( desiredWidthValue )
     {
       desiredWidthValue->Get( desiredWidth );
     }
 
     int desiredHeight = 0;
-    Property::Value* desiredHeightValue = propertyMap.Find( Dali::Toolkit::BatchImageVisual::Property::DESIRED_HEIGHT, DESIRED_HEIGHT );
+    Property::Value* desiredHeightValue = propertyMap.Find( Dali::Toolkit::ImageVisual::Property::DESIRED_HEIGHT, DESIRED_HEIGHT );
     if( desiredHeightValue )
     {
       desiredHeightValue->Get( desiredHeight );
@@ -170,11 +167,6 @@ void BatchImageVisual::GetNaturalSize( Vector2& naturalSize ) const
   naturalSize = Vector2::ZERO;
 }
 
-void BatchImageVisual::SetClipRect( const Rect<int>& clipRect )
-{
-  Visual::Base::SetClipRect( clipRect );
-}
-
 void BatchImageVisual::InitializeRenderer( const std::string& imageUrl )
 {
   if( imageUrl.empty() )
@@ -192,7 +184,7 @@ void BatchImageVisual::InitializeRenderer( const std::string& imageUrl )
   {
     if( !mImpl->mRenderer )
     {
-      TextureSet textureSet = mAtlasManager.Add(
+      TextureSet textureSet = mFactoryCache.GetAtlasManager()->Add(
             mAtlasRect,
             imageUrl,
             mDesiredSize );
@@ -234,6 +226,8 @@ void BatchImageVisual::DoSetOnStage( Actor& actor )
   }
   // Turn batching on, to send message it must be on stage
   mImpl->mRenderer.SetProperty( Dali::Renderer::Property::BATCHING_ENABLED, true );
+
+  actor.AddRenderer( mImpl->mRenderer );
 }
 
 void BatchImageVisual::DoSetOffStage( Actor& actor )
@@ -254,13 +248,14 @@ void BatchImageVisual::DoSetOffStage( Actor& actor )
 void BatchImageVisual::DoCreatePropertyMap( Property::Map& map ) const
 {
   map.Clear();
-  map.Insert( Toolkit::Visual::Property::TYPE, Toolkit::Visual::BATCH_IMAGE );
+  map.Insert( Toolkit::Visual::Property::TYPE, Toolkit::Visual::IMAGE );
 
   if( !mImageUrl.empty() )
   {
-    map.Insert( Toolkit::BatchImageVisual::Property::URL, mImageUrl );
-    map.Insert( Toolkit::BatchImageVisual::Property::DESIRED_WIDTH, mDesiredSize.GetWidth() );
-    map.Insert( Toolkit::BatchImageVisual::Property::DESIRED_HEIGHT, mDesiredSize.GetHeight() );
+    map.Insert( Toolkit::ImageVisual::Property::URL, mImageUrl );
+    map.Insert( Toolkit::ImageVisual::Property::BATCHING_ENABLED, true );
+    map.Insert( Toolkit::ImageVisual::Property::DESIRED_WIDTH, mDesiredSize.GetWidth() );
+    map.Insert( Toolkit::ImageVisual::Property::DESIRED_HEIGHT, mDesiredSize.GetHeight() );
   }
 }
 
@@ -281,7 +276,7 @@ void BatchImageVisual::CleanCache(const std::string& url)
   mImpl->mRenderer.Reset();
   if( mFactoryCache.CleanRendererCache( url ) )
   {
-    mAtlasManager.Remove( textureSet, mAtlasRect );
+    mFactoryCache.GetAtlasManager()->Remove( textureSet, mAtlasRect );
   }
 }
 

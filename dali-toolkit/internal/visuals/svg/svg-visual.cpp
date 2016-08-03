@@ -31,6 +31,7 @@
 #include <dali-toolkit/third-party/nanosvg/nanosvg.h>
 #include <dali-toolkit/internal/visuals/svg/svg-rasterize-thread.h>
 #include <dali-toolkit/internal/visuals/image/image-visual.h>
+#include <dali-toolkit/internal/visuals/image-atlas-manager.h>
 #include <dali-toolkit/internal/visuals/visual-factory-cache.h>
 #include <dali-toolkit/internal/visuals/visual-string-constants.h>
 #include <dali-toolkit/internal/visuals/visual-base-data-impl.h>
@@ -52,10 +53,9 @@ namespace Toolkit
 namespace Internal
 {
 
-SvgVisual::SvgVisual( VisualFactoryCache& factoryCache, ImageAtlasManager& atlasManager )
+SvgVisual::SvgVisual( VisualFactoryCache& factoryCache )
 : Visual::Base( factoryCache ),
   mAtlasRect( FULL_TEXTURE_RECT ),
-  mAtlasManager( atlasManager ),
   mParsedImage( NULL )
 {
   // the rasterized image is with pre-multiplied alpha format
@@ -68,11 +68,6 @@ SvgVisual::~SvgVisual()
   {
     nsvgDelete( mParsedImage );
   }
-}
-
-bool SvgVisual::IsSvgUrl( const std::string& url )
-{
-  return url.substr( url.find_last_of(".") + 1 ) == "svg";
 }
 
 void SvgVisual::DoInitialize( Actor& actor, const Property::Map& propertyMap )
@@ -94,7 +89,7 @@ void SvgVisual::DoInitialize( Actor& actor, const Property::Map& propertyMap )
 
 void SvgVisual::DoSetOnStage( Actor& actor )
 {
-  Shader shader = ImageVisual::GetImageShader( mFactoryCache );
+  Shader shader = ImageVisual::GetImageShader( mFactoryCache, true, true );
   Geometry geometry = mFactoryCache.GetGeometry( VisualFactoryCache::QUAD_GEOMETRY );
   if( !geometry )
   {
@@ -109,6 +104,9 @@ void SvgVisual::DoSetOnStage( Actor& actor )
   {
     AddRasterizationTask( mImpl->mSize );
   }
+
+  // Hold the weak handle of the placement actor and delay the adding of renderer until the svg rasterization is finished.
+  mPlacementActor = actor;
 }
 
 void SvgVisual::DoSetOffStage( Actor& actor )
@@ -117,6 +115,7 @@ void SvgVisual::DoSetOffStage( Actor& actor )
 
   actor.RemoveRenderer( mImpl->mRenderer );
   mImpl->mRenderer.Reset();
+  mPlacementActor.Reset();
 }
 
 void SvgVisual::GetNaturalSize( Vector2& naturalSize ) const
@@ -198,11 +197,11 @@ void SvgVisual::ApplyRasterizedImage( PixelData rasterizedPixelData )
     TextureSet currentTextureSet = mImpl->mRenderer.GetTextures();
     if( mAtlasRect != FULL_TEXTURE_RECT )
     {
-      mAtlasManager.Remove( currentTextureSet, mAtlasRect );
+      mFactoryCache.GetAtlasManager()->Remove( currentTextureSet, mAtlasRect );
     }
 
     Vector4 atlasRect;
-    TextureSet textureSet = mAtlasManager.Add(atlasRect, rasterizedPixelData );
+    TextureSet textureSet = mFactoryCache.GetAtlasManager()->Add(atlasRect, rasterizedPixelData );
     if( textureSet ) // atlasing
     {
       if( textureSet != currentTextureSet )
@@ -211,11 +210,13 @@ void SvgVisual::ApplyRasterizedImage( PixelData rasterizedPixelData )
       }
       mImpl->mRenderer.RegisterProperty( ATLAS_RECT_UNIFORM_NAME, atlasRect );
       mAtlasRect = atlasRect;
+      mImpl->mFlags |= Impl::IS_ATLASING_APPLIED;
     }
     else // no atlasing
     {
       Atlas texture = Atlas::New( rasterizedPixelData.GetWidth(), rasterizedPixelData.GetHeight() );
       texture.Upload( rasterizedPixelData, 0, 0 );
+      mImpl->mFlags &= ~Impl::IS_ATLASING_APPLIED;
 
       if( mAtlasRect == FULL_TEXTURE_RECT )
       {
@@ -235,9 +236,17 @@ void SvgVisual::ApplyRasterizedImage( PixelData rasterizedPixelData )
         TextureSetImage( textureSet, 0u, texture );
       }
     }
+
+    // Rasterized pixels are uploaded to texture. If weak handle is holding a placement actor, it is the time to add the renderer to actor.
+    Actor actor = mPlacementActor.GetHandle();
+    if( actor )
+    {
+      actor.AddRenderer( mImpl->mRenderer );
+      // reset the weak handle so that the renderer only get added to actor once
+      mPlacementActor.Reset();
+    }
   }
 }
-
 
 
 } // namespace Internal

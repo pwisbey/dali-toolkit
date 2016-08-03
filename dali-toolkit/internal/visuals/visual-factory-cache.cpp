@@ -1,5 +1,5 @@
  /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,17 @@
 
 // EXTERNAL HEADER
 #include <dali/devel-api/common/hash.h>
+#include <dali/public-api/images/resource-image.h>
 
 // INTERNAL HEADER
 #include <dali-toolkit/internal/visuals/color/color-visual.h>
 #include <dali-toolkit/internal/visuals/svg/svg-visual.h>
+#include <dali-toolkit/internal/visuals/image-atlas-manager.h>
+
+namespace
+{
+const char * const BROKEN_VISUAL_IMAGE_URL( DALI_IMAGE_DIR "broken.png");
+}
 
 namespace Dali
 {
@@ -143,14 +150,14 @@ bool VisualFactoryCache::CleanRendererCache( const std::string& key )
   return false;
 }
 
-void VisualFactoryCache::CacheDebugRenderer( Renderer& renderer )
+void VisualFactoryCache::CacheWireframeRenderer( Renderer& renderer )
 {
-  mDebugRenderer = renderer;
+  mWireframeRenderer = renderer;
 }
 
-Renderer VisualFactoryCache::GetDebugRenderer()
+Renderer VisualFactoryCache::GetWireframeRenderer()
 {
-  return mDebugRenderer;
+  return mWireframeRenderer;
 }
 
 Geometry VisualFactoryCache::CreateQuadGeometry()
@@ -177,6 +184,17 @@ Geometry VisualFactoryCache::CreateQuadGeometry()
   geometry.SetType( Geometry::TRIANGLE_STRIP );
 
   return geometry;
+}
+
+ImageAtlasManagerPtr VisualFactoryCache::GetAtlasManager()
+{
+  if( !mAtlasManager )
+  {
+    mAtlasManager = new ImageAtlasManager();
+    mAtlasManager->SetBrokenImage( BROKEN_VISUAL_IMAGE_URL );
+  }
+
+  return mAtlasManager;
 }
 
 SvgRasterizeThread* VisualFactoryCache::GetSVGRasterizationThread()
@@ -307,6 +325,11 @@ Geometry VisualFactoryCache::CreateBatchQuadGeometry( Vector4 texCoords )
   geometry.SetType( Geometry::TRIANGLES );
 
   return geometry;
+}
+
+Image VisualFactoryCache::GetBrokenVisualImage()
+{
+  return ResourceImage::New( BROKEN_VISUAL_IMAGE_URL );
 }
 
 } // namespace Internal

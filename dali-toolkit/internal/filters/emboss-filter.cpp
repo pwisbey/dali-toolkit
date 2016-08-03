@@ -30,6 +30,7 @@
 // INTERNAL INCLUDES
 #include <dali-toolkit/public-api/visuals/visual-properties.h>
 #include <dali-toolkit/devel-api/visual-factory/visual-factory.h>
+#include <dali-toolkit/internal/visuals/visual-base-impl.h>
 
 namespace Dali
 {
@@ -89,8 +90,8 @@ EmbossFilter::~EmbossFilter()
 
 void EmbossFilter::Enable()
 {
-  mImageForEmboss1 = FrameBufferImage::New( mTargetSize.width, mTargetSize.height, mPixelFormat, Image::UNUSED );
-  mImageForEmboss2 = FrameBufferImage::New( mTargetSize.width, mTargetSize.height, mPixelFormat, Image::UNUSED );
+  mImageForEmboss1 = FrameBufferImage::New( mTargetSize.width, mTargetSize.height, mPixelFormat );
+  mImageForEmboss2 = FrameBufferImage::New( mTargetSize.width, mTargetSize.height, mPixelFormat );
 
   Property::Map customShader;
   customShader[ Toolkit::Visual::Shader::Property::FRAGMENT_SHADER ] = EMBOSS_FRAGMENT_SOURCE;
@@ -123,13 +124,16 @@ void EmbossFilter::Enable()
   mActorForComposite.SetColor( Color::BLACK );
 
   customShader[ Toolkit::Visual::Shader::Property::FRAGMENT_SHADER ] = COMPOSITE_FRAGMENT_SOURCE;
-  visualMap[ Toolkit::Visual::Property::SHADER ] = customShader;
-  visualMap[ Toolkit::Visual::Property::TYPE ] = Toolkit::Visual::IMAGE;
 
   mRootActor.Add( mActorForComposite );
 
-  InitializeVisual( mActorForComposite, mVisualForEmboss1, visualMap );
-  InitializeVisual( mActorForComposite, mVisualForEmboss2, visualMap );
+  Image dummyImage; // Dummy image, force creation of an image visual
+
+  InitializeVisual( mActorForComposite, mVisualForEmboss1, dummyImage );
+  Toolkit::GetImplementation( mVisualForEmboss1 ).SetCustomShader( customShader );
+
+  InitializeVisual( mActorForComposite, mVisualForEmboss2, dummyImage );
+  Toolkit::GetImplementation( mVisualForEmboss2 ).SetCustomShader( customShader );
 
   TextureSet textureSet1 = TextureSet::New();
   TextureSetImage( textureSet1, 0, mImageForEmboss1 );

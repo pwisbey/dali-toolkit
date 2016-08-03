@@ -90,25 +90,6 @@ public:
   virtual void GetNaturalSize( Vector2& naturalSize ) const;
 
   /**
-   * ToDo: Add this function to Toolkit::Visual when it is fully implemented.
-   *
-   * Set the clip rectangular of this visual.
-   * The contents of the visual will not be visible outside this rectangular.
-   *
-   * @param [in] clipRect The clipping rectangular.
-   */
-  virtual void SetClipRect( const Rect<int>& clipRect );
-
-  /**
-   *ToDo: Add this function to Toolkit::Visual when it is fully implemented.
-   *
-   * Reposition this visual with a 2D offset.
-   *
-   * @param[in] offset The offset to reposition the visual.
-   */
-  virtual void SetOffset( const Vector2& offset );
-
-  /**
    * @copydoc Toolkit::Visual::Base::SetDepthIndex
    */
   void SetDepthIndex( float index );
@@ -189,9 +170,11 @@ protected:
   /**
    * @brief Called by SetOnStage() allowing sub classes to respond to the SetOnStage event
    *
+   * @note The derived class is required to create the renderer, and add it to the actor when all the resources are in place.
+   *
    * @param[in] actor The actor applying this visual.
    */
-  virtual void DoSetOnStage( Actor& actor );
+  virtual void DoSetOnStage( Actor& actor )=0;
 
   /**
    * @brief Called by SetOffStage() allowing sub classes to respond to the SetOffStage event

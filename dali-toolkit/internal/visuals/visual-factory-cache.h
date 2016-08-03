@@ -39,6 +39,9 @@ namespace Toolkit
 namespace Internal
 {
 
+class ImageAtlasManager;
+typedef IntrusivePtr<ImageAtlasManager> ImageAtlasManagerPtr;
+
 /**
  * Caches shaders and geometries. Owned by VisualFactory.
  */
@@ -60,6 +63,8 @@ public:
     GRADIENT_SHADER_RADIAL_BOUNDING_BOX,
     IMAGE_SHADER,
     BATCH_IMAGE_SHADER,
+    IMAGE_SHADER_ATLAS_DEFAULT_WRAP,
+    IMAGE_SHADER_ATLAS_CUSTOM_WRAP,
     NINE_PATCH_SHADER,
     SVG_SHADER,
     SHADER_TYPE_MAX = SVG_SHADER
@@ -130,6 +135,12 @@ public:
    */
   static Geometry CreateBatchQuadGeometry( Vector4 texCoords );
 
+  /**
+   * @brief Returns an image to be used when a visual has failed to correctly render
+   * @return The broken image handle.
+   */
+  static Image GetBrokenVisualImage();
+
 public:
 
   /**
@@ -160,14 +171,20 @@ public:
   bool CleanRendererCache( const std::string& key );
 
   /**
-   * @brief Cache the debug renderer
+   * @brief Cache the wireframe renderer
    */
-  void CacheDebugRenderer( Renderer& renderer );
+  void CacheWireframeRenderer( Renderer& renderer );
 
   /**
-   * @brief Request the debug renderer;
+   * @brief Request the wireframe renderer;
    */
-  Renderer GetDebugRenderer();
+  Renderer GetWireframeRenderer();
+
+  /**
+   * Get the image atlas manager.
+   * @return A pointer pointing to the atlas manager
+   */
+  ImageAtlasManagerPtr GetAtlasManager();
 
   /**
    * Get the SVG rasterization thread.
@@ -228,8 +245,9 @@ private:
   HashVector mRendererHashes;
   CachedRenderers mRenderers;
 
-  Renderer mDebugRenderer;
+  Renderer mWireframeRenderer;
 
+  ImageAtlasManagerPtr mAtlasManager;
   SvgRasterizeThread*  mSvgRasterizeThread;
 };
 

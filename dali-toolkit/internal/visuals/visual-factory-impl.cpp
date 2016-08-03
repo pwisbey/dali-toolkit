@@ -31,22 +31,17 @@
 #include <dali-toolkit/public-api/visuals/visual-properties.h>
 #include <dali-toolkit/internal/visuals/border/border-visual.h>
 #include <dali-toolkit/internal/visuals/color/color-visual.h>
-#include <dali-toolkit/internal/visuals/debug/debug-visual.h>
 #include <dali-toolkit/internal/visuals/gradient/gradient-visual.h>
-#include <dali-toolkit/internal/visuals/npatch/npatch-visual.h>
-#include <dali-toolkit/internal/visuals/image/image-visual.h>
-#include <dali-toolkit/internal/visuals/svg/svg-visual.h>
-#include <dali-toolkit/internal/visuals/mesh/mesh-visual.h>
-#include <dali-toolkit/internal/visuals/primitive/primitive-visual.h>
-#include <dali-toolkit/internal/visuals/visual-factory-cache.h>
-#include <dali-toolkit/internal/visuals/visual-string-constants.h>
-#include <dali-toolkit/internal/visuals/image-atlas-manager.h>
 #include <dali-toolkit/internal/visuals/image/batch-image-visual.h>
-
-namespace
-{
-const char * const BROKEN_VISUAL_IMAGE_URL( DALI_IMAGE_DIR "broken.png");
-}
+#include <dali-toolkit/internal/visuals/image/image-visual.h>
+#include <dali-toolkit/internal/visuals/mesh/mesh-visual.h>
+#include <dali-toolkit/internal/visuals/npatch/npatch-visual.h>
+#include <dali-toolkit/internal/visuals/primitive/primitive-visual.h>
+#include <dali-toolkit/internal/visuals/svg/svg-visual.h>
+#include <dali-toolkit/internal/visuals/wireframe/wireframe-visual.h>
+#include <dali-toolkit/internal/visuals/visual-factory-cache.h>
+#include <dali-toolkit/internal/visuals/visual-factory-resolve-url.h>
+#include <dali-toolkit/internal/visuals/visual-string-constants.h>
 
 namespace Dali
 {
@@ -67,13 +62,11 @@ DALI_ENUM_TO_STRING_WITH_SCOPE( Toolkit::Visual, GRADIENT )
 DALI_ENUM_TO_STRING_WITH_SCOPE( Toolkit::Visual, IMAGE )
 DALI_ENUM_TO_STRING_WITH_SCOPE( Toolkit::Visual, MESH )
 DALI_ENUM_TO_STRING_WITH_SCOPE( Toolkit::Visual, PRIMITIVE )
-DALI_ENUM_TO_STRING_WITH_SCOPE( Toolkit::Visual, DEBUG )
-DALI_ENUM_TO_STRING_WITH_SCOPE( Toolkit::Visual, BATCH_IMAGE )
+DALI_ENUM_TO_STRING_WITH_SCOPE( Toolkit::Visual, WIREFRAME )
 DALI_ENUM_TO_STRING_TABLE_END( VISUAL_TYPE )
 
 const char * const VISUAL_TYPE( "visualType" );
 const char * const BATCHING_ENABLED( "batchingEnabled" );
-
 BaseHandle Create()
 {
   BaseHandle handle = Toolkit::VisualFactory::Get();
@@ -103,10 +96,10 @@ Toolkit::Visual::Base VisualFactory::CreateVisual( const Property::Map& property
     mFactoryCache = new VisualFactoryCache();
   }
 
-  // Return a new DebugVisual if we have debug enabled
+  // Return a new WireframeVisual if we have debug enabled
   if( mDebugEnabled )
   {
-    return Toolkit::Visual::Base( new DebugVisual( *( mFactoryCache.Get() ) ) );
+    return Toolkit::Visual::Base( new WireframeVisual( *( mFactoryCache.Get() ) ) );
   }
 
   Visual::Base* visualPtr = NULL;
@@ -116,21 +109,6 @@ Toolkit::Visual::Base VisualFactory::CreateVisual( const Property::Map& property
   if( typeValue )
   {
     Scripting::GetEnumerationProperty( *typeValue, VISUAL_TYPE_TABLE, VISUAL_TYPE_TABLE_COUNT, visualType );
-  }
-
-  // If the type is IMAGE, either from a default or the TYPE value in the property-map, change it to a BatchImage if required.
-  if( visualType == Toolkit::Visual::IMAGE )
-  {
-    bool batchingEnabled( false );
-    Property::Value* value = propertyMap.Find( Toolkit::Visual::Property::BATCHING_ENABLED, BATCHING_ENABLED );
-    if( value )
-    {
-      value->Get( batchingEnabled );
-      if( batchingEnabled )
-      {
-        visualType = Toolkit::Visual::BATCH_IMAGE;
-      }
-    }
   }
 
   switch( visualType )
@@ -153,38 +131,42 @@ Toolkit::Visual::Base VisualFactory::CreateVisual( const Property::Map& property
       break;
     }
 
-    default: // Default to Image type if unknown (check if there is a URL)
     case Toolkit::Visual::IMAGE:
     {
       Property::Value* imageURLValue = propertyMap.Find( Toolkit::ImageVisual::Property::URL, IMAGE_URL_NAME );
       std::string imageUrl;
       if( imageURLValue && imageURLValue->Get( imageUrl ) )
       {
-        if( NinePatchImage::IsNinePatchUrl( imageUrl ) )
+        // first resolve url type to know which visual to create
+        UrlType::Type type = ResolveUrlType( imageUrl );
+        if( UrlType::N_PATCH == type )
         {
           visualPtr = new NPatchVisual( *( mFactoryCache.Get() ) );
         }
-        else
+        else if( UrlType::SVG == type )
         {
-          CreateAtlasManager();
-
-          if( SvgVisual::IsSvgUrl( imageUrl ) )
+          visualPtr = new SvgVisual( *( mFactoryCache.Get() ) );
+        }
+        else // Regular image
+        {
+          Property::Value* batchingEnabledValue = propertyMap.Find( Toolkit::ImageVisual::Property::BATCHING_ENABLED, BATCHING_ENABLED );
+          if( batchingEnabledValue  )
           {
-            visualPtr = new SvgVisual( *( mFactoryCache.Get() ), *( mAtlasManager.Get() ) );
+            bool batchingEnabled( false );
+            batchingEnabledValue->Get( batchingEnabled );
+            if( batchingEnabled )
+            {
+              visualPtr = new BatchImageVisual( *( mFactoryCache.Get() ) );
+              break;
+            }
           }
           else
           {
-            visualPtr = new ImageVisual( *( mFactoryCache.Get() ), *( mAtlasManager.Get() ) );
+            visualPtr = new ImageVisual( *( mFactoryCache.Get() ) );
           }
         }
       }
-      else if( propertyMap.Find( Toolkit::Visual::Property::SHADER, CUSTOM_SHADER ) )
-      {
-        // Create Image Visual if it has a shader
-        // TODO: This is required because of EffectsView which should be fixed
-        CreateAtlasManager();
-        visualPtr = new ImageVisual( *( mFactoryCache.Get() ), *( mAtlasManager.Get() ) );
-      }
+
       break;
     }
 
@@ -200,18 +182,12 @@ Toolkit::Visual::Base VisualFactory::CreateVisual( const Property::Map& property
       break;
     }
 
-    case Toolkit::Visual::DEBUG:
+    case Toolkit::Visual::WIREFRAME:
     {
-      visualPtr = new DebugVisual( *( mFactoryCache.Get() ) );
+      visualPtr = new WireframeVisual( *( mFactoryCache.Get() ) );
       break;
     }
 
-    case Toolkit::Visual::BATCH_IMAGE:
-    {
-      CreateAtlasManager();
-      visualPtr = new BatchImageVisual( *( mFactoryCache.Get() ), *( mAtlasManager.Get() ) );
-      break;
-    }
   }
 
   if( visualPtr )
@@ -236,7 +212,7 @@ Toolkit::Visual::Base VisualFactory::CreateVisual( const Image& image )
 
   if( mDebugEnabled )
   {
-    return Toolkit::Visual::Base( new DebugVisual( *( mFactoryCache.Get() ) ) );
+    return Toolkit::Visual::Base( new WireframeVisual( *( mFactoryCache.Get() ) ) );
   }
 
   NinePatchImage npatchImage = NinePatchImage::DownCast( image );
@@ -249,8 +225,7 @@ Toolkit::Visual::Base VisualFactory::CreateVisual( const Image& image )
   }
   else
   {
-    CreateAtlasManager();
-    ImageVisual* visualPtr = new ImageVisual( *( mFactoryCache.Get() ), *( mAtlasManager.Get() ) );
+    ImageVisual* visualPtr = new ImageVisual( *( mFactoryCache.Get() ) );
     Actor actor;
     visualPtr->SetImage( actor, image );
 
@@ -267,46 +242,31 @@ Toolkit::Visual::Base VisualFactory::CreateVisual( const std::string& url, Image
 
   if( mDebugEnabled )
   {
-    return Toolkit::Visual::Base( new DebugVisual( *( mFactoryCache.Get() ) ) );
+    return Toolkit::Visual::Base( new WireframeVisual( *( mFactoryCache.Get() ) ) );
   }
 
-  if( NinePatchImage::IsNinePatchUrl( url ) )
+  // first resolve url type to know which visual to create
+  UrlType::Type type = ResolveUrlType( url );
+  if( UrlType::N_PATCH == type )
   {
     NPatchVisual* visualPtr = new NPatchVisual( *( mFactoryCache.Get() ) );
     visualPtr->SetImage( url );
 
     return Toolkit::Visual::Base( visualPtr );
   }
-  else if( SvgVisual::IsSvgUrl( url ) )
+  else if( UrlType::SVG == type )
   {
-    CreateAtlasManager();
-    SvgVisual* visualPtr = new SvgVisual( *( mFactoryCache.Get() ), *( mAtlasManager.Get() ) );
+    SvgVisual* visualPtr = new SvgVisual( *( mFactoryCache.Get() ) );
     visualPtr->SetImage( url, size );
     return Toolkit::Visual::Base( visualPtr );
   }
-  else
+  else // Regular image
   {
-    CreateAtlasManager();
-    ImageVisual* visualPtr = new ImageVisual( *( mFactoryCache.Get() ), *( mAtlasManager.Get() ) );
+    ImageVisual* visualPtr = new ImageVisual( *( mFactoryCache.Get() ));
     Actor actor;
     visualPtr->SetImage( actor, url, size );
 
     return Toolkit::Visual::Base( visualPtr );
-  }
-}
-
-Image VisualFactory::GetBrokenVisualImage()
-{
-  return ResourceImage::New( BROKEN_VISUAL_IMAGE_URL );
-}
-
-void VisualFactory::CreateAtlasManager()
-{
-  if( !mAtlasManager )
-  {
-    Shader shader = ImageVisual::GetImageShader( *( mFactoryCache.Get() ) );
-    mAtlasManager = new ImageAtlasManager();
-    mAtlasManager->SetBrokenImage( BROKEN_VISUAL_IMAGE_URL );
   }
 }
 

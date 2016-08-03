@@ -254,17 +254,6 @@ void NPatchVisual::GetNaturalSize( Vector2& naturalSize ) const
   }
 }
 
-void NPatchVisual::SetClipRect( const Rect<int>& clipRect )
-{
-  Visual::Base::SetClipRect( clipRect );
-  //ToDo: renderer responds to the clipRect change
-}
-
-void NPatchVisual::SetOffset( const Vector2& offset )
-{
-  //ToDo: renderer applies the offset
-}
-
 Geometry NPatchVisual::CreateGeometry()
 {
   Geometry geometry;
@@ -390,6 +379,8 @@ void NPatchVisual::DoSetOnStage( Actor& actor )
   {
     ApplyImageToSampler();
   }
+
+  actor.AddRenderer( mImpl->mRenderer );
 }
 
 void NPatchVisual::DoSetOffStage( Actor& actor )
@@ -522,7 +513,7 @@ void NPatchVisual::InitializeFromImage( NinePatchImage nPatch )
 
 void NPatchVisual::InitializeFromBrokenImage()
 {
-  mCroppedImage = VisualFactory::GetBrokenVisualImage();
+  mCroppedImage = VisualFactoryCache::GetBrokenVisualImage();
   mImageSize = ImageDimensions( mCroppedImage.GetWidth(), mCroppedImage.GetHeight() );
 
   mStretchPixelsX.Clear();

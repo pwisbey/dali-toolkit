@@ -17,6 +17,8 @@ SET(TC_SOURCES
  utc-Dali-Text-Shaping.cpp
  utc-Dali-VisualModel.cpp
  utc-Dali-Text-Layout.cpp
+ utc-Dali-Text-Controller.cpp
+ utc-Dali-VisualFactoryResolveUrl.cpp
 )
 
 # Append list of test harness files (Won't get parsed for test cases)

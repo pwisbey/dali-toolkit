@@ -2,7 +2,7 @@
 #define __DALI_TOOLKIT_TEXT_CONTROLLER_IMPL_H__
 
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,6 +116,8 @@ struct EventData
    */
   std::vector<Event> mEventQueue;              ///< The queue of touch events etc.
 
+  Vector<InputStyle::Mask> mInputStyleChangedQueue; ///< Queue of changes in the input style. Used to emit the signal in the iddle callback.
+
   InputStyle         mInputStyle;              ///< The style to be set to the new inputed text.
 
   State              mPreviousState;           ///< Stores the current state before it's updated with the new one.
@@ -166,7 +168,6 @@ struct FontDefaults
 {
   FontDefaults()
   : mFontDescription(),
-    mFontStyle(),
     mDefaultPointSize( 0.f ),
     mFontId( 0u ),
     familyDefined( false ),
@@ -192,7 +193,6 @@ struct FontDefaults
   }
 
   TextAbstraction::FontDescription mFontDescription;  ///< The default font's description.
-  std::string                      mFontStyle;        ///< The font's style string set through the property system.
   float                            mDefaultPointSize; ///< The default font's point size.
   FontId                           mFontId;           ///< The font's id of the default font.
   bool familyDefined:1; ///< Whether the default font's family name is defined.
@@ -441,6 +441,11 @@ struct Controller::Impl
   void NotifyImfManager();
 
   /**
+   * @brief Helper to notify IMF manager with multi line status.
+   */
+  void NotifyImfMultiLineStatus();
+
+  /**
    * @brief Retrieve the current cursor position.
    *
    * @return The cursor position.
@@ -470,6 +475,12 @@ struct Controller::Impl
   {
     bool result( mClipboard && mClipboard.NumberOfItems() );
     return !result; // If NumberOfItems greater than 0, return false
+  }
+
+  bool IsClipboardVisible()
+  {
+    bool result( mClipboard && mClipboard.IsVisible() );
+    return result;
   }
 
   /**
@@ -579,7 +590,7 @@ struct Controller::Impl
 
   void SendSelectionToClipboard( bool deleteAfterSending );
 
-  void GetTextFromClipboard( unsigned int itemIndex, std::string& retrievedString );
+  void RequestGetTextFromClipboard();
 
   void RepositionSelectionHandles();
   void RepositionSelectionHandles( float visualX, float visualY );

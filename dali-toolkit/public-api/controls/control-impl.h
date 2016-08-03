@@ -251,6 +251,7 @@ public:
    */
   bool IsKeyboardFocusGroup();
 
+  /// @cond internal
   /**
    * @brief Called by the AccessibilityManager to activate the Control.
    * @SINCE_1_0.0
@@ -262,6 +263,7 @@ public:
    * @SINCE_1_0.0
    */
   DALI_INTERNAL void KeyboardEnter();
+  /// @endcond
 
   // Signals
 
@@ -280,6 +282,7 @@ public:
    */
   Toolkit::Control::KeyInputFocusSignalType& KeyInputFocusLostSignal();
 
+  /// @cond internal
   /**
    * @brief Called by the KeyInputFocusManager to emit key event signals.
    *
@@ -288,6 +291,7 @@ public:
    * @return True if the event was consumed.
    */
   DALI_INTERNAL bool EmitKeyEventSignal( const KeyEvent& event );
+  /// @endcond
 
 protected: // For derived classes to call
 
@@ -296,21 +300,44 @@ protected: // For derived classes to call
    * In the case of the visual being an actor or control deeming controlRenderer not required then controlRenderer should be an empty handle.
    * No parenting is done during registration, this should be done by derived class.
    *
-   * @SINCE_1_1.46
+   * @SINCE_1_2.0
    *
    * @param[in] index The Property index of the visual, used to reference visual
    * @param[in] placementActor The actor used to by the visual.
    * @param[in] visual The visual to register
+   * @note Derived class must NOT call visual.SetOnStage(placementActor). It is the responsibility of the base class to connect/disconnect registered visual to stage.
    */
-   void RegisterVisual( Property::Index index, Actor placementActor, Toolkit::Visual::Base visual );
+   void RegisterVisual( Property::Index index, Actor& placementActor, Toolkit::Visual::Base& visual );
 
    /**
     * @brief Erase the entry matching the given index from the list of registered visuals
     * @param[in] index The Property index of the visual, used to reference visual
     *
-    * @SINCE_1_1.46
+    * @SINCE_1_2.0
     */
    void UnregisterVisual( Property::Index index );
+
+   /**
+    * @brief Retrieve the visual associated with the given property index.
+    *
+    * @SINCE_1_2.2
+    *
+    * @param[in] index The Property index of the visual.
+    * @return The registered visual if exist, otherwise empty handle.
+    * @note For managing object life-cycle, do not store the returned visual as a member which increments its reference count.
+    */
+   Toolkit::Visual::Base GetVisual( Property::Index index ) const;
+
+   /**
+    * @brief Retrieve the placement actor associated with the given index.
+    *
+    * @SINCE_1_2.2
+    *
+    * @@param[in] index The Property index of the visual.
+    * @return Then placement actor if exist, otherwise empty handle.
+    * @note For managing object life-cycle, do not store the returned placement actor as a member which increments its reference count.
+    */
+   Actor GetPlacementActor( Property::Index index ) const;
 
   /**
    * @brief Emits KeyInputFocusGained signal if true else emits KeyInputFocusLost signal
@@ -685,12 +712,14 @@ public: // API for derived classes to override
 
 private:
 
+  /// @cond internal
   // Undefined
   DALI_INTERNAL Control( const Control& );
   DALI_INTERNAL Control& operator=( const Control& );
 
   class Impl;
   Impl* mImpl;
+  /// @endcond
 
 };
 

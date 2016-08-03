@@ -190,8 +190,9 @@ int UtcDaliVisualSize(void)
 
   // Batch Image visual
   propertyMap.Clear();
-  propertyMap.Insert( Visual::Property::TYPE, Visual::BATCH_IMAGE );
-  propertyMap.Insert( BatchImageVisual::Property::URL, TEST_IMAGE_FILE_NAME );
+  propertyMap.Insert( Visual::Property::TYPE, Visual::IMAGE );
+  propertyMap.Insert( ImageVisual::Property::URL, TEST_IMAGE_FILE_NAME );
+  propertyMap.Insert( ImageVisual::Property::BATCHING_ENABLED, true );
   Visual::Base batchImageVisual = factory.CreateVisual( propertyMap );
   batchImageVisual.SetSize( visualSize );
   DALI_TEST_EQUALS( batchImageVisual.GetSize(), visualSize, TEST_LOCATION );
@@ -511,6 +512,9 @@ int UtcDaliVisualGetPropertyMap5(void)
   propertyMap.Insert( ImageVisual::Property::DESIRED_HEIGHT,   30 );
   propertyMap.Insert( ImageVisual::Property::FITTING_MODE,   FittingMode::FIT_HEIGHT );
   propertyMap.Insert( ImageVisual::Property::SAMPLING_MODE,   SamplingMode::BOX_THEN_NEAREST );
+  propertyMap.Insert( ImageVisual::Property::PIXEL_AREA, Vector4( 0.25f, 0.25f, 0.5f, 0.5f ) );
+  propertyMap.Insert( ImageVisual::Property::WRAP_MODE_U, WrapMode::REPEAT );
+  propertyMap.Insert( ImageVisual::Property::WRAP_MODE_V, WrapMode::MIRRORED_REPEAT );
   propertyMap.Insert( "synchronousLoading",   true );
 
   Visual::Base imageVisual = factory.CreateVisual(propertyMap);
@@ -544,6 +548,18 @@ int UtcDaliVisualGetPropertyMap5(void)
   DALI_TEST_CHECK( value );
   DALI_TEST_CHECK( value->Get<int>() == 30 );
 
+  value = resultMap.Find( ImageVisual::Property::PIXEL_AREA, Property::VECTOR4 );
+  DALI_TEST_CHECK( value );
+  DALI_TEST_EQUALS( value->Get<Vector4>(), Vector4( 0.25f, 0.25f, 0.5f, 0.5f ), Math::MACHINE_EPSILON_100, TEST_LOCATION );
+
+  value = resultMap.Find( ImageVisual::Property::WRAP_MODE_U, Property::INTEGER );
+  DALI_TEST_CHECK( value );
+  DALI_TEST_CHECK(  value->Get<int>() == WrapMode::REPEAT);
+
+  value = resultMap.Find( ImageVisual::Property::WRAP_MODE_V, Property::INTEGER );
+  DALI_TEST_CHECK( value );
+  DALI_TEST_CHECK(  value->Get<int>() == WrapMode::MIRRORED_REPEAT);
+
   value = resultMap.Find( "synchronousLoading",   Property::BOOLEAN );
   DALI_TEST_CHECK( value );
   DALI_TEST_CHECK( value->Get<bool>() == true );
@@ -576,6 +592,18 @@ int UtcDaliVisualGetPropertyMap5(void)
   value = resultMap.Find( ImageVisual::Property::DESIRED_HEIGHT,   Property::INTEGER );
   DALI_TEST_CHECK( value );
   DALI_TEST_CHECK( value->Get<int>() == 200 );
+
+  value = resultMap.Find( ImageVisual::Property::PIXEL_AREA, Property::VECTOR4 );
+  DALI_TEST_CHECK( value );
+  DALI_TEST_EQUALS( value->Get<Vector4>(), Vector4( 0.f, 0.f, 1.f, 1.f ), Math::MACHINE_EPSILON_100, TEST_LOCATION );
+
+  value = resultMap.Find( ImageVisual::Property::WRAP_MODE_U, Property::INTEGER );
+  DALI_TEST_CHECK( value );
+  DALI_TEST_CHECK(  value->Get<int>() == WrapMode::DEFAULT);
+
+  value = resultMap.Find( ImageVisual::Property::WRAP_MODE_V, Property::INTEGER );
+  DALI_TEST_CHECK( value );
+  DALI_TEST_CHECK(  value->Get<int>() == WrapMode::DEFAULT);
 
   value = resultMap.Find( "synchronousLoading",   Property::BOOLEAN );
   DALI_TEST_CHECK( value );
@@ -716,7 +744,7 @@ int UtcDaliVisualGetPropertyMap9(void)
   Property::Map propertyMap;
   propertyMap.Insert( Visual::Property::TYPE, Visual::PRIMITIVE );
   propertyMap.Insert( PrimitiveVisual::Property::SHAPE, PrimitiveVisual::Shape::CUBE );
-  propertyMap.Insert( PrimitiveVisual::Property::COLOR, color );
+  propertyMap.Insert( PrimitiveVisual::Property::MIX_COLOR, color );
   propertyMap.Insert( PrimitiveVisual::Property::SLICES, 10 );
   propertyMap.Insert( PrimitiveVisual::Property::STACKS, 20 );
   propertyMap.Insert( PrimitiveVisual::Property::SCALE_TOP_RADIUS, 30.0f );
@@ -741,7 +769,7 @@ int UtcDaliVisualGetPropertyMap9(void)
   DALI_TEST_CHECK( value );
   DALI_TEST_EQUALS( value->Get<int>(), (int)PrimitiveVisual::Shape::CUBE, TEST_LOCATION );
 
-  value = resultMap.Find( PrimitiveVisual::Property::COLOR, Property::VECTOR4 );
+  value = resultMap.Find( PrimitiveVisual::Property::MIX_COLOR, Property::VECTOR4 );
   DALI_TEST_CHECK( value );
   DALI_TEST_CHECK( value->Get<Vector4>() == color );
   DALI_TEST_EQUALS( value->Get<Vector4>(), color, Math::MACHINE_EPSILON_100, TEST_LOCATION );
@@ -796,10 +824,11 @@ int UtcDaliVisualGetPropertyMapBatchImageVisual(void)
 
   VisualFactory factory = VisualFactory::Get();
   Property::Map propertyMap;
-  propertyMap.Insert( Visual::Property::TYPE, Visual::BATCH_IMAGE );
-  propertyMap.Insert( BatchImageVisual::Property::URL, TEST_IMAGE_FILE_NAME );
-  propertyMap.Insert( BatchImageVisual::Property::DESIRED_WIDTH, 20 );
-  propertyMap.Insert( BatchImageVisual::Property::DESIRED_HEIGHT, 30 );
+  propertyMap.Insert( Visual::Property::TYPE, Visual::IMAGE );
+  propertyMap.Insert( ImageVisual::Property::BATCHING_ENABLED, true );
+  propertyMap.Insert( ImageVisual::Property::URL, TEST_IMAGE_FILE_NAME );
+  propertyMap.Insert( ImageVisual::Property::DESIRED_WIDTH, 20 );
+  propertyMap.Insert( ImageVisual::Property::DESIRED_HEIGHT, 30 );
 
   Visual::Base batchImageVisual = factory.CreateVisual( propertyMap );
   DALI_TEST_CHECK( batchImageVisual );
@@ -810,17 +839,17 @@ int UtcDaliVisualGetPropertyMapBatchImageVisual(void)
   // Check the property values from the returned map from visual
   Property::Value* value = resultMap.Find( Visual::Property::TYPE, Property::INTEGER );
   DALI_TEST_CHECK( value );
-  DALI_TEST_CHECK( value->Get<int>() == Visual::BATCH_IMAGE );
+  DALI_TEST_CHECK( value->Get<int>() == Visual::IMAGE );
 
-  value = resultMap.Find( BatchImageVisual::Property::URL, Property::STRING );
+  value = resultMap.Find( ImageVisual::Property::URL, Property::STRING );
   DALI_TEST_CHECK( value );
   DALI_TEST_CHECK( value->Get<std::string>() == TEST_IMAGE_FILE_NAME );
 
-  value = resultMap.Find( BatchImageVisual::Property::DESIRED_WIDTH, Property::INTEGER );
+  value = resultMap.Find( ImageVisual::Property::DESIRED_WIDTH, Property::INTEGER );
   DALI_TEST_CHECK( value );
   DALI_TEST_CHECK( value->Get<int>() == 20 );
 
-  value = resultMap.Find( BatchImageVisual::Property::DESIRED_HEIGHT, Property::INTEGER );
+  value = resultMap.Find( ImageVisual::Property::DESIRED_HEIGHT, Property::INTEGER );
   DALI_TEST_CHECK( value );
   DALI_TEST_CHECK( value->Get<int>() == 30 );
 
@@ -834,12 +863,13 @@ int UtcDaliVisualGetPropertyMapBatchImageVisualNoAtlas(void)
 
   VisualFactory factory = VisualFactory::Get();
   Property::Map propertyMap;
-  propertyMap.Insert( Visual::Property::TYPE, Visual::BATCH_IMAGE );
-  propertyMap.Insert( BatchImageVisual::Property::URL, TEST_IMAGE_FILE_NAME );
+  propertyMap.Insert( Visual::Property::TYPE, Visual::IMAGE );
+  propertyMap.Insert( ImageVisual::Property::BATCHING_ENABLED, true );
+  propertyMap.Insert( ImageVisual::Property::URL, TEST_IMAGE_FILE_NAME );
 
   // Set the desired size to be larger than the atlas limit of 1024x1024.
-  propertyMap.Insert( BatchImageVisual::Property::DESIRED_WIDTH, 2048 );
-  propertyMap.Insert( BatchImageVisual::Property::DESIRED_HEIGHT, 2048 );
+  propertyMap.Insert( ImageVisual::Property::DESIRED_WIDTH, 2048 );
+  propertyMap.Insert( ImageVisual::Property::DESIRED_HEIGHT, 2048 );
 
   // Create the visual.
   Visual::Base batchImageVisual = factory.CreateVisual( propertyMap );
@@ -851,5 +881,212 @@ int UtcDaliVisualGetPropertyMapBatchImageVisualNoAtlas(void)
 
   DALI_TEST_CHECK( actor.GetRendererCount() == 1u );
 
+  END_TEST;
+}
+
+int UtcDaliVisualAnimateBorderVisual01(void)
+{
+  ToolkitTestApplication application;
+  tet_infoline( "UtcDaliAnimateBorderVisual Color" );
+
+  VisualFactory factory = VisualFactory::Get();
+  Property::Map propertyMap;
+  propertyMap.Insert(Visual::Property::TYPE,  Visual::BORDER);
+  propertyMap.Insert(BorderVisual::Property::COLOR,  Color::BLUE);
+  propertyMap.Insert(BorderVisual::Property::SIZE,  5.f);
+  Visual::Base borderVisual = factory.CreateVisual( propertyMap );
+
+  Actor actor = Actor::New();
+  actor.SetSize(2000, 2000);
+  actor.SetParentOrigin(ParentOrigin::CENTER);
+  Stage::GetCurrent().Add(actor);
+  borderVisual.SetOnStage( actor );
+
+  DALI_TEST_EQUALS( actor.GetRendererCount(), 1u, TEST_LOCATION);
+
+  Renderer renderer = actor.GetRendererAt(0);
+  Property::Index index = renderer.GetPropertyIndex( BorderVisual::Property::COLOR );
+
+  Animation animation = Animation::New(4.0f);
+  animation.AnimateTo( Property(renderer, index), Color::WHITE );
+  animation.Play();
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(2000u); // halfway point between blue and white
+
+  Vector4 color = renderer.GetProperty<Vector4>( index );
+  Vector4 testColor = (Color::BLUE + Color::WHITE)*0.5f;
+  DALI_TEST_EQUALS( color, testColor, TEST_LOCATION );
+  DALI_TEST_EQUALS( application.GetGlAbstraction().CheckUniformValue<Vector4>("borderColor", testColor ), true, TEST_LOCATION );
+
+  application.Render(2000u); // halfway point between blue and white
+
+  color = renderer.GetProperty<Vector4>( index );
+  DALI_TEST_EQUALS( color, Color::WHITE, TEST_LOCATION );
+  DALI_TEST_EQUALS( application.GetGlAbstraction().CheckUniformValue<Vector4>("borderColor", Color::WHITE ), true, TEST_LOCATION );
+
+  END_TEST;
+}
+
+
+int UtcDaliVisualAnimateBorderVisual02(void)
+{
+  ToolkitTestApplication application;
+  tet_infoline( "UtcDaliAnimateBorderVisual Size" );
+
+  VisualFactory factory = VisualFactory::Get();
+  Property::Map propertyMap;
+  propertyMap.Insert(Visual::Property::TYPE,  Visual::BORDER);
+  propertyMap.Insert(BorderVisual::Property::COLOR,  Color::BLUE);
+  propertyMap.Insert(BorderVisual::Property::SIZE,  5.f);
+  Visual::Base borderVisual = factory.CreateVisual( propertyMap );
+
+  Actor actor = Actor::New();
+  actor.SetSize(2000, 2000);
+  actor.SetParentOrigin(ParentOrigin::CENTER);
+  Stage::GetCurrent().Add(actor);
+  borderVisual.SetOnStage( actor );
+
+  DALI_TEST_EQUALS( actor.GetRendererCount(), 1u, TEST_LOCATION);
+
+  Renderer renderer = actor.GetRendererAt(0);
+  Property::Index index = renderer.GetPropertyIndex( BorderVisual::Property::SIZE );
+
+  Animation animation = Animation::New(4.0f);
+  animation.AnimateTo( Property(renderer, index), 9.0f );
+  animation.Play();
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(2000u); // halfway point
+
+  float size = renderer.GetProperty<float>( index );
+  DALI_TEST_EQUALS( size, 7.0f, 0.0001f, TEST_LOCATION );
+  DALI_TEST_EQUALS( application.GetGlAbstraction().CheckUniformValue<float>("borderSize", 7.0f ), true, TEST_LOCATION );
+
+  application.Render(2000u); // halfway point between blue and white
+
+  size = renderer.GetProperty<float>( index );
+  DALI_TEST_EQUALS( size, 9.0f, 0.0001f, TEST_LOCATION );
+  DALI_TEST_EQUALS( application.GetGlAbstraction().CheckUniformValue<float>("borderSize", 9.0f ), true, TEST_LOCATION );
+
+  END_TEST;
+}
+
+int UtcDaliVisualAnimateColorVisual(void)
+{
+  ToolkitTestApplication application;
+  tet_infoline( "UtcDaliAnimateColorVisual mixColor" );
+
+  VisualFactory factory = VisualFactory::Get();
+  Property::Map propertyMap;
+  propertyMap.Insert(Visual::Property::TYPE,  Visual::COLOR);
+  propertyMap.Insert(ColorVisual::Property::MIX_COLOR, Color::BLUE);
+  Visual::Base borderVisual = factory.CreateVisual( propertyMap );
+
+  Actor actor = Actor::New();
+  actor.SetSize(2000, 2000);
+  actor.SetParentOrigin(ParentOrigin::CENTER);
+  Stage::GetCurrent().Add(actor);
+  borderVisual.SetOnStage( actor );
+
+  DALI_TEST_EQUALS( actor.GetRendererCount(), 1u, TEST_LOCATION);
+
+  Renderer renderer = actor.GetRendererAt(0);
+  Property::Index index = renderer.GetPropertyIndex( ColorVisual::Property::MIX_COLOR );
+
+  Animation animation = Animation::New(4.0f);
+  animation.AnimateTo( Property(renderer, index), Color::WHITE );
+  animation.Play();
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(2000u); // halfway point
+
+  Vector4 color = renderer.GetProperty<Vector4>( index );
+  Vector4 testColor = (Color::BLUE + Color::WHITE)*0.5f;
+  DALI_TEST_EQUALS( color, testColor, TEST_LOCATION );
+
+  DALI_TEST_EQUALS( application.GetGlAbstraction().CheckUniformValue<Vector4>("mixColor", testColor ), true, TEST_LOCATION );
+
+  application.Render(2000u); // halfway point between blue and white
+
+  color = renderer.GetProperty<Vector4>( index );
+  DALI_TEST_EQUALS( color, Color::WHITE, TEST_LOCATION );
+
+  DALI_TEST_EQUALS( application.GetGlAbstraction().CheckUniformValue<Vector4>("mixColor", Color::WHITE ), true, TEST_LOCATION );
+
+
+  END_TEST;
+}
+
+
+int UtcDaliVisualAnimatePrimitiveVisual(void)
+{
+  ToolkitTestApplication application;
+  tet_infoline( "UtcDaliAnimatePrimitiveVisual color" );
+
+  VisualFactory factory = VisualFactory::Get();
+  Property::Map propertyMap;
+  propertyMap.Insert(Visual::Property::TYPE,  Visual::COLOR);
+  propertyMap.Insert(ColorVisual::Property::MIX_COLOR, Color::BLUE);
+  Visual::Base borderVisual = factory.CreateVisual( propertyMap );
+
+  Actor actor = Actor::New();
+  actor.SetSize(2000, 2000);
+  actor.SetParentOrigin(ParentOrigin::CENTER);
+  actor.SetColor(Color::BLACK);
+  Stage::GetCurrent().Add(actor);
+  borderVisual.SetOnStage( actor );
+
+  DALI_TEST_EQUALS( actor.GetRendererCount(), 1u, TEST_LOCATION);
+
+  Renderer renderer = actor.GetRendererAt(0);
+  Property::Index index = renderer.GetPropertyIndex( PrimitiveVisual::Property::MIX_COLOR );
+
+  // The property isn't registered on the renderer, it's instead registered on the shader.
+  DALI_TEST_EQUALS( index, Property::INVALID_INDEX, TEST_LOCATION );
+
+  Animation animation = Animation::New(4.0f);
+  animation.AnimateTo( Property(actor, Actor::Property::COLOR), Color::WHITE );
+  animation.Play();
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(2000u); // halfway point
+
+  // Actor color overrides renderer color.
+  DALI_TEST_EQUALS( application.GetGlAbstraction().CheckUniformValue<Vector4>("uColor", Vector4(0.5f, 0.5f, 0.5f, 1.0f )), true, TEST_LOCATION );
+
+  application.Render(2000u); // halfway point between blue and white
+
+  DALI_TEST_EQUALS( actor.GetCurrentColor(), Color::WHITE, TEST_LOCATION );
+  DALI_TEST_EQUALS( application.GetGlAbstraction().CheckUniformValue<Vector4>("uColor", Color::WHITE ), true, TEST_LOCATION );
+
+
+  END_TEST;
+}
+
+int UtcDaliVisualWireframeVisual(void)
+{
+  ToolkitTestApplication application;
+
+  VisualFactory factory = VisualFactory::Get();
+  Property::Map propertyMap;
+  propertyMap.Insert( Visual::Property::TYPE, Visual::WIREFRAME );
+
+  // Create the visual.
+  Visual::Base visual = factory.CreateVisual( propertyMap );
+
+  DALI_TEST_CHECK( visual );
+
+  Property::Map resultMap;
+  visual.CreatePropertyMap( resultMap );
+
+  // Check the property values from the returned map from visual
+  Property::Value* value = resultMap.Find( Visual::Property::TYPE, Property::INTEGER );
+  DALI_TEST_CHECK( value );
+  DALI_TEST_CHECK( value->Get<int>() == Visual::WIREFRAME );
   END_TEST;
 }

@@ -20,7 +20,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-toolkit/internal/visuals/visual-base-impl.h>
-#include <dali-toolkit/internal/visuals/image-atlas-manager.h>
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/images/image.h>
@@ -81,9 +80,8 @@ public:
    * @brief Constructor.
    *
    * @param[in] factoryCache The VisualFactoryCache object
-   * @param[in] atlasManager The atlasManager object
    */
-  ImageVisual( VisualFactoryCache& factoryCache, ImageAtlasManager& atlasManager );
+  ImageVisual( VisualFactoryCache& factoryCache );
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().
@@ -93,43 +91,28 @@ public:
 public:  // from Visual
 
   /**
-   * @copydoc Visual::SetSize
-   */
-  virtual void SetSize( const Vector2& size );
-
-  /**
-   * @copydoc Visual::GetNaturalSize
+   * @copydoc Visual::Base::GetNaturalSize
    */
   virtual void GetNaturalSize( Vector2& naturalSize ) const;
 
   /**
-   * @copydoc Visual::SetClipRect
-   */
-  virtual void SetClipRect( const Rect<int>& clipRect );
-
-  /**
-   * @copydoc Visual::SetOffset
-   */
-  virtual void SetOffset( const Vector2& offset );
-
-  /**
-   * @copydoc Visual::CreatePropertyMap
+   * @copydoc Visual::Base::CreatePropertyMap
    */
   virtual void DoCreatePropertyMap( Property::Map& map ) const;
 
 protected:
   /**
-   * @copydoc Visual::DoInitialize
+   * @copydoc Visual::Base::DoInitialize
    */
   virtual void DoInitialize( Actor& actor, const Property::Map& propertyMap );
 
   /**
-   * @copydoc Visual::DoSetOnStage
+   * @copydoc Visual::Base::DoSetOnStage
    */
   virtual void DoSetOnStage( Actor& actor );
 
   /**
-   * @copydoc Visual::DoSetOffStage
+   * @copydoc Visual::Base::DoSetOffStage
    */
   virtual void DoSetOffStage( Actor& actor );
 
@@ -138,8 +121,10 @@ public:
   /**
    * Get the standard image rendering shader.
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
+   * @param[in] atlasing Whether texture atlasing is applied.
+   * @param[in] defaultTextureWrapping Whether the default texture wrap mode is applied.
    */
-  static Shader GetImageShader( VisualFactoryCache& factoryCache );
+  static Shader GetImageShader( VisualFactoryCache& factoryCache, bool atlasing, bool defaultTextureWrapping );
 
   /**
    * @brief Sets the image of this visual to the resource at imageUrl
@@ -252,13 +237,15 @@ private:
 
 private:
   Image mImage;
-  ImageAtlasManager& mAtlasManager;
   PixelData mPixels;
+  Vector4 mPixelArea;
 
   std::string mImageUrl;
   Dali::ImageDimensions mDesiredSize;
   Dali::FittingMode::Type mFittingMode;
   Dali::SamplingMode::Type mSamplingMode;
+  Dali::WrapMode::Type mWrapModeU;
+  Dali::WrapMode::Type mWrapModeV;
 
   std::string mNativeFragmentShaderCode;
   bool mNativeImageFlag;
