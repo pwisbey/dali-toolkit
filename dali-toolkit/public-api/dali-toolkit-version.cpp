@@ -32,7 +32,7 @@ namespace Toolkit
 const unsigned int TOOLKIT_MAJOR_VERSION = 1;
 const unsigned int TOOLKIT_MINOR_VERSION = 1;
 const unsigned int TOOLKIT_MICRO_VERSION = 39;
-const char * const TOOLKIT_BUILD_DATE    = __DATE__ " " __TIME__;
+__attribute__ ((__section__(".tizen.build-id"))) const char TOOLKIT_BUILD_DATE[]    = __DATE__ " " __TIME__;
 
 #ifdef DEBUG_ENABLED
 namespace
