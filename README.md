@@ -1,5 +1,17 @@
 <img src="https://dalihub.github.io/images/DaliLogo320x200.png">
 
+# Table of Contents
+
+   * [Build Instructions](#build-instructions)
+      * [1. GBS Builds](#1-gbs-builds)
+         * [NON-SMACK Targets](#non-smack-targets)
+         * [SMACK enabled Targets](#smack-enabled-targets)
+         * [DEBUG Builds](#debug-builds)
+      * [1. Building for Ubuntu desktop](#1-building-for-ubuntu-desktop)
+         * [Minimum Requirements](#minimum-requirements)
+         * [Building the Repository](#building-the-repository)
+         * [Building and executing test cases](#building-and-executing-test-cases)
+
 # Build Instructions
 
 ## 1. GBS Builds
@@ -16,7 +28,7 @@
 
          $ gbs build -A [TARGET_ARCH] --define "%enable_debug 1"
 
-## 1. Building for Ubuntu desktop
+## 2. Building for Ubuntu desktop
 
 ### Minimum Requirements
 
