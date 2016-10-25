@@ -18,7 +18,7 @@
 
 ### Minimum Requirements
 
- - Ubuntu 14.04
+ - Ubuntu 14.04 or later
  - Environment created using dali_env script in dali-core repository
 
 ### Building the Repository
