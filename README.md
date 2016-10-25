@@ -3,32 +3,18 @@
 # Table of Contents
 
    * [Build Instructions](#build-instructions)
-      * [1. GBS Builds](#1-gbs-builds)
-         * [NON-SMACK Targets](#non-smack-targets)
-         * [SMACK enabled Targets](#smack-enabled-targets)
-         * [DEBUG Builds](#debug-builds)
       * [1. Building for Ubuntu desktop](#1-building-for-ubuntu-desktop)
          * [Minimum Requirements](#minimum-requirements)
          * [Building the Repository](#building-the-repository)
          * [Building and executing test cases](#building-and-executing-test-cases)
+      * [2. GBS Builds](#2-gbs-builds)
+         * [NON-SMACK Targets](#non-smack-targets)
+         * [SMACK enabled Targets](#smack-enabled-targets)
+         * [DEBUG Builds](#debug-builds)
 
 # Build Instructions
 
-## 1. GBS Builds
-
-### NON-SMACK Targets
-
-         $ gbs build -A [TARGET_ARCH]
-
-### SMACK enabled Targets
-
-         $ gbs build -A [TARGET_ARCH] --define "%enable_dali_smack_rules 1"
-
-### DEBUG Builds
-
-         $ gbs build -A [TARGET_ARCH] --define "%enable_debug 1"
-
-## 2. Building for Ubuntu desktop
+## 1. Building for Ubuntu desktop
 
 ### Minimum Requirements
 
@@ -50,3 +36,17 @@ Then run the following commands:
 ### Building and executing test cases
 
 See the README.md in dali-toolkit/automated-tests.
+
+## 2. GBS Builds
+
+### NON-SMACK Targets
+
+         $ gbs build -A [TARGET_ARCH]
+
+### SMACK enabled Targets
+
+         $ gbs build -A [TARGET_ARCH] --define "%enable_dali_smack_rules 1"
+
+### DEBUG Builds
+
+         $ gbs build -A [TARGET_ARCH] --define "%enable_debug 1"
